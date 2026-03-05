@@ -1,0 +1,8 @@
+# %%
+url: mqtt://192.168.0.15:1883
+user: plugtest
+password: fcfc50kc35
+
+# $$
+smart_plug/+/status
+
