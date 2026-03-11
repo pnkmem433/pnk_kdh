@@ -2,9 +2,11 @@
 클로바노트 화자 이름 변경 스크립트 (최종 통합본)
 ====================================
 - 전체 노트에서 가장 최신 노트 접속
+- 튜토리얼 팝업 등 오버레이 방해 요소 강제 돌파 (force=True)
 - JS로 전체 DOM 스캔 (가상스크롤 대응)
-- 화자별 발화 텍스트 수집 → 이름 자동 매핑
-- exact=True 매칭을 통한 안전한 화자 이름 일괄 변경 → 완료 → 다운로드
+- 화자별 발화 텍스트 수집 -> 이름 자동 매핑
+- exact=True 매칭을 통한 안전한 화자 이름 일괄 변경 (토스트 메시지 중복 방지)
+- 완료 -> 팝업 대응 다운로드
 """
 
 import os
@@ -12,7 +14,7 @@ import re
 from playwright.sync_api import sync_playwright
 
 # ================================================================
-#  ✅ 설정값
+#  설정값
 # ================================================================
 
 CLOVA_EMAIL    = "xmflzhqxj12"
@@ -48,7 +50,7 @@ def collect_speaker_texts(page) -> dict:
 
                 # 화자 이름
                 name_btn = block.locator("button[class*='name_btn']").first
-                speaker = name_btn.inner_text(timeout=500).strip()  # "참석자1"
+                speaker = name_btn.inner_text(timeout=500).strip()
 
                 # 발화 텍스트
                 words = block.locator("[class*='SttEditor_word']").all()
@@ -64,7 +66,7 @@ def collect_speaker_texts(page) -> dict:
             "? document.querySelector('.ReactVirtualized__Grid').scrollTop : 0"
         )
         if current_height == prev_height:
-            break  # 더 이상 스크롤 안 됨 → 끝
+            break
         prev_height = current_height
 
         page.evaluate(
@@ -136,10 +138,9 @@ def auto_map(speaker_texts: dict, speaker_count: int) -> dict:
 def confirm_or_fix(mapping: dict, speaker_count: int) -> dict:
     speakers = [f"참석자{i}" for i in range(1, speaker_count + 1)]
 
-    print("\n  ┌─ 자동 매핑 결과 ──────────────────")
+    print("\n  [자동 매핑 결과]")
     for s in speakers:
-        print(f"  │  {s} → {mapping.get(s) or '(미배정)'}")
-    print("  └───────────────────────────────────")
+        print(f"  - {s} -> {mapping.get(s) or '(미배정)'}")
 
     ans = input("\n  이대로 진행할까요? (y / n): ").strip().lower()
     if ans == "y":
@@ -190,6 +191,7 @@ def run():
             page.get_by_role("textbox", name="비밀번호").fill(CLOVA_PASSWORD)
             page.get_by_role("button", name="로그인").click()
             page.wait_for_load_state("networkidle")
+            
             try:
                 page.get_by_role("link", name="등록안함").click(timeout=5000)
             except Exception:
@@ -204,23 +206,41 @@ def run():
                 page.get_by_role("button", name="다시 보지 않기").click(timeout=5000)
             except Exception:
                 pass
-            print("     ✅ 로그인 완료")
+            print("     [OK] 로그인 완료")
 
-            # ── 전체 노트 → 최신 노트 클릭 ──────────────────────
+            # ── 전체 노트 -> 최신 노트 클릭 ──────────────────────
             print("[2] 최신 노트 접속 중...")
             page.get_by_role("tree", name="menu").get_by_label("전체 노트").click()
             page.wait_for_timeout(1500)
             page.locator("a[href*='note-detail']").first.click()
             page.wait_for_url("**/note-detail/**", timeout=30000)
             page.wait_for_timeout(2000)
-            print("     ✅ 노트 접속 완료")
+            print("     [OK] 노트 접속 완료")
 
-            # ── 편집 모드 먼저 진입 (편집 모드에서 블록이 더 잘 렌더링됨) ──
+            # ── 편집 모드 진입 (튜토리얼 팝업 방해 요소 선제 제거 포함) ──
             print("[3] 편집 모드 진입...")
-            page.get_by_role("button", name="편집", exact=True).click()
-            page.wait_for_timeout(1000)
+            
+            # 1. 화면을 가리는 튜토리얼 '닫기' 버튼 제거
             try:
-                page.locator("#tutorial_main_content").get_by_role("button", name="닫기").click(timeout=3000)
+                page.locator(".introjs-tooltipbuttons").get_by_role("button", name="닫기").click(timeout=2000)
+                page.wait_for_timeout(500)
+            except Exception:
+                pass
+
+            # 2. ESC 키를 눌러 혹시 모를 오버레이 강제 종료
+            try:
+                page.keyboard.press("Escape")
+                page.wait_for_timeout(500)
+            except Exception:
+                pass
+            
+            # 3. 편집 버튼 클릭 (force=True로 오버레이 무시)
+            page.get_by_role("button", name="편집", exact=True).click(force=True)
+            page.wait_for_timeout(1000)
+            
+            # 4. 편집 모드 진입 직후 뜨는 튜토리얼 제거
+            try:
+                page.locator("#tutorial_main_content").get_by_role("button", name="닫기").click(timeout=2000)
                 page.wait_for_timeout(500)
             except Exception:
                 pass
@@ -249,10 +269,10 @@ def run():
                 if not new_name or target_speaker == new_name:
                     continue
                     
-                print(f"     {target_speaker} → {new_name}")
+                print(f"     {target_speaker} -> {new_name}")
                 
                 try:
-                    # '참석자N' 버튼 중 렌더링된 첫 번째 것을 클릭 (exact=True로 참석자1과 참석자10 겹침 방지)
+                    # '참석자N' 버튼 중 렌더링된 첫 번째 것을 클릭
                     page.get_by_role("button", name=target_speaker, exact=True).first.click()
                     page.wait_for_timeout(500)
                     
@@ -260,8 +280,8 @@ def run():
                     page.locator(".ProseMirror-focused").fill(new_name)
                     page.wait_for_timeout(300)
                     
-                    # '전체 구간' 선택
-                    page.get_by_text("전체 구간").click()
+                    # '전체 구간' 선택 (exact=True로 하단 토스트 메시지와 겹침 방지)
+                    page.get_by_text("전체 구간", exact=True).click()
                     page.wait_for_timeout(300)
                     
                     # '변경' 버튼 클릭
@@ -271,7 +291,7 @@ def run():
                     page.wait_for_timeout(1000)
                     
                 except Exception as e:
-                    print(f"     ⚠️ {target_speaker} 이름 변경 중 오류: {e}")
+                    print(f"     [Warning] {target_speaker} 이름 변경 중 오류: {e}")
                     # 오류 시 떠있는 팝업이 있다면 닫기 시도
                     try:
                         page.locator("#tutorial_main_content").get_by_role("button", name="닫기").click(timeout=1000)
@@ -284,18 +304,29 @@ def run():
             page.wait_for_timeout(1500)
 
             # ── 다운로드 ─────────────────────────────────────────
-            print("[8] 다운로드 중...")
-            page.get_by_role("button", name="다운로드").click()
-            page.wait_for_timeout(500)
+            print("[8] 다운로드 팝업 열기 및 파일 저장 중...")
+            page.wait_for_timeout(2000)
+            
+            # 1. 메인 화면 우측 상단의 '다운로드' 아이콘 클릭
+            page.get_by_role("button", name="다운로드").first.click()
+            page.wait_for_timeout(1000)
+            
+            # 2. 드롭다운 메뉴에서 '음성 기록 다운로드' 클릭 (팝업 열기)
+            page.get_by_text("음성 기록 다운로드").click()
+            page.wait_for_timeout(1000)
+            
+            # 3. 팝업 창 하단의 최종 '다운로드' 버튼 클릭 및 다운로드 이벤트 대기
             with page.expect_download(timeout=15000) as dl_info:
-                page.get_by_role("button", name="음성 기록 다운로드").click(timeout=15000)
+                page.get_by_role("button", name="다운로드", exact=True).last.click()
+                
             download = dl_info.value
+            
             save_path = os.path.join(TXT_FOLDER, "test_download.txt")
             download.save_as(save_path)
-            print(f"\n✅ 완료: {save_path}")
+            print(f"\n[OK] 최종 다운로드 완료: {save_path}")
 
         except Exception as e:
-            print(f"\n❌ 오류: {e}")
+            print(f"\n[Error] 오류: {e}")
             import traceback; traceback.print_exc()
         finally:
             context.close()
