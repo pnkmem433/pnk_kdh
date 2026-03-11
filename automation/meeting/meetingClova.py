@@ -138,7 +138,9 @@ def search_speaker_names_by_pattern(speaker_texts: dict, speaker_sequence: list)
 
     mapping = {}
     confidence = {}
+    excluded_names = {}  # {화자: set(제외할 이름들)} - 호칭한 이름은 본인이 아님
 
+    # 1차: 호칭-응답 패턴
     for i, (speaker, text) in enumerate(speaker_sequence):
         for member, aliases in MEMBER_ALIASES.items():
             for alias in aliases:
@@ -149,35 +151,33 @@ def search_speaker_names_by_pattern(speaker_texts: dict, speaker_sequence: list)
                             if next_speaker not in confidence or confidence[next_speaker] < 2:
                                 mapping[next_speaker] = member
                                 confidence[next_speaker] = 2
-                                print(f"     [패턴] [{speaker}]가 '{alias}' 호칭  [{next_speaker}] = {member}", flush=True)
-                    if speaker not in mapping:
-                        mapping[speaker] = f"NOT_{member}"
+                                print(f"     [패턴] [{speaker}]가 '{alias}' 호칭 -> [{next_speaker}] = {member}", flush=True)
+                    # 호칭한 화자는 그 이름이 아님 (제외 목록에만 추가, 매핑은 건드리지 않음)
+                    excluded_names.setdefault(speaker, set()).add(member)
 
+    # 2차: 직접 텍스트 검색
     for speaker, text in speaker_texts.items():
         if speaker in confidence and confidence[speaker] >= 2:
-            continue
+            continue  # 이미 패턴으로 확정된 화자는 스킵
+
+        excluded = excluded_names.get(speaker, set())
         name_counts = {}
         for member in ALL_MEMBERS:
+            if member in excluded:
+                continue  # 호칭한 이름은 제외
             count = text.count(member)
             for alias in MEMBER_ALIASES.get(member, []):
                 count += text.count(alias)
             if count > 0:
                 name_counts[member] = count
+
         if name_counts:
             best_name = max(name_counts, key=name_counts.get)
-            excluded = mapping.get(speaker, "")
-            if excluded == f"NOT_{best_name}":
-                print(f"     [검색] [{speaker}]: '{best_name}' 발견되었으나 호칭한 사람이므로 제외", flush=True)
-                del mapping[speaker]
-                continue
             mapping[speaker] = best_name
             confidence[speaker] = 1
-            print(f"     [검색] [{speaker}]: '{best_name}' {name_counts[best_name]}회  매핑", flush=True)
+            print(f"     [검색] [{speaker}]: '{best_name}' {name_counts[best_name]}회 -> 매핑", flush=True)
         else:
-            if speaker not in mapping or mapping[speaker].startswith("NOT_"):
-                print(f"     [검색] [{speaker}]: 이름 발견 안 됨  변경 생략", flush=True)
-
-    mapping = {k: v for k, v in mapping.items() if not v.startswith("NOT_")}
+            print(f"     [검색] [{speaker}]: 이름 단서 없음 -> 변경 생략", flush=True)
 
     name_to_speakers = {}
     for speaker, name in mapping.items():
@@ -198,6 +198,27 @@ def search_speaker_names_by_pattern(speaker_texts: dict, speaker_sequence: list)
     return final_mapping
 
 
+def ensure_bogyeong(mapping: dict, speaker_texts: dict) -> dict:
+    """
+    성보경은 모든 회의에 반드시 참석.
+    매핑 결과에 성보경이 없으면, 미매핑 화자 중 발화량이 가장 많은 사람을 성보경으로 강제 배정.
+    """
+    if "성보경" in mapping.values():
+        return mapping  # 이미 있으면 그대로
+
+    all_speakers = set(speaker_texts.keys())
+    unmapped = all_speakers - set(mapping.keys())
+
+    if not unmapped:
+        # 모든 화자가 이미 다른 이름으로 매핑됨 -> 발화량 최대 화자를 성보경으로 덮어쓰기
+        unmapped = all_speakers
+
+    best = max(unmapped, key=lambda s: len(speaker_texts.get(s, "")))
+    mapping[best] = "성보경"
+    print(f"     [보장] 성보경 미배정 -> [{best}] 발화량 최대({len(speaker_texts.get(best,''))}자)로 성보경 강제 배정", flush=True)
+    return mapping
+
+
 def build_speaker_mapping(speaker_texts: dict, speaker_sequence: list) -> dict:
     print(f"\n[3] 화자 이름 매핑 시작...", flush=True)
     gemini_result = analyze_speakers_with_gemini(speaker_texts, speaker_sequence)
@@ -215,13 +236,15 @@ def build_speaker_mapping(speaker_texts: dict, speaker_sequence: list) -> dict:
             for name, speakers in reverse_map.items():
                 if len(speakers) > 1:
                     print(f"     [분석] {', '.join(speakers)}  동일인물 '{name}'", flush=True)
-            return mapping
         else:
             print(f"     [Gemini] 변경할 화자 없음으로 판단됨.", flush=True)
-            return {}
+        mapping = ensure_bogyeong(mapping, speaker_texts)
+        return mapping
 
     print(f"     [Warning] Gemini 실패  폴백으로 전환", flush=True)
-    return search_speaker_names_by_pattern(speaker_texts, speaker_sequence)
+    mapping = search_speaker_names_by_pattern(speaker_texts, speaker_sequence)
+    mapping = ensure_bogyeong(mapping, speaker_texts)
+    return mapping
 
 
 def fix_text_with_gemini(file_path):
