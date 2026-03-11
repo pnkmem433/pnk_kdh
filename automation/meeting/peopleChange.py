@@ -23,7 +23,7 @@ CLOVA_EMAIL    = config.CLOVA_EMAIL
 CLOVA_PASSWORD = config.CLOVA_PASSWORD
 
 # 일반 설정값은 코드 내에서 직접 관리합니다.
-TXT_FOLDER     = r"C:\WS\미팅txt"
+TXT_FOLDER     = r"G:\.shortcut-targets-by-id\18_ReZvonpmf6OyZv1wQqqC9zhDKFWbHG\강동현"
 ALL_MEMBERS    = ["성보경", "김건우", "강동현", "배윤선", "정세빈", "정재진"]
 
 # ================================================================
