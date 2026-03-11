@@ -6,22 +6,25 @@
 - JS로 전체 DOM 스캔 (가상스크롤 대응)
 - 화자별 발화 텍스트 수집 -> 이름 자동 매핑
 - exact=True 매칭을 통한 안전한 화자 이름 일괄 변경 (토스트 메시지 중복 방지)
-- 완료 -> 팝업 대응 다운로드
+- 완료 -> 클로바노트 원본 파일명으로 다운로드 -> 3번째 줄 삭제 후처리
 """
 
 import os
 import re
 from playwright.sync_api import sync_playwright
+import config  # 분리한 설정 파일 불러오기
 
 # ================================================================
 #  설정값
 # ================================================================
 
-CLOVA_EMAIL    = "xmflzhqxj12"
-CLOVA_PASSWORD = "c4F?j#fc+m2$Naw"
-TXT_FOLDER     = r"C:\WS\미팅txt"
+# 민감한 정보는 config에서 가져옵니다.
+CLOVA_EMAIL    = config.CLOVA_EMAIL
+CLOVA_PASSWORD = config.CLOVA_PASSWORD
 
-ALL_MEMBERS = ["성보경", "김건우", "강동현", "배윤선", "정세빈", "정재진"]
+# 일반 설정값은 코드 내에서 직접 관리합니다.
+TXT_FOLDER     = r"C:\WS\미팅txt"
+ALL_MEMBERS    = ["성보경", "김건우", "강동현", "배윤선", "정세빈", "정재진"]
 
 # ================================================================
 #  JS로 전체 발화 블록 수집 (가상 스크롤 대응: 스크롤하며 수집)
@@ -321,9 +324,30 @@ def run():
                 
             download = dl_info.value
             
-            save_path = os.path.join(TXT_FOLDER, "test_download.txt")
+            # 💡 핵심 변경: 클로바노트가 제공하는 원래 파일명(음성 파일명 기반)을 그대로 가져옵니다.
+            original_filename = download.suggested_filename
+            save_path = os.path.join(TXT_FOLDER, original_filename)
+            
             download.save_as(save_path)
             print(f"\n[OK] 최종 다운로드 완료: {save_path}")
+
+            # ── 텍스트 후처리 (3번째 줄 삭제) ──────────────────────
+            print("[9] 텍스트 후처리 (참석자 목록 줄 삭제) 진행 중...")
+            try:
+                with open(save_path, "r", encoding="utf-8") as f:
+                    lines = f.readlines()
+                
+                # 3번째 줄(인덱스 2)이 존재하는 경우 삭제
+                if len(lines) >= 3:
+                    del lines[2]
+                    
+                    with open(save_path, "w", encoding="utf-8") as f:
+                        f.writelines(lines)
+                    print("     [OK] 후처리 완료 (참석자 목록 삭제 및 덮어쓰기 성공)")
+                else:
+                    print("     [Warning] 파일이 3줄 미만이라 삭제를 건너뜁니다.")
+            except Exception as e:
+                print(f"     [Error] 텍스트 후처리 중 오류 발생: {e}")
 
         except Exception as e:
             print(f"\n[Error] 오류: {e}")
