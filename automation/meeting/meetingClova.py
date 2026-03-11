@@ -32,8 +32,8 @@ import threading
 #  ✅ 설정값
 # ================================================================
 
-NOTION_TOKEN        = "ntn_T52157200687OXUCdSrUJaPts9GEh7ZJWBdF7VYWi1s1Eq"
-WORKSPACE_PAGE_ID   = "31b136e19284813aaf71d9f6c16dff3f"
+NOTION_TOKEN        = "..."
+WORKSPACE_PAGE_ID   = "..."
 DB_ID_FILE          = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".meeting_db_id")
 
 RECORDING_FOLDER    = r"C:\Users\pnks\Documents\소리 녹음"
@@ -44,8 +44,8 @@ CHROME_PROFILE      = "Default"
 
 CHATGPT_PROJECT_URL = "https://chatgpt.com/g/g-p-69af853d94bc81919807a1d57a670757/project"
 
-CLOVA_EMAIL         = "xmflzhqxj12"       # 네이버 아이디
-CLOVA_PASSWORD      = "c4F?j#fc+m2$Naw"  # 네이버 비밀번호
+CLOVA_EMAIL         = "..."       # 네이버 아이디
+CLOVA_PASSWORD      = "..."  # 네이버 비밀번호
 
 MEETING_LIST = [
     "주간팀회의",
