@@ -5,10 +5,10 @@
   1. Notion DB 확인 (최초 1회 생성)
   2. Music 폴더에서 최신 .m4a 파일 탐색
   3. 미팅 종류 선택
-  4. 파일명 변경  →  YYMMDD-미팅명.m4a
+  4. 파일명 변경 -> YYMMDD-미팅명.m4a
   5. Notion DB에 새 페이지 생성
-  6. 클로바노트 로그인 → m4a 업로드 → 변환 완료 대기 → txt 다운로드
-  7. ChatGPT 프로젝트에 txt 업로드 → 요약 답변 수신
+  6. 클로바노트 로그인 -> m4a 업로드 -> 변환 완료 대기 -> txt 다운로드
+  7. ChatGPT 프로젝트에 txt 업로드 -> 요약 답변 수신
   8. Notion 페이지에 전사내용 + GPT요약 블록 자동 삽입
 
 사전 준비:
@@ -28,12 +28,20 @@ from pathlib import Path
 import requests
 import threading
 
+# 분리한 설정 파일 불러오기
+import config
+
 # ================================================================
-#  ✅ 설정값
+#  설정값
 # ================================================================
 
-NOTION_TOKEN        = "ntn_T52157200687OXUCdSrUJaPts9GEh7ZJWBdF7VYWi1s1Eq"
-WORKSPACE_PAGE_ID   = "31b136e19284813aaf71d9f6c16dff3f"
+# 민감한 보안 정보는 config에서 가져옵니다.
+NOTION_TOKEN        = config.NOTION_TOKEN
+WORKSPACE_PAGE_ID   = config.WORKSPACE_PAGE_ID
+CLOVA_EMAIL         = config.CLOVA_EMAIL
+CLOVA_PASSWORD      = config.CLOVA_PASSWORD
+
+# 일반 설정값은 코드 내에서 직접 관리합니다.
 DB_ID_FILE          = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".meeting_db_id")
 
 RECORDING_FOLDER    = r"C:\Users\pnks\Documents\소리 녹음"
@@ -43,9 +51,6 @@ CHROME_USER_DATA    = r"C:\Users\pnks\AppData\Local\Google\Chrome\User Data"
 CHROME_PROFILE      = "Default"
 
 CHATGPT_PROJECT_URL = "https://chatgpt.com/g/g-p-69af853d94bc81919807a1d57a670757/project"
-
-CLOVA_EMAIL         = "xmflzhqxj12"       # 네이버 아이디
-CLOVA_PASSWORD      = "c4F?j#fc+m2$Naw"  # 네이버 비밀번호
 
 MEETING_LIST = [
     "주간팀회의",
@@ -94,7 +99,7 @@ def create_meeting_db():
     if resp.status_code == 200:
         db_id = resp.json()["id"]
         save_db_id(db_id)
-        print(f"     ✅ DB 생성 완료 (ID: {db_id})")
+        print(f"     [OK] DB 생성 완료 (ID: {db_id})")
         return db_id
     else:
         print(f"\n[오류] DB 생성 실패 ({resp.status_code})\n{resp.text}")
@@ -190,7 +195,7 @@ def create_notion_page(db_id: str, dt: datetime, meeting_name: str):
 def run_clova_upload_and_download(m4a_path: str, filename_base: str,
                                    ready_event: threading.Event = None) -> str | None:
     """
-    클로바노트에 m4a 업로드 → 변환 완료 대기(JS) → txt 다운로드
+    클로바노트에 m4a 업로드 -> 변환 완료 대기(JS) -> txt 다운로드
     ready_event: 업로드 완료 후 병렬 작업에 신호를 보낼 Event (선택)
     반환값: 다운로드된 txt 파일 경로 (실패 시 None)
     """
@@ -233,16 +238,16 @@ def run_clova_upload_and_download(m4a_path: str, filename_base: str,
             with page.expect_file_chooser() as fc_info:
                 page.get_by_role("button", name="파일 첨부").click()
             fc_info.value.set_files(m4a_path)
-            print(f"     [클로바] ✅ 파일 선택 완료: {os.path.basename(m4a_path)}")
+            print(f"     [클로바] [OK] 파일 선택 완료: {os.path.basename(m4a_path)}")
 
             # ── 노트 상세 페이지 진입 대기 ──────────────────────
             page.wait_for_url("**/note-detail/**", timeout=60_000)
-            print("     [클로바] ✅ 노트 페이지 진입 - 전사 중...")
+            print("     [클로바] [OK] 노트 페이지 진입 - 전사 중...")
 
-            # ── 업로드 완료 신호 → 병렬 작업 시작 ──────────────
+            # ── 업로드 완료 신호 -> 병렬 작업 시작 ──────────────
             if ready_event:
                 ready_event.set()
-                print("     [클로바] 📢 병렬 작업 시작 신호 전송!")
+                print("     [클로바] [Notice] 병렬 작업 시작 신호 전송!")
 
             # ── JS로 다운로드 버튼 나타날 때까지 무한 대기 ───────
             print("     [클로바] 전사 완료 대기 중... (다운로드 버튼 감시)")
@@ -255,7 +260,7 @@ def run_clova_upload_and_download(m4a_path: str, filename_base: str,
                 }""",
                 timeout=0
             )
-            print("     [클로바] ✅ 전사 완료 - 다운로드 버튼 감지!")
+            print("     [클로바] [OK] 전사 완료 - 다운로드 버튼 감지!")
 
             # ── txt 다운로드 ─────────────────────────────────────
             print("     [클로바] txt 다운로드 중...")
@@ -266,11 +271,11 @@ def run_clova_upload_and_download(m4a_path: str, filename_base: str,
                 page.get_by_role("button", name="음성 기록 다운로드").click(timeout=15000)
             download = dl_info.value
             download.save_as(txt_save_path)
-            print(f"     [클로바] ✅ txt 저장 완료: {txt_save_path}")
+            print(f"     [클로바] [OK] txt 저장 완료: {txt_save_path}")
             return txt_save_path
 
         except Exception as e:
-            print(f"     [클로바] ❌ 오류: {e}")
+            print(f"     [클로바] [Error] 오류: {e}")
             if ready_event and not ready_event.is_set():
                 ready_event.set()  # 오류 시에도 블로킹 해제
             return None
@@ -284,8 +289,8 @@ def run_clova_upload_and_download(m4a_path: str, filename_base: str,
 
 def run_chatgpt_summary(txt_path: str) -> str | None:
     """
-    기존 Chrome 프로필로 ChatGPT 프로젝트 접속 →
-    txt 파일 업로드 → 요약 답변 수신 → 텍스트 반환
+    기존 Chrome 프로필로 ChatGPT 프로젝트 접속 ->
+    txt 파일 업로드 -> 요약 답변 수신 -> 텍스트 반환
     """
     from playwright.sync_api import sync_playwright
 
@@ -344,15 +349,15 @@ def run_chatgpt_summary(txt_path: str) -> str | None:
                 ".markdown.prose"
             ).all()
             if not messages:
-                print("     ❌ 답변을 찾지 못했습니다.")
+                print("     [Error] 답변을 찾지 못했습니다.")
                 return None
 
             gpt_text = messages[-1].inner_text()
-            print("     ✅ GPT 요약 수신 완료")
+            print("     [OK] GPT 요약 수신 완료")
             return gpt_text
 
         except Exception as e:
-            print(f"     ❌ ChatGPT 오류: {e}")
+            print(f"     [Error] ChatGPT 오류: {e}")
             return None
         finally:
             browser.close()
@@ -375,9 +380,9 @@ def kill_chrome():
 
 def upload_files_to_notion(page_url: str, m4a_path: str, txt_path: str):
     """
-    기존 Chrome 프로필로 Notion 페이지 접속 →
-    /오디오 입력 → 엔터 → m4a 업로드
-    /파일 입력 → 엔터 → txt 업로드
+    기존 Chrome 프로필로 Notion 페이지 접속 ->
+    /오디오 입력 -> 엔터 -> m4a 업로드
+    /파일 입력 -> 엔터 -> txt 업로드
     """
     from playwright.sync_api import sync_playwright
 
@@ -411,12 +416,12 @@ def upload_files_to_notion(page_url: str, m4a_path: str, txt_path: str):
                 page.keyboard.press("Enter")
                 page.wait_for_timeout(1000)
 
-                # "파일을 선택하세요" 버튼 클릭 → 파일 선택
+                # "파일을 선택하세요" 버튼 클릭 -> 파일 선택
                 with page.expect_file_chooser() as fc_info:
                     page.get_by_role("button", name="파일을 선택하세요").last.click()
                 fc_info.value.set_files(m4a_path)
                 page.wait_for_timeout(4000)
-                print("     ✅ m4a 업로드 완료")
+                print("     [OK] m4a 업로드 완료")
 
             # ── txt 업로드: /파일 블록 생성 후 파일 선택 ─────────
             if txt_path and os.path.exists(txt_path):
@@ -431,15 +436,15 @@ def upload_files_to_notion(page_url: str, m4a_path: str, txt_path: str):
                 page.keyboard.press("Enter")
                 page.wait_for_timeout(1000)
 
-                # "파일을 선택하세요" 버튼 클릭 → 파일 선택
+                # "파일을 선택하세요" 버튼 클릭 -> 파일 선택
                 with page.expect_file_chooser() as fc_info:
                     page.get_by_role("button", name="파일을 선택하세요").last.click()
                 fc_info.value.set_files(txt_path)
                 page.wait_for_timeout(4000)
-                print("     ✅ txt 업로드 완료")
+                print("     [OK] txt 업로드 완료")
 
         except Exception as e:
-            print(f"     ❌ Notion 파일 업로드 오류: {e}")
+            print(f"     [Error] Notion 파일 업로드 오류: {e}")
         finally:
             browser.close()
 
@@ -481,7 +486,7 @@ def add_resource_skeleton(page_id: str, filename_base: str):
         {"object": "block", "type": "divider", "divider": {}},
         {
             "object": "block", "type": "heading_3",
-            "heading_3": {"rich_text": [{"type": "text", "text": {"content": "📁 회의 리소스"}}]}
+            "heading_3": {"rich_text": [{"type": "text", "text": {"content": "회의 리소스"}}]}
         },
         {
             "object": "block", "type": "bulleted_list_item",
@@ -512,21 +517,21 @@ def add_resource_skeleton(page_id: str, filename_base: str):
         # 전사/요약 자리 표시자
         {
             "object": "block", "type": "heading_3",
-            "heading_3": {"rich_text": [{"type": "text", "text": {"content": "📝 전사 내용 (화자 구분)"}}]}
+            "heading_3": {"rich_text": [{"type": "text", "text": {"content": "전사 내용 (화자 구분)"}}]}
         },
         {
             "object": "block", "type": "paragraph",
-            "paragraph": {"rich_text": [{"type": "text", "text": {"content": "⏳ 클로바노트 변환 완료 후 자동 삽입됩니다..."},
+            "paragraph": {"rich_text": [{"type": "text", "text": {"content": "클로바노트 변환 완료 후 자동 삽입됩니다..."},
                                          "annotations": {"color": "gray"}}]}
         },
         {"object": "block", "type": "divider", "divider": {}},
         {
             "object": "block", "type": "heading_3",
-            "heading_3": {"rich_text": [{"type": "text", "text": {"content": "🤖 GPT 요약"}}]}
+            "heading_3": {"rich_text": [{"type": "text", "text": {"content": "GPT 요약"}}]}
         },
         {
             "object": "block", "type": "paragraph",
-            "paragraph": {"rich_text": [{"type": "text", "text": {"content": "⏳ GPT 요약 완료 후 자동 삽입됩니다..."},
+            "paragraph": {"rich_text": [{"type": "text", "text": {"content": "GPT 요약 완료 후 자동 삽입됩니다..."},
                                          "annotations": {"color": "gray"}}]}
         },
     ]
@@ -536,16 +541,16 @@ def add_resource_skeleton(page_id: str, filename_base: str):
         data=json.dumps({"children": blocks}),
     )
     if resp.status_code == 200:
-        print("     ✅ Notion 기본 형식 삽입 완료")
+        print("     [OK] Notion 기본 형식 삽입 완료")
     else:
-        print(f"     ❌ 기본 형식 삽입 실패: {resp.status_code}")
+        print(f"     [Error] 기본 형식 삽입 실패: {resp.status_code}")
 
 
 def add_full_content_blocks(page_id: str, filename_base: str,
                              transcript: str, gpt_summary: str):
     """
     Notion 페이지에 전체 콘텐츠 삽입:
-    📁 회의 리소스 / 📝 전사 내용 / 🤖 GPT 요약
+    회의 리소스 / 전사 내용 / GPT 요약
     """
     m4a_name = f"{filename_base}.m4a"
     txt_name = f"{filename_base}.txt"
@@ -555,7 +560,7 @@ def add_full_content_blocks(page_id: str, filename_base: str,
         {"object": "block", "type": "divider", "divider": {}},
         {
             "object": "block", "type": "heading_3",
-            "heading_3": {"rich_text": [{"type": "text", "text": {"content": "📁 회의 리소스"}}]}
+            "heading_3": {"rich_text": [{"type": "text", "text": {"content": "회의 리소스"}}]}
         },
         {
             "object": "block", "type": "bulleted_list_item",
@@ -587,12 +592,12 @@ def add_full_content_blocks(page_id: str, filename_base: str,
 
     # ── 전사 내용 ──────────────────────────────────────────
     if transcript:
-        blocks += make_text_blocks("📝 전사 내용 (화자 구분)", transcript)
+        blocks += make_text_blocks("전사 내용 (화자 구분)", transcript)
         blocks.append({"object": "block", "type": "divider", "divider": {}})
 
     # ── GPT 요약 ───────────────────────────────────────────
     if gpt_summary:
-        blocks += make_text_blocks("🤖 GPT 요약", gpt_summary)
+        blocks += make_text_blocks("GPT 요약", gpt_summary)
         blocks.append({"object": "block", "type": "divider", "divider": {}})
 
     # Notion API는 한 번에 최대 100개 블록
@@ -604,10 +609,10 @@ def add_full_content_blocks(page_id: str, filename_base: str,
             data=json.dumps({"children": batch}),
         )
         if resp.status_code != 200:
-            print(f"     ❌ 블록 삽입 실패 (배치 {i//100+1}): {resp.status_code}\n{resp.text}")
+            print(f"     [Error] 블록 삽입 실패 (배치 {i//100+1}): {resp.status_code}\n{resp.text}")
             return
 
-    print("     ✅ Notion 콘텐츠 삽입 완료")
+    print("     [OK] Notion 콘텐츠 삽입 완료")
 
 # ================================================================
 #  메인
@@ -654,15 +659,15 @@ def main():
     print("\n[5] Notion 페이지 생성 중...")
     page_id, page_url = create_notion_page(db_id, rec_dt, meeting_name)
     if not page_url:
-        print("     ❌ 실패")
+        print("     [Error] 실패")
         input("\n[Enter] 종료"); sys.exit(1)
-    print(f"     ✅ 완료  URL: {page_url}")
+    print(f"     [OK] 완료  URL: {page_url}")
 
     # 기본 리소스 형식 미리 삽입 (전사/요약 없이 뼈대만)
     print("     Notion 기본 형식 삽입 중...")
     add_resource_skeleton(page_id, filename_base)
 
-    # 6. 클로바노트 업로드 → 전사 완료 → txt 다운로드
+    # 6. 클로바노트 업로드 -> 전사 완료 -> txt 다운로드
     #    (Chromium 사용, Chrome 프로필과 충돌 없음)
     print("\n[6] 클로바노트 업로드 및 전사 대기 중...")
     txt_path = run_clova_upload_and_download(new_path, filename_base)
@@ -673,7 +678,7 @@ def main():
             transcript = f.read()
         print(f"     전사 내용 미리보기: {transcript[:80]}...")
     else:
-        print("     ⚠️  클로바노트 실패 - 전사 내용 없이 계속합니다.")
+        print("     [Warning] 클로바노트 실패 - 전사 내용 없이 계속합니다.")
 
     # 7. Notion에 m4a 파일 첨부 (Chrome 프로필)
     print("\n[7] Notion에 m4a 파일 첨부...")
@@ -692,7 +697,7 @@ def main():
         if gpt_summary:
             print(f"     요약 미리보기: {gpt_summary[:80]}...")
         else:
-            print("     ⚠️  ChatGPT 요약 실패 - 요약 없이 계속합니다.")
+            print("     [Warning] ChatGPT 요약 실패 - 요약 없이 계속합니다.")
     else:
         print("\n[9] txt 파일 없음 - ChatGPT 요약 건너뜁니다.")
 
@@ -705,7 +710,7 @@ def main():
 
     # 완료 요약
     print("\n" + "=" * 56)
-    print("  ✅ 완료 요약")
+    print("  [OK] 완료 요약")
     print("=" * 56)
     print(f"  파일명  : {new_filename}")
     print(f"  날짜    : {rec_dt.strftime('%Y년 %m월 %d일 %H:%M')}")
