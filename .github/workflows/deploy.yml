@@ -1,4 +1,4 @@
-name: Zero-Touch Auto Deploy
+name: Zero-Touch Auto Deploy (Method 3: Safe Build)
 
 on:
   push:
@@ -11,25 +11,45 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Create Target Folder and Sync Everything
+      - name: Stage to Temp and Verify
         run: |
-          # 1. 대상 경로 설정
+          # 1. 환경 설정
           REPO_NAME="${{ github.event.repository.name }}"
+          TEMP_PATH="./temp_build"
           TARGET_PATH="/var/www/html/$REPO_NAME"
           
-          echo "Target Path: $TARGET_PATH"
+          # 2. 깨끗한 temp 폴더 준비
+          rm -rf $TEMP_PATH
+          mkdir -p $TEMP_PATH
+          
+          # 3. temp 폴더로 모든 파일 복사 (1차 빌드)
+          echo "Staging files to temp..."
+          cp -r ./* $TEMP_PATH/
+          
+          # 4. 검증 (Safety Check)
+          # 예: index.html 파일이 없으면 배포 중단(exit 1)
+          if [ ! -f "$TEMP_PATH/index.html" ]; then
+            echo "❌ CRITICAL ERROR: index.html is missing! Aborting deployment."
+            exit 1
+          fi
+          
+          echo "✅ Verification passed. Ready to sync."
 
-          # 2. 서버에 폴더가 없으면 생성
+      - name: Final Deploy to Nginx
+        # 앞의 단계가 성공(exit 0)했을 때만 실행됩니다.
+        run: |
+          REPO_NAME="${{ github.event.repository.name }}"
+          TARGET_PATH="/var/www/html/$REPO_NAME"
+          TEMP_PATH="./temp_build"
+          
+          # 서버 폴더 권한 확인 및 생성
           if [ ! -d "$TARGET_PATH" ]; then
-            echo "Creating folder: $TARGET_PATH"
             sudo mkdir -p "$TARGET_PATH"
             sudo chown -R $USER:$USER "$TARGET_PATH"
           fi
-
-          # 3. 전체 파일 동기화 (rsync)
-          # --exclude='.git*' 를 사용해 깃 설정 파일만 제외하고 
-          # 내 PC의 현재 폴더(.) 내용을 서버의 대상 경로로 그대로 복사합니다.
-          rsync -av --delete --exclude='.git*' ./ "$TARGET_PATH/"
+          
+          # 검증된 temp 폴더 내용을 실제 경로로 동기화
+          rsync -av --delete --exclude='.git*' $TEMP_PATH/ "$TARGET_PATH/"
           
       - name: Finish
-        run: echo "Successfully mirrored all files to $TARGET_PATH"
+        run: echo "Safe deployment completed successfully!"
