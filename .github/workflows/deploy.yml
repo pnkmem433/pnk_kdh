@@ -9,19 +9,18 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Checkout Code
+        # 서브모듈 체크를 건너뛰도록 'with' 섹션을 삭제했습니다.
         uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
 
       - name: Auto Create Folder and Sync
         run: |
-          # 1. 현재 저장소 이름 가져오기 (예: 3d_printer_schedule)
+          # 1. 현재 저장소 이름 가져오기 (예: pnk_kdh)
           REPO_NAME="${{ github.event.repository.name }}"
           TARGET_PATH="/var/www/html/$REPO_NAME"
           
           echo "Target Path: $TARGET_PATH"
 
-          # 2. 서버에 폴더가 없으면 자동으로 생성 (관리자 권한 사용)
+          # 2. 서버에 폴더가 없으면 자동으로 생성 (visudo 설정 덕분에 sudo 가능)
           if [ ! -d "$TARGET_PATH" ]; then
             echo "Folder does not exist. Creating..."
             sudo mkdir -p "$TARGET_PATH"
@@ -32,13 +31,16 @@ jobs:
           rm -rf ./dist
           mkdir -p ./dist
           
-          # 4. 배포할 폴더만 dist로 복사 (이전에 정한 방식)
+          # 4. 배포할 폴더만 dist로 복사 (기존 규칙 유지)
           [ -d "./automation" ] && cp -r ./automation/* ./dist/ 2>/dev/null || true
           [ -d "./smart_plug" ] && cp -r ./smart_plug/* ./dist/ 2>/dev/null || true
-          # 만약 폴더 구조 없이 파일만 있다면 전체 복사 시도
-          if [ -z "$(ls -A ./dist)" ]; then cp -r ./* ./dist/ 2>/dev/null || true; fi
+          
+          # 만약 특정 폴더 구조 없이 루트에 파일이 있다면 전체 복사 시도
+          if [ -z "$(ls -A ./dist)" ]; then 
+            cp -r ./* ./dist/ 2>/dev/null || true
+          fi
 
-          # 5. 최종 배포 (rsync)
+          # 5. 최종 배포 (rsync로 파일 전송)
           rsync -av --delete ./dist/ "$TARGET_PATH/"
           
       - name: Finish
