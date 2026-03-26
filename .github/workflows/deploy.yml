@@ -12,26 +12,24 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Stage to Temp and Verify
+        # 블로그의 'comment_line_break: |' 규칙 적용
         run: |
-          # 1. 환경 설정
           REPO_NAME="${{ github.event.repository.name }}"
           TEMP_PATH="./temp_build"
           
-          # 2. 깨끗한 temp 폴더 준비
           rm -rf $TEMP_PATH
           mkdir -p $TEMP_PATH
           
-          # 3. temp 폴더로 모든 파일 복사
           echo "Staging files to temp..."
           cp -r ./* $TEMP_PATH/
           
-          # 4. 검증 (Safety Check) - 여기서 대괄호 [ ] 양옆 공백이 필수입니다!
+          # IF문 대괄호 [ ] 사이의 공백도 YAML 규칙만큼 중요합니다!
           if [ ! -f "$TEMP_PATH/index.html" ]; then
-            echo "❌ ERROR: index.html is missing!"
+            echo "Error: index.html is missing!"
             exit 1
           fi
           
-          echo "✅ Verification passed."
+          echo "Verification passed."
 
       - name: Final Deploy to Nginx
         run: |
