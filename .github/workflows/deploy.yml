@@ -21,18 +21,17 @@ jobs:
           rm -rf $TEMP_PATH
           mkdir -p $TEMP_PATH
           
-          # 3. temp 폴더로 모든 파일 복사 (1차 빌드)
+          # 3. temp 폴더로 모든 파일 복사
           echo "Staging files to temp..."
           cp -r ./* $TEMP_PATH/
           
-          # 4. 검증 (Safety Check)
-          # index.html 파일이 제대로 복사됐는지 확인합니다.
+          # 4. 검증 (Safety Check) - 여기서 대괄호 [ ] 양옆 공백이 필수입니다!
           if [ ! -f "$TEMP_PATH/index.html" ]; then
-            echo "❌ CRITICAL ERROR: index.html is missing! Aborting deployment."
+            echo "❌ ERROR: index.html is missing!"
             exit 1
           fi
           
-          echo "✅ Verification passed. Ready to sync."
+          echo "✅ Verification passed."
 
       - name: Final Deploy to Nginx
         run: |
@@ -40,13 +39,11 @@ jobs:
           TARGET_PATH="/var/www/html/$REPO_NAME"
           TEMP_PATH="./temp_build"
           
-          # 서버 폴더 권한 확인 및 생성
           if [ ! -d "$TARGET_PATH" ]; then
             sudo mkdir -p "$TARGET_PATH"
             sudo chown -R $USER:$USER "$TARGET_PATH"
           fi
           
-          # 검증된 temp 폴더 내용을 실제 경로로 동기화
           rsync -av --delete --exclude='.git*' $TEMP_PATH/ "$TARGET_PATH/"
 
       - name: Finish
