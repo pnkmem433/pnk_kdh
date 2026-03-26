@@ -1,0 +1,35 @@
+name: Selective Folder Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Sync Specific Folders to Server
+        run: |
+          # 1. 임시 빌드 폴더 생성
+          mkdir -p ./dist
+          
+          # 2. rsync의 --exclude 옵션을 사용하여 필요 없는 폴더 제외
+          # --exclude 뒤에 제외하고 싶은 폴더명을 적어주면 됩니다.
+          rsync -av \
+            --exclude='.git*' \
+            --exclude='.github*' \
+            --exclude='github_동작지침' \
+            --exclude='smartPlugTest' \
+            ./ ./dist/
+
+          # 3. 라떼판다의 실제 경로로 최종 동기화
+          # 이제 dist 안에는 automation과 smart_plug만 남아있으므로 이것만 배포됩니다.
+          rsync -av --delete ./dist/ /var/www/html/pnk_kdh/
+          
+      - name: Finish
+        run: echo "🚀 필요한 폴더(automation, smart_plug)만 서버에 업데이트되었습니다!"
