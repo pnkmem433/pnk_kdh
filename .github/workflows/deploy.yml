@@ -1,4 +1,4 @@
-name: Integrated Folder Deploy
+name: Zero-Touch Auto Deploy
 
 on:
   push:
@@ -11,23 +11,35 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          # 서브모듈 내용까지 포함하여 가져오기
           submodules: 'recursive'
 
-      - name: Sync Only Selected Folders
+      - name: Auto Create Folder and Sync
         run: |
-          # 1. 기존 dist 폴더가 있다면 삭제하고 새로 생성
+          # 1. 현재 저장소 이름 가져오기 (예: 3d_printer_schedule)
+          REPO_NAME="${{ github.event.repository.name }}"
+          TARGET_PATH="/var/www/html/$REPO_NAME"
+          
+          echo "Target Path: $TARGET_PATH"
+
+          # 2. 서버에 폴더가 없으면 자동으로 생성 (관리자 권한 사용)
+          if [ ! -d "$TARGET_PATH" ]; then
+            echo "Folder does not exist. Creating..."
+            sudo mkdir -p "$TARGET_PATH"
+            sudo chown -R $USER:$USER "$TARGET_PATH"
+          fi
+
+          # 3. 임시 빌드 폴더(dist) 준비
           rm -rf ./dist
           mkdir -p ./dist
           
-          # 2. 배포하고 싶은 특정 폴더만 dist 폴더로 복사
-          # 폴더가 존재하지 않을 경우를 대비해 처리 추가
-          [ -d "./automation" ] && cp -r ./automation ./dist/
-          [ -d "./smart_plug" ] && cp -r ./smart_plug ./dist/
-          
-          # 3. 라떼판다의 실제 Nginx 경로로 최종 동기화
-          # --delete 옵션으로 서버에 남아있는 불필요한 파일 삭제
-          rsync -av --delete ./dist/ /var/www/html/pnk_kdh/
+          # 4. 배포할 폴더만 dist로 복사 (이전에 정한 방식)
+          [ -d "./automation" ] && cp -r ./automation/* ./dist/ 2>/dev/null || true
+          [ -d "./smart_plug" ] && cp -r ./smart_plug/* ./dist/ 2>/dev/null || true
+          # 만약 폴더 구조 없이 파일만 있다면 전체 복사 시도
+          if [ -z "$(ls -A ./dist)" ]; then cp -r ./* ./dist/ 2>/dev/null || true; fi
+
+          # 5. 최종 배포 (rsync)
+          rsync -av --delete ./dist/ "$TARGET_PATH/"
           
       - name: Finish
-        run: echo "Deployment completed for automation and smart_plug folders."
+        run: echo "Deployment to ${{ github.event.repository.name }} completed successfully!"
