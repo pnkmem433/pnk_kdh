@@ -16,7 +16,6 @@ jobs:
           # 1. 환경 설정
           REPO_NAME="${{ github.event.repository.name }}"
           TEMP_PATH="./temp_build"
-          TARGET_PATH="/var/www/html/$REPO_NAME"
           
           # 2. 깨끗한 temp 폴더 준비
           rm -rf $TEMP_PATH
@@ -27,7 +26,7 @@ jobs:
           cp -r ./* $TEMP_PATH/
           
           # 4. 검증 (Safety Check)
-          # 예: index.html 파일이 없으면 배포 중단(exit 1)
+          # index.html 파일이 제대로 복사됐는지 확인합니다.
           if [ ! -f "$TEMP_PATH/index.html" ]; then
             echo "❌ CRITICAL ERROR: index.html is missing! Aborting deployment."
             exit 1
@@ -36,7 +35,6 @@ jobs:
           echo "✅ Verification passed. Ready to sync."
 
       - name: Final Deploy to Nginx
-        # 앞의 단계가 성공(exit 0)했을 때만 실행됩니다.
         run: |
           REPO_NAME="${{ github.event.repository.name }}"
           TARGET_PATH="/var/www/html/$REPO_NAME"
@@ -50,6 +48,6 @@ jobs:
           
           # 검증된 temp 폴더 내용을 실제 경로로 동기화
           rsync -av --delete --exclude='.git*' $TEMP_PATH/ "$TARGET_PATH/"
-          
+
       - name: Finish
         run: echo "Safe deployment completed successfully!"
