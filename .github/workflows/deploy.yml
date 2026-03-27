@@ -209,14 +209,29 @@ jobs:
           echo "Using command: $DOCKER_COMPOSE_CMD"
 
           # ===========================================
-          # 2. 홈 디렉토리에서 docker-compose 실행
+          # 2. 포트 충돌 방지를 위해 기존 컨테이너 정리
           # ===========================================
-          # (홈 디렉토리에는 gha-runner 사용자의 권한이 충분히 있음)
           echo "Compose file path: $COMPOSE_FILE"
           echo "Working directory: $(pwd)"
 
-          # 기존 컨테이너 중지 및 삭제 (|| true로 에러 무시)
-          echo "Stopping existing containers..."
+          echo "Removing previous deployment container if it exists..."
+          sudo docker rm -f lattepanda-web-docker 2>/dev/null || true
+
+          echo "Checking for containers already publishing port 8080..."
+          PORT_8080_CONTAINERS=$(sudo docker ps -q --filter "publish=8080")
+          if [ -n "$PORT_8080_CONTAINERS" ]; then
+            echo "Stopping containers using host port 8080: $PORT_8080_CONTAINERS"
+            sudo docker stop $PORT_8080_CONTAINERS || true
+            sudo docker rm $PORT_8080_CONTAINERS || true
+          else
+            echo "No running Docker containers are using host port 8080."
+          fi
+
+          # ===========================================
+          # 3. 홈 디렉토리에서 docker-compose 실행
+          # ===========================================
+          # (홈 디렉토리에는 gha-runner 사용자의 권한이 충분히 있음)
+          echo "Stopping existing compose project..."
           sudo $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" down || true
 
           # 새 컨테이너 빌드 및 실행
@@ -224,7 +239,7 @@ jobs:
           sudo $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" up -d --build
 
           # ===========================================
-          # 3. 배포 완료 후 원본 디렉토리에도 최종 결과 동기화 (선택)
+          # 4. 배포 완료 후 원본 디렉토리에도 최종 결과 동기화 (선택)
           # ===========================================
           echo "Deployment completed in home directory"
 
