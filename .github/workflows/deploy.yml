@@ -7,7 +7,8 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    # 깃허브 웹사이트에서 추가한 'alpha-server' 이름표를 적어줍니다.
+    runs-on: [self-hosted, alpha-server]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
