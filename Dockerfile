@@ -1,19 +1,19 @@
 # ===========================================
-# Docker 레시피 (Dockerfile)
-# 목적: nginx 웹 서버를 담은 도커 컨테이너 생성
-# 특징: 아주 가벼운 alpine 리눅스 기반
+# Dockerfile for static web deployment
+#
+# 목적:
+# - nginx:alpine 이미지를 기반으로 아주 가벼운 정적 웹 서버를 만든다.
+# - 현재 저장소의 index.html 을 컨테이너 기본 웹 루트에 배치한다.
+#
+# 참고:
+# - 추가 정적 자산(css, js, image 등)이 생기면 COPY 대상을 확장하면 된다.
+# - 커스텀 nginx 설정이 필요해지면 nginx.conf 복사 단계를 추가하면 된다.
 # ===========================================
 
-# 1. 베이스 이미지 선택: 가벼운 nginx 웹 서버
+# 가볍고 널리 쓰이는 nginx Alpine 이미지를 사용한다.
 FROM nginx:alpine
 
-# 2. 내가 만든 index.html을 도커 컨테이너의 웹 경로로 복사
-# 호스트의 index.html → 컨테이너의 /usr/share/nginx/html/index.html
+# 기본 nginx 정적 파일 경로에 index.html 을 덮어써서 배포 페이지를 제공한다.
 COPY index.html /usr/share/nginx/html/index.html
 
-# 3. (선택) 추가 설정: nginx 설정 파일 복사 가능
-# COPY nginx.conf /etc/nginx/nginx.conf
-
-# ===========================================
-# 실행 시 자동으로 nginx가 시작됨 (CMD는 nginx 이미지에 이미 설정됨)
-# ===========================================
+# 현재 이미지는 nginx 기본 CMD 를 그대로 사용하므로 별도 CMD 선언은 생략한다.
