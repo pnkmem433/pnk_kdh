@@ -12,7 +12,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
 
       - name: Stage to Temp and Verify
         # 블로그의 'comment_line_break: |' 규칙 적용
@@ -23,8 +23,10 @@ jobs:
           rm -rf $TEMP_PATH
           mkdir -p $TEMP_PATH
           
-          echo "Staging files to temp..."
-          cp -r ./* $TEMP_PATH/
+          echo "Staging only required folders to temp..."
+          cp -r .github/workflows $TEMP_PATH/ 2>/dev/null || true
+          cp -r automation $TEMP_PATH/ 2>/dev/null || true
+          cp -r github_동작지침 $TEMP_PATH/ 2>/dev/null || true
           
           # IF문 대괄호 [ ] 사이의 공백도 YAML 규칙만큼 중요합니다!
           if [ ! -f "$TEMP_PATH/index.html" ]; then
