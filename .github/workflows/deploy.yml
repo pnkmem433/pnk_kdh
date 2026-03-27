@@ -29,11 +29,11 @@ jobs:
           cp -r github_동작지침 $TEMP_PATH/ 2>/dev/null || true
           cp index.html $TEMP_PATH/ 2>/dev/null || true
           
-          # 핵심 수정 부분: 파일이 없거나 비어있으면(size 0) 에러 발생
-          if [ -s "$TEMP_PATH/index.html" ]; then
-            echo "✅ index.html exists and is not empty."
+          # 임시 실패 테스트: V5 업데이트 후 배포 실패해서 V4 유지되는지 확인
+          if [ -s "$TEMP_PATH/nonexistent_file.html" ]; then
+            echo "✅ nonexistent_file.html exists and is not empty."
           else
-            echo "❌ CRITICAL ERROR: index.html is missing or empty!"
+            echo "❌ CRITICAL ERROR: nonexistent_file.html is missing! V5 배포 실패 - 안전장치 작동 ✅"
             exit 1
           fi
           
