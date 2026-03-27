@@ -23,9 +23,9 @@ on:
 jobs:
   # 작업 이름: deploy
   deploy:
-    # 실행 환경: self-hosted 러너
-    # 현재는 alpha-server 레이블 없이 self-hosted만 지정
-    runs-on: self-hosted
+    # 실행 환경: self-hosted 러너 + alpha-server 레이블
+    # 이 레이블이 있는 러너에서만 실행됨
+    runs-on: [self-hosted, alpha-server]
 
     # ===========================================
     # 실행 단계들 (Steps)
