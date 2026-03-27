@@ -217,14 +217,14 @@ jobs:
           echo "Removing previous deployment container if it exists..."
           sudo docker rm -f lattepanda-web-docker 2>/dev/null || true
 
-          echo "Checking for containers already publishing port 8080..."
-          PORT_8080_CONTAINERS=$(sudo docker ps -q --filter "publish=8080")
-          if [ -n "$PORT_8080_CONTAINERS" ]; then
-            echo "Stopping containers using host port 8080: $PORT_8080_CONTAINERS"
-            sudo docker stop $PORT_8080_CONTAINERS || true
-            sudo docker rm $PORT_8080_CONTAINERS || true
+          echo "Checking for containers already publishing port 8090..."
+          PORT_8090_CONTAINERS=$(sudo docker ps -q --filter "publish=8090")
+          if [ -n "$PORT_8090_CONTAINERS" ]; then
+            echo "Stopping containers using host port 8090: $PORT_8090_CONTAINERS"
+            sudo docker stop $PORT_8090_CONTAINERS || true
+            sudo docker rm $PORT_8090_CONTAINERS || true
           else
-            echo "No running Docker containers are using host port 8080."
+            echo "No running Docker containers are using host port 8090."
           fi
 
           # ===========================================
@@ -247,6 +247,6 @@ jobs:
       - name: Finish and Verify
         run: |
           echo "Safe deployment completed successfully!"
-          echo "Docker container should be running on port 8080"
+          echo "Docker container should be running on port 8090"
           # 도커 컨테이너 상태 확인 (선택)
           sudo docker ps --filter "name=lattepanda-web-docker" || echo "Docker verification completed"
