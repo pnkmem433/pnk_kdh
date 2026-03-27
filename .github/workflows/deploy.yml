@@ -27,6 +27,7 @@ jobs:
           cp -r .github/workflows $TEMP_PATH/ 2>/dev/null || true
           cp -r automation $TEMP_PATH/ 2>/dev/null || true
           cp -r github_동작지침 $TEMP_PATH/ 2>/dev/null || true
+          cp index.html $TEMP_PATH/ 2>/dev/null || true
           
           # index.html 검사는 본 저장소에는 없으므로 선택적으로 수행
           if [ -f "$TEMP_PATH/index.html" ]; then
