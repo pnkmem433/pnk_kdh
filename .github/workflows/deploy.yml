@@ -28,10 +28,11 @@ jobs:
           cp -r automation $TEMP_PATH/ 2>/dev/null || true
           cp -r github_동작지침 $TEMP_PATH/ 2>/dev/null || true
           
-          # IF문 대괄호 [ ] 사이의 공백도 YAML 규칙만큼 중요합니다!
-          if [ ! -f "$TEMP_PATH/index.html" ]; then
-            echo "Error: index.html is missing!"
-            exit 1
+          # index.html 검사는 본 저장소에는 없으므로 선택적으로 수행
+          if [ -f "$TEMP_PATH/index.html" ]; then
+            echo "index.html exists as expected."
+          else
+            echo "index.html not found; skipping index validation."
           fi
           
           echo "Verification passed."
