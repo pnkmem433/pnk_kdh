@@ -31,9 +31,9 @@ jobs:
           
           # 3. 필수 파일 검증 (안전장치)
           if [ -s "$TEMP_PATH/index.html" ]; then
-            echo "✅ index.html 검증 완료"
+            echo "index.html 검증 완료"
           else
-            echo "❌ 에러: 필수 파일 누락"
+            echo "에러: 필수 파일 누락"
             exit 1
           fi
           
