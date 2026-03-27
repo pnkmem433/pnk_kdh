@@ -3,13 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>라떼판다 서버</title>
-
-    <!--
-      이 페이지는 Docker/nginx 배포가 정상인지 빠르게 확인하기 위한 기본 랜딩 페이지다.
-      GitHub Actions 가 성공적으로 동작하면 이 파일이 컨테이너 내부로 복사되어 서비스된다.
-    -->
     <style>
-        /* 페이지 전체 배경과 기본 레이아웃 */
         body {
             font-family: sans-serif;
             text-align: center;
@@ -17,7 +11,6 @@
             background: #f4f4f9;
         }
 
-        /* 중앙 카드 영역 */
         .card {
             background: white;
             padding: 20px;
@@ -26,11 +19,9 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        /* 제목과 본문 텍스트 색상 */
         h1 { color: #333; }
         p { color: #666; }
 
-        /* 프로젝트 목록은 왼쪽 정렬로 읽기 편하게 표시 */
         .project-list {
             text-align: left;
             margin-top: 20px;
@@ -39,15 +30,9 @@
 </head>
 <body>
     <div class="card">
-        <!-- 서버 배포 성공 여부를 눈으로 확인하는 핵심 문구 -->
         <h1>Welcome to LattePanda IoT Server</h1>
-
-        <!-- 배포 파이프라인이 살아 있는지 확인하기 위한 상태 메시지 -->
         <p>자동 배포 테스트 페이지가 정상적으로 구성되었습니다. V7 서버가 응답 중입니다.</p>
-
         <hr>
-
-        <!-- 현재 서버에서 함께 관리하는 대표 프로젝트 예시 -->
         <div class="project-list">
             <h3>현재 프로젝트 폴더</h3>
             <ul>
@@ -56,8 +41,6 @@
                 <li>Meeting Logs</li>
             </ul>
         </div>
-
-        <!-- 수동 확인 시점 메모 -->
         <p><i>Last Updated: 2026-03-26</i></p>
     </div>
 </body>

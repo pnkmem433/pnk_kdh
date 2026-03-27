@@ -1,0 +1,13 @@
+# ===========================================
+# Docker Compose configuration for deploy_root
+# ===========================================
+
+version: '3.8'
+
+services:
+  my-web-docker:
+    build: .
+    ports:
+      - "8090:80"
+    restart: always
+    container_name: lattepanda-web-docker
