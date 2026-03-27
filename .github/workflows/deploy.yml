@@ -3,17 +3,25 @@
 #
 # 목적:
 # - main 브랜치 push 시 self-hosted runner 에서 자동 배포한다.
-# - 배포 대상은 저장소 루트 전체가 아니라 deploy_root/ 폴더만 사용한다.
-# - 서버에는 deploy_root/ 내용만 /var/www/html/<repo-name> 로 동기화한다.
-# - Docker Compose 는 여전히 홈 디렉토리 작업 폴더에서 실행해 경로 이슈를 피한다.
+# - 배포 대상은 저장소 전체가 아니라 site/ 폴더만 사용한다.
+# - 서버에는 site/ 내용만 /var/www/html/<repo-name> 로 동기화한다.
+# - Docker Compose 는 홈 디렉토리 작업 폴더에서 실행해 경로 이슈를 피한다.
 #
-# 이 구조의 장점:
-# - "무엇을 배포할지" 선택하거나 "무엇을 제외할지" 관리할 필요가 거의 없다.
-# - 현재 deploy_root/ 에는 index.html, Dockerfile, docker-compose.yml 뿐 아니라
-#   automation/, github_동작지침/, 배포 참고용 deploy.yml 사본도 함께 포함한다.
+# site/ 를 쓰는 이유:
+# - 이름만 봐도 "배포되는 사이트 파일"이라는 뜻이 바로 보인다.
+# - 무엇을 포함할지/제외할지 매번 고민하지 않아도 된다.
+# - 앞으로 배포할 파일은 site/ 안에 넣고, 배포하지 않을 파일은 밖에 두면 된다.
+#
+# 현재 site/ 에 포함되는 항목:
+# - index.html
+# - Dockerfile
+# - docker-compose.yml
+# - automation/
+# - github_동작지침/
+# - 배포 참고용 .github/workflows/deploy.yml 사본
 # ===========================================
 
-name: "Zero-Touch Auto Deploy (Deploy Root Mode)"
+name: "Zero-Touch Auto Deploy (Site Folder Mode)"
 
 on:
   push:
@@ -30,63 +38,60 @@ jobs:
         with:
           submodules: false
 
-      # 배포 전용 폴더가 존재하고 핵심 파일/폴더가 들어 있는지 확인한다.
-      - name: Verify Deploy Root
+      - name: Verify Site Folder
         run: |
-          DEPLOY_ROOT="./deploy_root"
+          SITE_DIR="./site"
 
-          if [ ! -d "$DEPLOY_ROOT" ]; then
-            echo "Deploy root not found: $DEPLOY_ROOT"
+          if [ ! -d "$SITE_DIR" ]; then
+            echo "Site folder not found: $SITE_DIR"
             exit 1
           fi
 
-          if [ ! -f "$DEPLOY_ROOT/index.html" ]; then
-            echo "Required file missing: $DEPLOY_ROOT/index.html"
+          if [ ! -f "$SITE_DIR/index.html" ]; then
+            echo "Required file missing: $SITE_DIR/index.html"
             exit 1
           fi
 
-          if [ ! -f "$DEPLOY_ROOT/Dockerfile" ]; then
-            echo "Required file missing: $DEPLOY_ROOT/Dockerfile"
+          if [ ! -f "$SITE_DIR/Dockerfile" ]; then
+            echo "Required file missing: $SITE_DIR/Dockerfile"
             exit 1
           fi
 
-          if [ ! -f "$DEPLOY_ROOT/docker-compose.yml" ]; then
-            echo "Required file missing: $DEPLOY_ROOT/docker-compose.yml"
+          if [ ! -f "$SITE_DIR/docker-compose.yml" ]; then
+            echo "Required file missing: $SITE_DIR/docker-compose.yml"
             exit 1
           fi
 
-          if [ ! -f "$DEPLOY_ROOT/.github/workflows/deploy.yml" ]; then
-            echo "Required file missing: $DEPLOY_ROOT/.github/workflows/deploy.yml"
+          if [ ! -f "$SITE_DIR/.github/workflows/deploy.yml" ]; then
+            echo "Required file missing: $SITE_DIR/.github/workflows/deploy.yml"
             exit 1
           fi
 
-          if [ ! -d "$DEPLOY_ROOT/automation" ]; then
-            echo "Required directory missing: $DEPLOY_ROOT/automation"
+          if [ ! -d "$SITE_DIR/automation" ]; then
+            echo "Required directory missing: $SITE_DIR/automation"
             exit 1
           fi
 
-          if [ ! -d "$DEPLOY_ROOT/github_동작지침" ]; then
-            echo "Required directory missing: $DEPLOY_ROOT/github_동작지침"
+          if [ ! -d "$SITE_DIR/github_동작지침" ]; then
+            echo "Required directory missing: $SITE_DIR/github_동작지침"
             exit 1
           fi
 
-          echo "Deploy root verification passed."
+          echo "Site folder verification passed."
 
-      # deploy_root/ 만 실제 웹 루트로 동기화한다.
       - name: Final Deploy to Nginx
         run: |
           REPO_NAME="${{ github.event.repository.name }}"
           TARGET_PATH="/var/www/html/$REPO_NAME"
-          DEPLOY_ROOT="./deploy_root"
+          SITE_DIR="./site"
 
           if [ ! -d "$TARGET_PATH" ]; then
             sudo mkdir -p "$TARGET_PATH"
             sudo chown -R "$USER:$USER" "$TARGET_PATH"
           fi
 
-          rsync -av --delete "$DEPLOY_ROOT/" "$TARGET_PATH/"
+          rsync -av --delete "$SITE_DIR/" "$TARGET_PATH/"
 
-      # Docker 는 홈 디렉토리 작업 폴더에서 compose 를 실행한다.
       - name: Run Docker Compose
         run: |
           REPO_NAME="${{ github.event.repository.name }}"
