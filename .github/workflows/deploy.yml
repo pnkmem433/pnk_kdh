@@ -123,7 +123,7 @@ jobs:
           # --exclude='__pycache__': Python 캐시 폴더 제외
           rsync -av --delete --exclude='.git*' --exclude='*.pyc' --exclude='__pycache__' $TEMP_PATH/ "$TARGET_PATH/"
 
-      # 단계 4: 도커 컨테이너 실행 (경로 지정 강화 버전)
+      # 단계 4: 도커 컨테이너 실행 (홈 디렉토리에서 실행)
       - name: Run Docker Compose
         run: |
           # ===========================================
@@ -134,8 +134,24 @@ jobs:
 
           echo "Repository name: $REPO_NAME"
           echo "Target directory: $TARGET_DIR"
+          echo "Home directory: $HOME"
 
-          cd "$TARGET_DIR"
+          # ===========================================
+          # 홈 디렉토리로 작업 디렉토리 생성 (권한 문제 해결)
+          # ===========================================
+          WORK_DIR="$HOME/docker-deploy-$REPO_NAME"
+          echo "Work directory: $WORK_DIR"
+
+          rm -rf "$WORK_DIR"
+          mkdir -p "$WORK_DIR"
+
+          # ===========================================
+          # /var/www/html에서 홈 디렉토리로 파일 복사
+          # ===========================================
+          echo "Copying files from $TARGET_DIR to $WORK_DIR..."
+          cp -r "$TARGET_DIR"/* "$WORK_DIR/" 2>/dev/null || true
+
+          cd "$WORK_DIR"
 
           # ===========================================
           # 디버깅: 현재 디렉토리와 파일 목록 확인
@@ -147,18 +163,18 @@ jobs:
           # ===========================================
           # 필수 파일 존재 확인 (절대 경로로)
           # ===========================================
-          COMPOSE_FILE="$TARGET_DIR/docker-compose.yml"
-          DOCKERFILE="$TARGET_DIR/Dockerfile"
-          INDEX_FILE="$TARGET_DIR/index.html"
+          COMPOSE_FILE="$WORK_DIR/docker-compose.yml"
+          DOCKERFILE="$WORK_DIR/Dockerfile"
+          INDEX_FILE="$WORK_DIR/index.html"
 
-          echo "Checking files with absolute paths:"
+          echo "Checking files in work directory:"
           echo "Compose file: $COMPOSE_FILE"
           echo "Dockerfile: $DOCKERFILE"
           echo "Index file: $INDEX_FILE"
 
           if [ ! -f "$COMPOSE_FILE" ]; then
             echo "Error: docker-compose.yml not found at $COMPOSE_FILE!"
-            ls -la "$TARGET_DIR/"
+            ls -la "$WORK_DIR/"
             exit 1
           fi
 
@@ -193,17 +209,24 @@ jobs:
           echo "Using command: $DOCKER_COMPOSE_CMD"
 
           # ===========================================
-          # 2. 파일 경로를 -f 옵션으로 명시하여 실행 (절대 경로 사용)
+          # 2. 홈 디렉토리에서 docker-compose 실행
           # ===========================================
-          echo "Compose file path for command: $COMPOSE_FILE"
+          # (홈 디렉토리에는 gha-runner 사용자의 권한이 충분히 있음)
+          echo "Compose file path: $COMPOSE_FILE"
+          echo "Working directory: $(pwd)"
 
           # 기존 컨테이너 중지 및 삭제 (|| true로 에러 무시)
           echo "Stopping existing containers..."
           sudo $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" down || true
 
           # 새 컨테이너 빌드 및 실행
-          echo "Starting deployment with explicit file path..."
+          echo "Starting deployment with Docker compose..."
           sudo $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" up -d --build
+
+          # ===========================================
+          # 3. 배포 완료 후 원본 디렉토리에도 최종 결과 동기화 (선택)
+          # ===========================================
+          echo "Deployment completed in home directory"
 
       # 단계 5: 배포 완료 및 도커 실행 확인
       - name: Finish and Verify
