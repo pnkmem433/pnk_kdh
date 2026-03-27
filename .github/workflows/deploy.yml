@@ -1,27 +1,19 @@
 # ===========================================
 # GitHub Actions Deploy Workflow
+# 파일명: .github/workflows/deploy.yml
 #
 # 목적:
-# - main 브랜치 push 시 self-hosted runner 에서 자동 배포한다.
-# - 배포 대상은 저장소 전체가 아니라 site/ 폴더만 사용한다.
-# - 서버에는 site/ 내용만 /var/www/html/<repo-name> 로 동기화한다.
-# - Docker Compose 는 홈 디렉토리 작업 폴더에서 실행해 경로 이슈를 피한다.
+# - main 브랜치에 변경이 push 되면 self-hosted runner 에서 자동 배포한다.
+# - 정적 파일은 /var/www/html/<repo-name> 경로에 배치한다.
+# - Docker Compose 는 홈 디렉토리 쪽 작업 폴더에서 실행해 경로 접근 문제를 피한다.
 #
-# site/ 를 쓰는 이유:
-# - 이름만 봐도 "배포되는 사이트 파일"이라는 뜻이 바로 보인다.
-# - 무엇을 포함할지/제외할지 매번 고민하지 않아도 된다.
-# - 앞으로 배포할 파일은 site/ 안에 넣고, 배포하지 않을 파일은 밖에 두면 된다.
-#
-# 현재 site/ 에 포함되는 항목:
-# - index.html
-# - Dockerfile
-# - docker-compose.yml
-# - automation/
-# - github_동작지침/
-# - 배포 참고용 .github/workflows/deploy.yml 사본
+# 최근 반영된 운영 이슈:
+# - /var/www/html 아래의 compose 파일을 Docker 가 직접 읽지 못한 적이 있어
+#   $HOME/docker-deploy-<repo-name> 에 복사한 뒤 그 위치에서 compose 를 실행한다.
+# - 서버의 8080 포트는 Jenkins 가 사용하므로 웹 컨테이너는 8090 포트를 사용한다.
 # ===========================================
 
-name: "Zero-Touch Auto Deploy (Site Folder Mode)"
+name: "Zero-Touch Auto Deploy (Method 3: Safe Build)"
 
 on:
   push:
@@ -38,59 +30,47 @@ jobs:
         with:
           submodules: false
 
-      - name: Verify Site Folder
+      - name: Stage to Temp and Verify
         run: |
-          SITE_DIR="./site"
+          TEMP_PATH="./temp_build"
 
-          if [ ! -d "$SITE_DIR" ]; then
-            echo "Site folder not found: $SITE_DIR"
+          rm -rf "$TEMP_PATH"
+          mkdir -p "$TEMP_PATH"
+
+          # 루트 전체를 우선 스테이징한 뒤, 배포에 필요 없는 항목만 제외한다.
+          cp -r ./* "$TEMP_PATH/" 2>/dev/null || true
+
+          rm -rf "$TEMP_PATH/.github"
+          rm -rf "$TEMP_PATH/.venv"
+          rm -rf "$TEMP_PATH/venv"
+          rm -rf "$TEMP_PATH/README.md"
+          rm -rf "$TEMP_PATH/site"
+
+          if [ -s "$TEMP_PATH/index.html" ]; then
+            echo "index.html verification passed."
+          else
+            echo "Required file missing: index.html"
             exit 1
           fi
 
-          if [ ! -f "$SITE_DIR/index.html" ]; then
-            echo "Required file missing: $SITE_DIR/index.html"
-            exit 1
-          fi
-
-          if [ ! -f "$SITE_DIR/Dockerfile" ]; then
-            echo "Required file missing: $SITE_DIR/Dockerfile"
-            exit 1
-          fi
-
-          if [ ! -f "$SITE_DIR/docker-compose.yml" ]; then
-            echo "Required file missing: $SITE_DIR/docker-compose.yml"
-            exit 1
-          fi
-
-          if [ ! -f "$SITE_DIR/.github/workflows/deploy.yml" ]; then
-            echo "Required file missing: $SITE_DIR/.github/workflows/deploy.yml"
-            exit 1
-          fi
-
-          if [ ! -d "$SITE_DIR/automation" ]; then
-            echo "Required directory missing: $SITE_DIR/automation"
-            exit 1
-          fi
-
-          if [ ! -d "$SITE_DIR/github_동작지침" ]; then
-            echo "Required directory missing: $SITE_DIR/github_동작지침"
-            exit 1
-          fi
-
-          echo "Site folder verification passed."
+          echo "Staging and verification completed."
 
       - name: Final Deploy to Nginx
         run: |
           REPO_NAME="${{ github.event.repository.name }}"
           TARGET_PATH="/var/www/html/$REPO_NAME"
-          SITE_DIR="./site"
+          TEMP_PATH="./temp_build"
 
           if [ ! -d "$TARGET_PATH" ]; then
             sudo mkdir -p "$TARGET_PATH"
             sudo chown -R "$USER:$USER" "$TARGET_PATH"
           fi
 
-          rsync -av --delete "$SITE_DIR/" "$TARGET_PATH/"
+          rsync -av --delete \
+            --exclude='.git*' \
+            --exclude='*.pyc' \
+            --exclude='__pycache__' \
+            "$TEMP_PATH/" "$TARGET_PATH/"
 
       - name: Run Docker Compose
         run: |
@@ -120,8 +100,14 @@ jobs:
           DOCKERFILE="$WORK_DIR/Dockerfile"
           INDEX_FILE="$WORK_DIR/index.html"
 
+          echo "Checking files in work directory:"
+          echo "Compose file: $COMPOSE_FILE"
+          echo "Dockerfile: $DOCKERFILE"
+          echo "Index file: $INDEX_FILE"
+
           if [ ! -f "$COMPOSE_FILE" ]; then
             echo "Error: docker-compose.yml not found at $COMPOSE_FILE"
+            ls -la "$WORK_DIR/"
             exit 1
           fi
 
@@ -134,6 +120,8 @@ jobs:
             echo "Error: index.html not found at $INDEX_FILE"
             exit 1
           fi
+
+          echo "All required files found. Proceeding with Docker deployment..."
 
           if command -v docker-compose &> /dev/null; then
             DOCKER_COMPOSE_CMD="docker-compose"
@@ -149,6 +137,8 @@ jobs:
           fi
 
           echo "Using command: $DOCKER_COMPOSE_CMD"
+          echo "Compose file path: $COMPOSE_FILE"
+          echo "Working directory: $(pwd)"
 
           echo "Removing previous deployment container if it exists..."
           sudo docker rm -f lattepanda-web-docker 2>/dev/null || true
