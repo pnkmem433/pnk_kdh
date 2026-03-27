@@ -1,4 +1,4 @@
-name: Zero-Touch Auto Deploy (Method 3: Safe Build)
+name: "Zero-Touch Auto Deploy (Method 3: Safe Build)"
 
 on:
   push:
