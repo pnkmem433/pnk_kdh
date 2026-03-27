@@ -29,11 +29,13 @@ jobs:
           cp -r github_동작지침 $TEMP_PATH/ 2>/dev/null || true
           cp index.html $TEMP_PATH/ 2>/dev/null || true
           
-          # index.html 검사는 본 저장소에는 없으므로 선택적으로 수행
-          if [ -f "$TEMP_PATH/index.html" ]; then
-            echo "index.html exists as expected."
+          # 핵심 수정 부분: 파일이 없거나 비어있으면(size 0) 에러 발생
+          if [ -s "$TEMP_PATH/index.html" ]; then
+            echo "✅ index.html exists and is not empty."
           else
-            echo "index.html not found; skipping index validation."
+            echo "❌ CRITICAL ERROR: index.html is missing or empty!"
+            # 여기서 exit 1을 해줘야 다음 단계(Final Deploy)로 안 넘어갑니다.
+            exit 1
           fi
           
           echo "Verification passed."
