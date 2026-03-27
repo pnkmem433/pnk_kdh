@@ -1,13 +1,31 @@
 # ===========================================
-# Docker Compose configuration for deploy_root
+# Docker Compose configuration
+#
+# 목적:
+# - Dockerfile 로 빌드한 nginx 정적 웹 컨테이너를 실행한다.
+# - GitHub Actions 배포 후 동일 설정으로 컨테이너를 다시 기동한다.
+#
+# 현재 운영 설정:
+# - 호스트 8090 포트를 컨테이너 80 포트에 연결한다.
+# - 컨테이너 이름은 lattepanda-web-docker 로 고정한다.
+# - 워크플로에서 이 이름과 포트를 기준으로 기존 컨테이너를 정리한다.
 # ===========================================
 
 version: '3.8'
 
 services:
+  # 단일 nginx 웹 서비스.
+  # build: . 은 현재 루트의 Dockerfile 을 사용해 이미지를 만든다는 뜻이다.
   my-web-docker:
     build: .
+
+    # 호스트 8090 포트를 컨테이너 80 포트에 연결한다.
+    # 브라우저에서는 http://<server-ip>:8090 으로 접근한다.
     ports:
       - "8090:80"
+
+    # 컨테이너가 예기치 않게 종료되면 Docker 가 자동 재시작을 시도한다.
     restart: always
+
+    # 배포 워크플로에서 동일 이름으로 컨테이너를 찾아 정리할 수 있도록 고정 이름을 사용한다.
     container_name: lattepanda-web-docker
