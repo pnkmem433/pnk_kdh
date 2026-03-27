@@ -15,25 +15,25 @@ jobs:
           submodules: false
 
       - name: Stage to Temp and Verify
-        # 블로그의 'comment_line_break: |' 규칙 적용
         run: |
-          REPO_NAME="${{ github.event.repository.name }}"
           TEMP_PATH="./temp_build"
-          
           rm -rf $TEMP_PATH
           mkdir -p $TEMP_PATH
           
-          echo "Staging only required folders to temp..."
-          cp -r .github/workflows $TEMP_PATH/ 2>/dev/null || true
-          cp -r automation $TEMP_PATH/ 2>/dev/null || true
-          cp -r github_동작지침 $TEMP_PATH/ 2>/dev/null || true
-          cp index.html $TEMP_PATH/ 2>/dev/null || true
+          # 1. 일단 모든 파일을 temp로 복사
+          cp -r ./* $TEMP_PATH/ 2>/dev/null || true
           
-          # 핵심 수정 부분: 파일이 없거나 비어있으면(size 0) 에러 발생
+          # 2. 제외하고 싶은 것들을 temp에서 삭제 (블랙리스트 방식)
+          rm -rf $TEMP_PATH/.github        # 워크플로우 지시서 제외
+          rm -rf $TEMP_PATH/.venv          # 가상환경 폴더 제외
+          rm -rf $TEMP_PATH/README.md      # 설명문 제외
+          rm -rf $TEMP_PATH/venv           # venv 폴더 제외
+          
+          # 3. 필수 파일 검증 (안전장치)
           if [ -s "$TEMP_PATH/index.html" ]; then
-            echo "✅ index.html exists and is not empty."
+            echo "✅ index.html 검증 완료"
           else
-            echo "❌ CRITICAL ERROR: index.html is missing or empty!"
+            echo "❌ 에러: 필수 파일 누락"
             exit 1
           fi
           
