@@ -2,24 +2,32 @@
 
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
-#include <ESP8266httpUpdate.h>
 #include <functional>
 
 enum class FirmwareUpdateResult {
   Success,
   NoUpdate,
-  Failed
+  Failed,
+  ProjectNotFound,
+  VersionNotFound,
+  FileNotFound
 };
 
 class FirmwareUpdater {
 public:
-  explicit FirmwareUpdater(const char* serverUrl);
+  FirmwareUpdater(const char* serverUrl, const char* projectId, int versionCode);
 
   void performFirmwareUpdate(std::function<void(float)> progressCallback,
                              std::function<void(FirmwareUpdateResult)> resultCallback);
+  void setAutoReset(bool enable);
+  void reset();
 
 private:
-  String updateUrl() const;
+  String requestUrl() const;
 
   const char* serverUrl_;
+  const char* projectId_;
+  int versionCode_;
+  bool autoReset_ = true;
+  uint8_t updateBuffer_[128];
 };

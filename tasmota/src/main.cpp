@@ -9,41 +9,27 @@
 #include "UuidStore.h"
 #include "WifiManager.h"
 
-#define FW_VER_MAJOR 0
-#define FW_VER_MINOR 5
-#define FW_VER_PATCH 2
-
-#define FW_VERSION_CODE ((FW_VER_MAJOR * 100) + (FW_VER_MINOR * 10) + FW_VER_PATCH)
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
-#define FW_VERSION_STRING STR(FW_VER_MAJOR) "." STR(FW_VER_MINOR) "." STR(FW_VER_PATCH)
-
-__attribute__((used))
-const char FW_VERSION[] = "SMARTPLUG_FW_VERSION:" FW_VERSION_STRING;
+const char* OTA_URL = "http://gym907-0001.iptime.org:3004";
+const char* PROJ_ID = "41742426-d035-4756-ba17-f542ea75ab02";
+constexpr int FW_VERSION_CODE = 53;
 
 WifiManager wifi(WIFI_SSID, WIFI_PASSWORD);
-FirmwareUpdater updater(OTA_MANIFEST_URL);
-
+FirmwareUpdater updater(OTA_URL, PROJ_ID, FW_VERSION_CODE);
 TimeSync dateTime;
 MqttService mqtt;
 UuidStore uuid;
 
 ButtonSensor button(Config::kButtonPin, true);
 DigitalOut relay(Config::kRelayPin);
-DigitalOut blueLed(Config::kLedPin, false);
-DigitalOut led2(Config::kAuxLedPin, false);
+DigitalOut led1(Config::kAuxLedPin, false);
+DigitalOut led2(Config::kLedPin, false);
 
 String controlTopic = "smart_plug/{uuid}";
-String commandTopic = "smart_plug/{uuid}/command";
-String statusTopic = "smart_plug/{uuid}/status";
-
-unsigned long lastPublishMs = 0;
-bool lastWifiState = false;
 
 void serviceDelay(unsigned long durationMs, bool serviceWifi = false) {
   unsigned long startedMs = millis();
   while (millis() - startedMs < durationMs) {
-    blueLed.tick();
+    led2.tick();
     if (serviceWifi) {
       wifi.tick(Config::kWifiRetryDelayMs);
     }
@@ -52,34 +38,11 @@ void serviceDelay(unsigned long durationMs, bool serviceWifi = false) {
 }
 
 String statusPayload(bool isOn) {
-  StaticJsonDocument<128> doc;
-  doc["state"] = isOn ? "on" : "off";
-  doc["wifi"] = wifi.connected();
-  doc["ip"] = wifi.connected() ? wifi.localIp().toString() : "";
-
-  String payload;
-  serializeJson(doc, payload);
-  return payload;
-}
-
-void applyRelayState(bool newState) {
-  if (newState) {
-    relay.on();
-  } else {
-    relay.off();
-  }
-
-  mqtt.publish(statusTopic, statusPayload(newState), true);
+  return "{\"state\":\"" + String(isOn ? "on" : "off") + "\"}";
 }
 
 void publishStatus() {
-  mqtt.publish(statusTopic, statusPayload(relay.isOn()), true);
-}
-
-void updateTopics() {
-  controlTopic = "smart_plug/" + uuid.load();
-  commandTopic = controlTopic + "/command";
-  statusTopic = controlTopic + "/status";
+  mqtt.publish(controlTopic + "/status", statusPayload(relay.isOn()));
 }
 
 void setup() {
@@ -88,112 +51,125 @@ void setup() {
 
   Serial.println();
   Serial.println(F("--- Boot Start ---"));
-  Serial.printf("FW Info: %s\n", FW_VERSION);
   Serial.printf("FW Code: %d\n", FW_VERSION_CODE);
 
   button.begin();
-  blueLed.begin();
+  led1.begin();
+  led2.begin();
   relay.begin();
 
-  // 부팅 시그니처: 10ms 간격으로 3초 동안 점멸
-  blueLed.blink(10);
+  led2.blink(10);
   serviceDelay(Config::kBootBlinkMs);
-  blueLed.stopBlink();
-  blueLed.off();
+  led2.stopBlink();
+  led2.off();
 
-  // WiFi 연결 단계
-  blueLed.blink(500);
+  led2.blink(500);
   serviceDelay(2000);
-  blueLed.stopBlink();
+  led2.stopBlink();
   wifi.begin();
 
-  // 펌웨어 업데이트 확인 단계
-  blueLed.blink(250);
+  led2.blink(250);
   serviceDelay(2000, true);
-  blueLed.stopBlink();
-  blueLed.on();
+  led2.stopBlink();
   updater.performFirmwareUpdate(
       [](float progress) { Serial.printf("Update Progress: %.2f%%\n", progress * 100.0f); },
-      [](FirmwareUpdateResult result) {
-        Serial.printf("Update Result: %d\n", static_cast<int>(result));
-      });
-  if (wifi.connected()) {
-    Serial.printf("WiFi connected. IP: %s\n", wifi.localIp().toString().c_str());
-  } else {
-    Serial.println(F("WiFi not connected during OTA check"));
-  }
+      [](FirmwareUpdateResult result) { Serial.printf("Update Result: %d\n", static_cast<int>(result)); });
 
-  // UUID 및 MQTT 설정 단계
-  blueLed.blink(100);
+  led2.blink(100);
   serviceDelay(2000, true);
-  blueLed.stopBlink();
-  blueLed.off();
+  led2.stopBlink();
   uuid.begin();
-  updateTopics();
+
+  controlTopic = "smart_plug/" + uuid.load();
+
   dateTime.begin();
 
   button.onPressed([]() {
-    bool newState = !relay.isOn();
-    applyRelayState(newState);
+    bool isOn = relay.isOn();
+    if (isOn) {
+      relay.off();
+      led1.off();
+    } else {
+      relay.on();
+      led1.on();
+    }
+
+    publishStatus();
   });
 
   mqtt.begin(MQTT_HOST, MQTT_PORT, MQTT_USER, MQTT_PASSWORD);
-  mqtt.subscribe(commandTopic);
+  mqtt.subscribe(controlTopic + "/command");
+
   mqtt.setCallback([](const String& topic, const String& payload) {
-    if (topic != commandTopic) {
+    Serial.printf("[MQTT] recv topic=%s payload=%s\n", topic.c_str(), payload.c_str());
+
+    StaticJsonDocument<256> doc;
+    DeserializationError err = deserializeJson(doc, payload);
+    if (err) {
+      Serial.printf("[MQTT] JSON parse error: %s\n", err.c_str());
       return;
     }
 
-    StaticJsonDocument<256> doc;
-    if (deserializeJson(doc, payload) != DeserializationError::Ok) {
-      return;
-    }
     if (!doc.containsKey("cmd")) {
+      Serial.println(F("[MQTT] invalid payload: missing cmd"));
       return;
     }
 
     String cmd = doc["cmd"].as<String>();
     cmd.toLowerCase();
 
-    if (cmd == "on" || cmd == "off") {
-      applyRelayState(cmd == "on");
-    } else if (cmd == "status") {
-      publishStatus();
+    Serial.printf("[MQTT] cmd=%s\n", cmd.c_str());
+
+    if (cmd == "on") {
+      relay.on();
+      led1.on();
+      Serial.println(F("[RELAY] ON"));
+      mqtt.publish(controlTopic + "/status", statusPayload(true));
+      return;
     }
+
+    if (cmd == "off") {
+      relay.off();
+      led1.off();
+      Serial.println(F("[RELAY] OFF"));
+      mqtt.publish(controlTopic + "/status", statusPayload(false));
+      return;
+    }
+
+    if (cmd == "status") {
+      publishStatus();
+      Serial.println(F("[MQTT] status sent"));
+      return;
+    }
+
+    Serial.println(F("[MQTT] unknown cmd"));
   });
 }
 
 void loop() {
+  static unsigned long lastPrint = 0;
   unsigned long now = millis();
 
-  blueLed.tick();
+  led1.tick();
+  led2.tick();
 
   wifi.tick(Config::kWifiRetryDelayMs);
   mqtt.tick(Config::kMqttRetryDelayMs);
   dateTime.tick();
   button.tick(Config::kDebounceMs);
 
-  bool wifiConnected = wifi.connected();
-  if (wifiConnected != lastWifiState) {
-    lastWifiState = wifiConnected;
-    Serial.printf("WiFi %s\n", wifiConnected ? "connected" : "disconnected");
-    if (wifiConnected) {
-      Serial.printf("IP: %s\n", wifi.localIp().toString().c_str());
-    }
-  }
-
   if (!wifi.connected()) {
-    blueLed.blink(500);
+    led2.blink(500);
   } else if (!mqtt.connected()) {
-    blueLed.blink(100);
+    led2.blink(100);
   } else {
-    blueLed.on();
+    led2.off();
   }
 
-  if (mqtt.connected() && now - lastPublishMs >= Config::kStatusPublishIntervalMs) {
-    lastPublishMs = now;
+  if (now - lastPrint > 5000) {
+    lastPrint = now;
     publishStatus();
   }
 
-  delay(10);
+  delay(100);
 }
