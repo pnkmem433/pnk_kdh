@@ -1,0 +1,7 @@
+{
+  "name": "thermoHygro",
+  "build": {
+    "includeDir": ".",
+    "srcDir": "."
+  }
+}
