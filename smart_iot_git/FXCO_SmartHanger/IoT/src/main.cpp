@@ -25,6 +25,7 @@
 #define REMOVE_CONFIRM_COUNT 3
 #define WIFI_BANNER_MS 1500UL
 #define INA_SAMPLE_MS 1000UL
+// INA226-compatible monitor registers used for battery voltage/current checks.
 #define INA_REG_CONFIG 0x00
 #define INA_REG_VSHUNT 0x01
 #define INA_REG_VBUS 0x02
