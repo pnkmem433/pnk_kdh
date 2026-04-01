@@ -1,0 +1,679 @@
+﻿#include "FirmwareUpdater.h"
+#include "Request.h"
+#include "Ui.h"
+#include "clothData.h"
+#include "digital_sensor.h"
+#include "esp_heap_caps.h"
+#include "wifiManager.h"
+#include <Arduino.h>
+#include <ArduinoJson.h>
+#include <TFT_eSPI.h>
+#include <http.h>
+#include <mqtt.h>
+#include <nfc.h>
+#include <qrcode_espi.h>
+#include <uuid.h>
+
+/*
+  Smart Hanger 메인 펌웨어 (main.cpp)
+
+  이 파일은 장치의 전체 라이프사이클을 담당한다.
+  1) 하드웨어/통신 초기화
+     - TFT UI, UUID, Wi-Fi, 충전 감지, NFC, MQTT, HTTP
+  2) 백엔드 연동
+     - MQTT 명령 수신 및 콜백 응답
+     - HTTP 이벤트 전송(connect/pickup/pickdown/time-tracking)
+  3) 이벤트 파이프라인
+     - NFC 이벤트를 큐로 분리하여 HTTP 경로와 MQTT 경로를 독립 처리
+  4) UI 렌더링
+     - notify > qr > 상품 색상 화면 순으로 상태에 맞게 표시
+  5) 그룹 동기화
+     - 여러 행거가 링 애니메이션 타이밍을 공유하도록 coordinator/follower 로직 수행
+*/
+
+// TFT 하드웨어/스프라이트 객체
+TFT_eSPI tft;
+TFT_eSprite spr(&tft);
+TFT_eSprite qrSpr(&tft);
+QRcode_eSPI qrcode(&qrSpr);
+Ui ui = Ui(&tft, &spr, &qrSpr, &qrcode);
+
+// 장치 식별/통신/센서 객체
+Uuid uuid = Uuid();
+Http http = Http();
+Sensor charge = Sensor(D6); // D6: 충전 레일 감지 입력
+
+// NFC 리더(RC522) 핀 구성
+Nfc nfc = Nfc({
+    .ssPin = D4,  // RC522 SS
+    .rstPin = D2, // RC522 RST
+});
+
+// Wi-Fi 후보 네트워크 목록
+WifiManager wifi = WifiManager({
+    {.ssid = "fxco-pnksolution-stylingbooth", .password = "71805802"},
+    {.ssid = "CC-Retail", .password = "pnks1111"},
+});
+
+// HTTP 요청 래퍼
+Request request = Request({
+    .http = &http,
+    .url = "http://192.168.1.100",
+    .port = 3001,
+});
+
+// OTA 업데이트용 펌웨어 식별 정보
+FirmwareUpdater updater = FirmwareUpdater({
+    .uuid = "89e051d1-c3bf-4ae0-aa63-40c004aa1431",
+    .version = 59,
+});  
+
+// MQTT 서버 설정
+Mqtt mqtt = Mqtt({
+    .server = "mqtt://192.168.1.100",
+    .port = 1883,
+    .user = "pnks",
+    .password = "pnks1111",
+    .qos = 1,
+});
+
+// notifyStart: 알림 시작 시각(ms)
+// phaseStart: 링 애니메이션 기준 시각(ms)
+uint64_t notifyStart = 0;
+uint64_t phaseStart = 0;
+uint64_t heartbeatMs = 0;
+
+// 이벤트 큐 분리
+// - appEventQ: HTTP 비즈니스 요청 경로 (느려도 됨)
+// - mqttFastQ: MQTT 즉시 전송 경로 (지연 최소화)
+QueueHandle_t appEventQ;
+QueueHandle_t mqttFastQ;
+
+TaskHandle_t appTaskHandle;
+TaskHandle_t mqttFastTask;
+
+// 그룹 타이밍 동기화 상태
+bool isGroupCoordinator = false;
+int delayTime = 0;               // takeover 충돌 완화용 랜덤 지연
+uint64_t lastTimingReceived = 0; // 마지막 timing 수신 시각
+
+typedef struct
+{
+  char topic[128];
+  char message[512];
+} MqttCmdEvent;
+
+QueueHandle_t mqttCmdQ;
+TaskHandle_t mqttCmdTaskHandle;
+
+void setup()
+{
+  Serial.begin(115200);
+  delay(50);
+
+  // 랜덤 지연값은 follower takeover 시 동시 발행 충돌을 줄이는 데 사용한다.
+  delayTime = random(0, 5000);
+
+  // UI 초기화 후 로고를 먼저 노출해 부팅 진행 상태를 사용자에게 전달한다.
+  ui.begin();
+  ui.showLogo();
+
+  // UUID를 사용하는 이유:
+  // 1) 서버/MQTT에서 장치를 고유하게 식별하기 위해
+  // 2) 재부팅 후에도 같은 장치 ID를 유지하기 위해(EEPROM 저장)
+  // 3) 이벤트 로그/장애 추적/운영 관리의 기준 키로 쓰기 위해
+  // 4) OTA 시 장치별 번호를 수기로 관리하지 않고,
+  //    같은 펌웨어를 공통 사용하면서 서버가 자동 식별/관리하게 하기 위해
+  // EEPROM을 쓰는 이유:
+  // - RAM은 전원 OFF 시 사라지지만 EEPROM은 값이 유지되므로 UUID 영속화 가능
+  // - UUID처럼 작은 고정 데이터는 SPIFFS/LittleFS보다 단순하게 관리 가능
+  // - 파일시스템 쓰기 중 전원 차단으로 생길 수 있는 오류 리스크를 줄이기 유리
+  // 최초 부팅이거나 EEPROM 값이 깨진 경우에만 새 UUID를 생성한다.
+  uuid.begin();
+
+  // 호스트명에 UUID를 포함하면 공유기/네트워크 장비에서 장치를 식별하기 쉽다.
+  wifi.begin("SMHGA01 (" + uuid.load() + ")");
+
+  // 충전 감지 센서 태스크 시작
+  charge.begin();
+
+  // OTA 업데이트 확인
+  // - 진행 중: 로고 + 프로그레스
+  // - 완료/실패: 로고 화면으로 복귀
+  updater.performFirmwareUpdate(
+      [](float progress)
+      { ui.showLogo(progress); },
+      [](FirmwareUpdateResult result)
+      {
+        (void)result;
+        ui.showLogo();
+        delay(1000);
+      });
+
+  // 백엔드 connect 호출 결과를 내부에 보관(의류 메타데이터 포함)
+  request.begin(uuid.load());
+
+  // UI에서도 현재 행거 UUID를 사용할 수 있게 전달
+  ui.setHangerUuid(uuid.load());
+
+  // MQTT 연결 시작
+  mqtt.begin("SMHGA01 (" + uuid.load() + ")");
+
+  // 명령 수신 토픽 구독
+  // 1) smart_hanger/command/all/#           : 전체 브로드캐스트
+  // 2) smart_hanger/command/{uuid}/#        : 단일 장치 대상
+  // 3) smart_hanger/eventCallback/{uuid}/#  : 이벤트 처리 확인 콜백
+  std::vector<String> topics = {
+      "smart_hanger/command/all/#",
+      "smart_hanger/command/" + uuid.load() + "/#",
+      "smart_hanger/eventCallback/" + uuid.load() + "/#",
+  };
+
+  for (String topic : topics)
+  {
+    mqtt.subscribe(topic.c_str());
+  }
+
+  // MQTT 메시지 수신 처리기
+  // MQTT Command Queue 생성 (setup 안에서)
+
+  // MQTT Command Queue 생성 (setup 안에서)
+  mqttCmdQ = xQueueCreate(10, sizeof(MqttCmdEvent));
+
+  xTaskCreatePinnedToCore(
+      [](void *)
+      {
+        MqttCmdEvent evt;
+
+        for (;;)
+        {
+          if (xQueueReceive(mqttCmdQ, &evt, portMAX_DELAY) == pdTRUE)
+          {
+            // 🔥 여기에 기존 mqtt.onReceived 안의
+            // 전체 로직을 그대로 붙이면 됩니다.
+
+            String topic = String(evt.topic);
+            String message = String(evt.message);
+            String myUuid = uuid.load();
+
+            // -------------------------------------------------
+            // 콜백 발행 헬퍼
+            // -------------------------------------------------
+            auto sendCb = [&](const char *result,
+                              const char *actionName,
+                              const char *msg)
+            {
+              delay(random(50, 500)); // 브로드캐스트 충돌 방지
+
+              String cbTopic = "smart_hanger/callback/" + myUuid;
+
+              char buf[300];
+              snprintf(buf, sizeof(buf),
+                       "{\"result\":\"%s\",\"action\":\"%s\",\"message\":\"%s\"}",
+                       result, actionName, msg);
+
+              Serial.printf("MQTT message sent\n topic=%s\n message=%s\n",
+                            cbTopic.c_str(), buf);
+
+              mqtt.publish(cbTopic.c_str(), buf);
+            };
+
+            Serial.printf("\n\nMQTT message received\n topic=%s\n message=%s\n",
+                          topic.c_str(), message.c_str());
+
+            sendCb("received", "raw", "message received and being processed");
+
+            // -------------------------------------------------
+            // 문자열 파싱
+            // -------------------------------------------------
+            int sep1 = message.indexOf('|');
+            String action = (sep1 == -1) ? message
+                                         : message.substring(0, sep1);
+
+            // -------------------------------------------------
+            // command 토픽 처리
+            // -------------------------------------------------
+            if (topic.startsWith("smart_hanger/command/"))
+            {
+              // ===============================
+              // notify|name|color
+              // ===============================
+              if (action == "notify")
+              {
+                if (notifyStart != 0)
+                {
+                  sendCb("fail", "notify", "another notify active");
+                  return;
+                }
+
+                int sep2 = message.indexOf('|', sep1 + 1);
+                if (sep1 == -1 || sep2 == -1)
+                {
+                  sendCb("fail", "notify", "missing name|color");
+                  return;
+                }
+
+                String name = message.substring(sep1 + 1, sep2);
+                String colorStr = message.substring(sep2 + 1);
+
+                // 색상 문자열 정리
+                if (colorStr.startsWith("0x") || colorStr.startsWith("0X"))
+                  colorStr = colorStr.substring(2);
+                else if (colorStr.startsWith("#"))
+                  colorStr = colorStr.substring(1);
+
+                uint32_t color =
+                    (uint32_t)strtoul(colorStr.c_str(), nullptr, 16) & 0xFFFFFFu;
+
+                notifyStart = esp_timer_get_time() / 1000;
+                ui.setNotify(name, color);
+
+                sendCb("success", "notify", "ok");
+                return;
+              }
+
+              // ===============================
+              // clear_notify
+              // ===============================
+              if (action == "clear_notify")
+              {
+                if (notifyStart != 0)
+                {
+                  notifyStart = 0;
+                  ui.removeNotify();
+                  sendCb("success", "clear_notify", "ok");
+                }
+                else
+                {
+                  sendCb("fail", "clear_notify", "no active notify");
+                }
+                return;
+              }
+
+              // ===============================
+              // restart
+              // ===============================
+              if (action == "restart")
+              {
+                sendCb("success", "restart", "rebooting");
+                delay(1000);
+                ESP.restart();
+                return;
+              }
+
+              // ===============================
+              // timing|uuid
+              // ===============================
+              if (action == "timing")
+              {
+                uint64_t nowMs = esp_timer_get_time() / 1000;
+
+                phaseStart = nowMs - 1200;
+                lastTimingReceived = nowMs;
+                ui.setRingAnimationAnchor(nowMs - 1200);
+
+                if (sep1 != -1)
+                {
+                  String coordinatorUuid = message.substring(sep1 + 1);
+                  isGroupCoordinator =
+                      (coordinatorUuid == myUuid);
+                }
+
+                sendCb("success", "timing", "ok");
+                return;
+              }
+
+              // ===============================
+              // show_network
+              // ===============================
+              if (action == "show_network")
+              {
+                ConnectedInfo info = wifi.getConnectedInfo();
+                ui.setNetWork(info.ssid,
+                              info.ip.toString(),
+                              wifi.rssi(),
+                              myUuid);
+
+                sendCb("success", "show_network", "ok");
+                return;
+              }
+
+              // ===============================
+              // hide_network
+              // ===============================
+              if (action == "hide_network")
+              {
+                ui.removeNetWork();
+                sendCb("success", "hide_network", "ok");
+                return;
+              }
+
+              // ===============================
+              // isGroupCoordinator
+              // ===============================
+              if (action == "isGroupCoordinator")
+              {
+                sendCb("success",
+                       "isGroupCoordinator",
+                       isGroupCoordinator ? "true" : "false");
+                return;
+              }
+
+              sendCb("fail", "Unknown", "unknown action");
+              return;
+            }
+          }
+        }
+      },
+      "mqtt_cmd",
+      8192,
+      nullptr,
+      5,
+      &mqttCmdTaskHandle,
+      1);
+
+  // MQTT 콜백 (enqueue only)
+  mqtt.onReceived([&](String topic, String message)
+                  {
+
+
+                    mqtt.publish("smart_hanger/ack/" + uuid.load(),
+                                 "{\"result\":\"received\",\"message\":\"MQTT message received and being processed\"}");
+  MqttCmdEvent evt;
+  memset(&evt, 0, sizeof(evt));
+
+  strncpy(evt.topic, topic.c_str(), sizeof(evt.topic) - 1);
+  strncpy(evt.message, message.c_str(), sizeof(evt.message) - 1);
+
+  if (xQueueSend(mqttCmdQ, &evt, 0) != pdTRUE)
+  {
+    Serial.println("MQTT CMD QUEUE FULL");
+  } });
+
+  // NFC 콜백 구성
+  // onScan:
+  //   1) 타이밍 측정 시작
+  //   2) rack UUID 저장
+  //   3) UI pickdown 상태 on
+  //   4) appEventQ + mqttFastQ 두 큐에 동일 이벤트 전송
+  // onRemove:
+  //   1) 타이밍 측정 시작
+  //   2) rack UUID 초기화
+  //   3) UI pickdown 상태 off
+  //   4) 두 큐로 이벤트 전송
+  // onPrepareForRemoval:
+  //   - 충전 상태에서 NFC 통신이 불안정해지면 재초기화 훅 수행
+  static NfcActions nfcCallbacks = {
+      .onScan =
+          [](String uid)
+      {
+        request.timeCheckStart(esp_timer_get_time() / 1000);
+        request.setRackUuid(uid);
+        ui.setPickdown(true);
+
+        NfcEvent e;
+        e.type = NfcEventType::Scan;
+        strncpy(e.uid, uid.c_str(), sizeof(e.uid));
+        xQueueSend(appEventQ, &e, 0);
+        xQueueSend(mqttFastQ, &e, 0);
+      },
+      .onRemove =
+          []()
+      {
+        request.timeCheckStart(esp_timer_get_time() / 1000);
+        request.setRackUuid("");
+        ui.setPickdown(false);
+
+        NfcEvent e;
+        e.type = NfcEventType::Remove;
+        xQueueSend(appEventQ, &e, 0);
+        xQueueSend(mqttFastQ, &e, 0);
+      },
+      .onPrepareForRemoval =
+          []()
+      {
+        if (charge.state() == true)
+        {
+          nfc.restartCommunication();
+        }
+      },
+  };
+
+  // 현재 충전 상태를 UI에 반영
+  ui.setCharge(charge.state());
+
+  // 충전 상태 변화 이벤트 처리
+  // HIGH:
+  //   - 충전 중으로 표시
+  //   - 카드가 감지 중이 아니라면 NFC 태스크를 재시작해 통신 안정성 확보
+  // LOW:
+  //   - 충전 아님으로 표시
+  charge.listen({
+      {.event = HIGH,
+       .delayMs = 0,
+       .action =
+           []()
+       {
+         ui.setCharge(true);
+         if (!nfc.isCardDetected())
+         {
+           nfc.stopTask();
+           nfc.begin(nfcCallbacks);
+         }
+       }},
+      {.event = LOW, .delayMs = 0, .action = []()
+                                   { ui.setCharge(false); }},
+  });
+
+  // connect 응답에 의류 데이터가 없으면 설정 유도 화면을 계속 출력한다.
+  if (!request.canLoadClothData())
+  {
+    while (1)
+    {
+      ui.showQrMsg("No Cloth", "Hanger is empty. Scan QR to set it up.");
+      vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+  }
+  else
+  {
+    // 의류 데이터가 있으면 설정 안내를 5초 보여준 뒤 정상 화면으로 진입한다.
+    uint64_t startTime = esp_timer_get_time() / 1000;
+    while (1)
+    {
+      ui.showQrMsg(
+          "Hanger Setup",
+          "If you want to set up the hanger, please scan the QR code below.");
+
+      uint64_t nowTime = esp_timer_get_time() / 1000;
+      if (nowTime - startTime >= 5000)
+      {
+        break;
+      }
+      vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+  }
+
+  // connect 응답 JSON을 UI 표현용 구조체로 변환
+  String clothData = request.loadClothData();
+  ClothData cloth = ClothData::fromString(clothData);
+
+  // QR 링크에 행거 UUID를 쿼리 파라미터로 주입한다.
+  String webSite = cloth.webSite +
+                   ((cloth.webSite.indexOf("?") == -1) ? "?" : "&") +
+                   "uuid=" + uuid.load();
+  cloth.webSite = webSite;
+
+  // UI 모델 적용
+  ui.setCloth(cloth);
+  ui.setAlpha(0.0f);
+
+  // 큐 생성
+  appEventQ = xQueueCreate(10, sizeof(NfcEvent));
+  mqttFastQ = xQueueCreate(10, sizeof(NfcEvent));
+
+  // 앱 로직 태스크
+  // - appEventQ에서 이벤트를 받아 HTTP API 호출 수행
+  // - 느린 HTTP와 빠른 MQTT를 분리하기 위한 전용 태스크
+  xTaskCreate(
+      [](void *)
+      {
+        NfcEvent e;
+        for (;;)
+        {
+          if (xQueueReceive(appEventQ, &e, portMAX_DELAY) == pdTRUE)
+          {
+            if (e.type == NfcEventType::Scan)
+            {
+              request.pickdown(e.uid);
+            }
+            else if (e.type == NfcEventType::Remove)
+            {
+              request.pickup();
+            }
+          }
+        }
+      },
+      "app_logic", 6144, nullptr, 3, &appTaskHandle);
+
+  // MQTT 고속 태스크
+  // - mqttFastQ를 읽어 즉시 이벤트 발행
+  // - remove 시 notify가 살아있다면 동시에 clear_notify 이벤트도 발행
+  xTaskCreatePinnedToCore(
+      [](void *)
+      {
+        NfcEvent e;
+        for (;;)
+        {
+          if (xQueueReceive(mqttFastQ, &e, portMAX_DELAY) == pdTRUE)
+          {
+            if (!mqtt.isConnected())
+            {
+              continue;
+            }
+
+            if (e.type == NfcEventType::Scan)
+            {
+              mqtt.publish("smart_hanger/event/" + uuid.load(),
+                           "{\"event\":\"pickdown\",\"card\":\"" +
+                               String(e.uid) + "\"}");
+            }
+            else if (e.type == NfcEventType::Remove)
+            {
+              mqtt.publish("smart_hanger/event/" + uuid.load(),
+                           "{\"event\":\"pickup\"}");
+
+              if (notifyStart != 0)
+              {
+                notifyStart = 0;
+                ui.removeNotify();
+                mqtt.publish("smart_hanger/event/" + uuid.load(),
+                             "{\"event\":\"clear_notify\","
+                             "\"reason\":\"pickup\"}");
+              }
+            }
+          }
+        }
+      },
+      "mqtt_fast", 4096, nullptr, 6, &mqttFastTask, 1);
+
+  // NFC 태스크 시작
+  nfc.begin(nfcCallbacks);
+
+  // 부팅 직후 애니메이션 기준점 설정 + 동기화 브로드캐스트 1회 발행
+  phaseStart = esp_timer_get_time() / 1000 - 1200;
+  lastTimingReceived = esp_timer_get_time() / 1000;
+  ui.setRingAnimationAnchor(esp_timer_get_time() / 1000 - 1200);
+  mqtt.publish("smart_hanger/command/all",
+               "{\"action\":\"timing\",  \"uuid\":\"" + uuid.load() +
+                   "\"}");
+
+  // 유지보수 태스크
+  // 1) notify 60초 자동 해제
+  // 2) coordinator면 30분마다 timing 재전송
+  // 3) follower면 40분 이상 timing 미수신 시 takeover 시도
+  xTaskCreate(
+      [](void *param)
+      {
+        (void)param;
+        for (;;)
+        {
+          uint64_t nowMs = esp_timer_get_time() / 1000;
+
+          // notify 자동 만료
+          if (notifyStart != 0 && nowMs - notifyStart > 60000)
+          {
+            notifyStart = 0;
+            ui.removeNotify();
+            mqtt.publish("smart_hanger/event/" + uuid.load(),
+                         "{\"event\":\"notify_cleared\","
+                         "\"reason\":\"timeout\"}");
+          }
+
+          if (isGroupCoordinator)
+          {
+            // 코디네이터: 30분마다 timing 하트비트 전파
+            if (nowMs - phaseStart > 1000 * 60 * 30)
+            {
+              if (mqtt.isConnected())
+              {
+                mqtt.publish("smart_hanger/command/all",
+                             "{\"action\":\"timing\", \"uuid\":\"" +
+                                 uuid.load() + "\"}");
+                phaseStart = nowMs - 1200;
+                lastTimingReceived = nowMs;
+              }
+            }
+          }
+          else if (nowMs - lastTimingReceived >
+                   (1000 * 60 * 40 + delayTime))
+          {
+            // 팔로워: timing이 오래 끊기면 takeover 발행
+            if (mqtt.isConnected())
+            {
+              mqtt.publish("smart_hanger/command/all",
+                           "{\"action\":\"timing\", \"uuid\":\"" +
+                               uuid.load() + "\"}");
+              phaseStart = nowMs - 1200;
+              lastTimingReceived = nowMs;
+            }
+          }
+
+          vTaskDelay(100 / portTICK_PERIOD_MS);
+        }
+      },
+      "notifyEndEvent", 4096, &mqtt, 2, nullptr);
+}
+
+void loop()
+{
+  // MQTT 연결 상태 점을 UI에 표시하기 위해 매 프레임 전달한다.
+  ui.setMqttConnected(mqtt.isConnected());
+
+  // 알림이 켜져 있으면 notify 기준, 아니면 phase 기준으로 페이드 계산
+  uint64_t now = esp_timer_get_time() / 1000;
+  uint64_t base = ((notifyStart != 0) ? notifyStart : phaseStart);
+  uint64_t timeStandard = base;
+
+  // 5초 주기의 부드러운 페이드 값을 만든다.
+  // 0~1 범위로 정규화되어 Ui::setAlpha()에 전달된다.
+  float progress =
+      1.0f - max(0.0f, (abs((int)((now - timeStandard) % 5000) - 2500) - 1500) /
+                           1000.0f);
+  ui.setAlpha(progress);
+
+  // 화면 우선순위
+  // 1) notify 활성 시 notify 화면 고정
+  // 2) 그 외에는 5초 간격으로 QR 화면과 상품 화면 교차
+  if (notifyStart != 0)
+  {
+    ui.showNotify();
+  }
+  else if ((now - timeStandard) / 5000 % 2)
+  {
+    ui.showQr();
+  }
+  else
+  {
+    ui.showAllColors();
+  }
+}
