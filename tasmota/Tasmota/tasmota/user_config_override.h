@@ -21,6 +21,16 @@
 #undef MQTT_PASS
 #define MQTT_PASS         "pnks1111"
 
+#ifdef APP_LEDSTATE
+#undef APP_LEDSTATE
+#endif
+#define APP_LEDSTATE      LED_POWER
+
+#ifdef APP_ENABLE_LEDLINK
+#undef APP_ENABLE_LEDLINK
+#endif
+#define APP_ENABLE_LEDLINK false
+
 #ifndef USE_SMARTPLUG_CUSTOM
 #define USE_SMARTPLUG_CUSTOM
 #endif
