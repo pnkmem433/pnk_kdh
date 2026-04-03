@@ -7,16 +7,18 @@
 
 namespace Spc98 {
 
-const uint32_t kSmartplugStatusPeriodSeconds = 5;
-const uint32_t kBootBlinkTicks = 40;      // 40 x 50ms = 2 seconds
-const uint32_t kOtaBlinkTicks = 2;        // 2 x 50ms = 100ms
+const uint32_t kSmartplugStatusPeriodSeconds = 1;
 uint32_t smartplug_seconds_until_publish = kSmartplugStatusPeriodSeconds;
-uint32_t smartplug_boot_blink_ticks = 0;
-uint32_t smartplug_ota_blink_ticks = 0;
-bool smartplug_led_state = false;
+char smartplug_id[33] = { 0 };
+
+void SpCustomLoadDeviceId() {
+  const String unique_id = NetworkUniqueId();
+  strlcpy(smartplug_id, unique_id.c_str(), sizeof(smartplug_id));
+  AddLog(LOG_LEVEL_INFO, PSTR("SPC: Device ID %s"), smartplug_id);
+}
 
 void SpCustomMakeTopic(char* buffer, size_t size, const char* suffix) {
-  snprintf_P(buffer, size, PSTR("smart_plug/%s/%s"), TasmotaGlobal.mqtt_topic, suffix);
+  snprintf_P(buffer, size, PSTR("smart_plug/%s/%s"), smartplug_id, suffix);
 }
 
 bool SpCustomIsOn() {
@@ -87,9 +89,7 @@ bool SpCustomHandleMqttData() {
 
 void SpCustomInit() {
   smartplug_seconds_until_publish = kSmartplugStatusPeriodSeconds;
-  smartplug_boot_blink_ticks = kBootBlinkTicks;
-  smartplug_ota_blink_ticks = kOtaBlinkTicks;
-  smartplug_led_state = false;
+  SpCustomLoadDeviceId();
 }
 
 void SpCustomEverySecond() {
@@ -99,35 +99,9 @@ void SpCustomEverySecond() {
 
   if (0 == smartplug_seconds_until_publish) {
     SpCustomPublishStatus();
+    MqttPublishSensor();
     smartplug_seconds_until_publish = kSmartplugStatusPeriodSeconds;
   }
-}
-
-void SpCustomEvery50mSecond() {
-  if (!PinUsed(GPIO_LEDLNK)) {
-    return;
-  }
-
-  if (smartplug_boot_blink_ticks > 0) {
-    smartplug_boot_blink_ticks--;
-    smartplug_led_state = !smartplug_led_state;
-    SetLedLink(smartplug_led_state);
-    return;
-  }
-
-  if (TasmotaGlobal.ota_state_flag) {
-    if (smartplug_ota_blink_ticks > 0) {
-      smartplug_ota_blink_ticks--;
-    }
-    if (0 == smartplug_ota_blink_ticks) {
-      smartplug_ota_blink_ticks = kOtaBlinkTicks;
-      smartplug_led_state = !smartplug_led_state;
-      SetLedLink(smartplug_led_state);
-    }
-    return;
-  }
-
-  smartplug_ota_blink_ticks = kOtaBlinkTicks;
 }
 
 }  // namespace Spc98
@@ -137,9 +111,6 @@ bool Xdrv98(uint32_t function) {
     case FUNC_INIT:
       Spc98::SpCustomInit();
       break;
-    case FUNC_EVERY_50_MSECOND:
-      Spc98::SpCustomEvery50mSecond();
-      break;
     case FUNC_MQTT_SUBSCRIBE:
       Spc98::SpCustomSubscribe();
       break;
@@ -147,6 +118,7 @@ bool Xdrv98(uint32_t function) {
       return Spc98::SpCustomHandleMqttData();
     case FUNC_SET_DEVICE_POWER:
       Spc98::SpCustomPublishStatus();
+      MqttPublishSensor();
       break;
     case FUNC_EVERY_SECOND:
       Spc98::SpCustomEverySecond();

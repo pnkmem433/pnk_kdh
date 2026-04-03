@@ -54,7 +54,7 @@ const uint16_t CHUNKED_BUFFER_SIZE = 500;                // Chunk buffer size (n
 const uint16_t HTTP_REFRESH_TIME = 2345;                 // milliseconds
 const uint16_t HTTP_RESTART_RECONNECT_TIME = 10000;      // milliseconds - Allow time for restart and wifi reconnect
 #ifdef ESP8266
-const uint16_t HTTP_OTA_RESTART_RECONNECT_TIME = 24000;  // milliseconds - Allow time for uploading binary, unzip/write to final destination and wifi reconnect
+const uint16_t HTTP_OTA_RESTART_RECONNECT_TIME = 15000;  // milliseconds - Allow time before auto-refresh after OTA start
 #endif  // ESP8266
 #ifdef ESP32
 const uint16_t HTTP_OTA_RESTART_RECONNECT_TIME = 10000;  // milliseconds - Allow time for restart and wifi reconnect
@@ -3442,7 +3442,7 @@ void HandleUpgradeFirmwareStart(void) {
   WSContentStart_P(PSTR(D_INFORMATION));
   WSContentSend_P(HTTP_SCRIPT_RELOAD_TIME, HTTP_OTA_RESTART_RECONNECT_TIME);
   WSContentSendStyle();
-  WSContentSend_P(PSTR("<div style='text-align:center;'><b>" D_UPGRADE_STARTED " ...</b></div>"));
+  WSContentSend_P(PSTR("<div style='text-align:center;'><b>" D_UPGRADE_STARTED " ...</b><br><br><b>OTA 진행중...</b><br>전원을 끄지 말고 잠시 기다려주세요.</div>"));
   WSContentSend_P(HTTP_MSG_RSTRT);
   WSContentSpaceButton(BUTTON_MAIN);
   WSContentStop();
