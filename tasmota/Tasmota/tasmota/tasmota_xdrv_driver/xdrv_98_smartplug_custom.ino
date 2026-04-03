@@ -7,11 +7,18 @@
 
 namespace Spc98 {
 
-const uint32_t kSmartplugStatusPeriodSeconds = 5;
+const uint32_t kSmartplugStatusPeriodSeconds = 1;
 uint32_t smartplug_seconds_until_publish = kSmartplugStatusPeriodSeconds;
+char smartplug_id[33] = { 0 };
+
+void SpCustomLoadDeviceId() {
+  const String unique_id = NetworkUniqueId();
+  strlcpy(smartplug_id, unique_id.c_str(), sizeof(smartplug_id));
+  AddLog(LOG_LEVEL_INFO, PSTR("SPC: Device ID %s"), smartplug_id);
+}
 
 void SpCustomMakeTopic(char* buffer, size_t size, const char* suffix) {
-  snprintf_P(buffer, size, PSTR("smart_plug/%s/%s"), TasmotaGlobal.mqtt_topic, suffix);
+  snprintf_P(buffer, size, PSTR("smart_plug/%s/%s"), smartplug_id, suffix);
 }
 
 bool SpCustomIsOn() {
@@ -82,6 +89,7 @@ bool SpCustomHandleMqttData() {
 
 void SpCustomInit() {
   smartplug_seconds_until_publish = kSmartplugStatusPeriodSeconds;
+  SpCustomLoadDeviceId();
 }
 
 void SpCustomEverySecond() {
@@ -91,6 +99,7 @@ void SpCustomEverySecond() {
 
   if (0 == smartplug_seconds_until_publish) {
     SpCustomPublishStatus();
+    MqttPublishSensor();
     smartplug_seconds_until_publish = kSmartplugStatusPeriodSeconds;
   }
 }
@@ -109,6 +118,7 @@ bool Xdrv98(uint32_t function) {
       return Spc98::SpCustomHandleMqttData();
     case FUNC_SET_DEVICE_POWER:
       Spc98::SpCustomPublishStatus();
+      MqttPublishSensor();
       break;
     case FUNC_EVERY_SECOND:
       Spc98::SpCustomEverySecond();

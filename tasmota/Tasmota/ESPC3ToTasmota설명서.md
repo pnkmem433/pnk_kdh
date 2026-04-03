@@ -824,3 +824,115 @@ AI는 빌드 후 아래를 항상 확인해야 한다.
   - 그 다음 최종 `firmware.bin` 또는 `firmware.bin.gz`
   순서를 기본으로 한다.
 - URL OTA 로 전환할 때도 원리는 같다. 다만 URL 은 **직접 바이너리 주소** 이어야 한다.
+---
+
+## UUID Topic Rule
+
+This section is an exception rule for projects that must keep the legacy topic shape:
+
+- `smart_plug/<uuid>/command`
+- `smart_plug/<uuid>/status`
+
+### 1. Default rule
+
+If there is no legacy system requirement, Tasmota should keep using:
+
+- `smart_plug/<mqtt_topic>/command`
+- `smart_plug/<mqtt_topic>/status`
+
+This remains the preferred Tasmota-native rule.
+
+### 2. When UUID topics are required
+
+If the existing broker, dashboard, backend, or client already requires
+`smart_plug/<uuid>/...`, AI must not keep `mqtt_topic` as the device identifier.
+
+In that case AI should switch the topic builder to a UUID-based identifier.
+
+### 3. Do not reuse the original ESP-C3 UUID library directly
+
+The original ESP-C3 code used a separate `Uuid` library and raw EEPROM storage.
+That library is not assumed to exist inside Tasmota.
+
+Therefore AI must not assume that:
+
+- `uuid.begin()`
+- `uuid.load()`
+- raw EEPROM writes
+
+can be copied into Tasmota unchanged.
+
+### 4. Recommended UUID strategy inside Tasmota
+
+If UUID topics are required, AI should use one of the following strategies in this order:
+
+1. Use a fixed UUID string provided by the user or by project configuration.
+2. Use a device-specific UUID string stored in Tasmota configuration.
+3. Only if necessary, add first-boot UUID generation logic that stores a persistent value using a Tasmota-friendly settings path.
+
+### 5. First implementation rule
+
+For the first working port, AI should prefer the simplest stable method:
+
+- define a fixed UUID string in `user_config_override.h`
+- use that UUID when building MQTT topics
+
+Example:
+
+```c
+#ifndef SMARTPLUG_UUID
+#define SMARTPLUG_UUID "41742426-d035-4756-ba17-f542ea75ab02"
+#endif
+```
+
+Then the topic builder should produce:
+
+- `smart_plug/41742426-d035-4756-ba17-f542ea75ab02/command`
+- `smart_plug/41742426-d035-4756-ba17-f542ea75ab02/status`
+
+### 6. Multi-device rule
+
+If the same firmware will be installed on more than one smart plug, AI must not leave a shared fixed UUID in place.
+
+For multi-device deployments, AI must ensure each device gets a different persistent UUID.
+
+Acceptable approaches:
+
+- build one firmware per device with a different `SMARTPLUG_UUID`
+- store a per-device UUID in Tasmota settings
+- generate a per-device UUID on first boot and keep it persistent
+
+### 7. What AI must explain to the user
+
+When UUID topics are enabled, AI must explicitly tell the user:
+
+- the exact UUID being used
+- the exact command topic
+- the exact status topic
+- whether that UUID is shared by every build or unique per device
+
+### 8. Safety rule
+
+If AI cannot guarantee a unique UUID strategy for multiple devices, it must warn that topic collisions will happen.
+
+### 9. Preferred multi-device implementation
+
+For real smart plug deployments with more than one device, AI should prefer:
+
+- generate a UUID on first boot
+- store it in a persistent Tasmota settings slot
+- reuse it on every later boot
+
+Recommended implementation rule:
+
+- use one `Mem` slot from Tasmota settings as the UUID storage
+- validate the stored string
+- if invalid or empty, generate a new UUID
+- save it immediately
+- use that value for `smart_plug/<uuid>/...`
+
+Suggested default:
+
+- use `SET_MEM16` or a clearly documented `SMARTPLUG_UUID_MEM_SLOT`
+
+AI must also explain that if the selected `Mem` slot is already used by Rules or other project logic, a different slot must be chosen.
