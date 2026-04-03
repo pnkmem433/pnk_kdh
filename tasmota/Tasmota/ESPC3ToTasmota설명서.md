@@ -1,4 +1,9 @@
-# ESPC3 To Tasmota 설명서
+﻿# ESPC3 To Tasmota 설명서
+
+https://tasmota.github.io/docs/Upgrading/ - OTA 업그레이드 방식, minimal 사용 조건, 업그레이드 순서를 확인하는 문서
+https://tasmota.github.io/docs/MQTT/ - MQTT 토픽 구조, broker 설정, command/status 사용 방식을 확인하는 문서
+https://tasmota.github.io/docs/Firmware-Builds/ - 공식 펌웨어 종류와 용도, 용량 차이를 확인하는 문서
+https://tasmota.github.io/docs/Compile-your-build/ - PlatformIO 기반 빌드 방법과 커스텀 빌드 절차를 확인하는 문서
 
 이 문서는 **ESP32-C3/ESP 계열용 Arduino 스타일 커스텀 펌웨어**를 **공식 Tasmota 소스코드 기반 커스텀 빌드**로 옮길 때, AI가 그대로 따라 작업할 수 있도록 만든 변환 지침서다.
 
@@ -936,3 +941,18 @@ Suggested default:
 - use `SET_MEM16` or a clearly documented `SMARTPLUG_UUID_MEM_SLOT`
 
 AI must also explain that if the selected `Mem` slot is already used by Rules or other project logic, a different slot must be chosen.
+
+
+## Official Tasmota Docs
+
+- Upgrade: https://tasmota.github.io/docs/Upgrading/
+  - OTA URL, file upload, minimal bridge, backup, migration path, upgrade flow
+- MQTT: https://tasmota.github.io/docs/MQTT/
+  - MQTT topic structure, FullTopic/prefix, broker settings, discovery, command/status usage
+- Firmware Builds: https://tasmota.github.io/docs/Firmware-Builds/
+  - firmware types, binary size differences, which build to choose, language and feature variants
+- Compile your build: https://tasmota.github.io/docs/Compile-your-build/
+  - local build method, PlatformIO env usage, custom build flow, compile prerequisites
+
+AI는 Tasmota 관련 판단 전 위 링크를 먼저 기준 문서로 보고, 설명서의 규칙과 충돌하면 공식 문서 내용을 확인한 뒤 사용자에게 차이를 설명해야 한다.
+
