@@ -11,8 +11,62 @@ const uint32_t kSmartplugStatusPeriodSeconds = 1;
 uint32_t smartplug_seconds_until_publish = kSmartplugStatusPeriodSeconds;
 char smartplug_uid[33] = { 0 };
 char smartplug_topic_id[TOPSZ] = { 0 };
+const char kSmartplugName[] = "Tasmota";
+const char kSmartplugTemplateJson[] = "{\"NAME\":\"Tasmota\",\"GPIO\":[0,0,0,0,224,0,320,0,0,0,0,0,0,0,0,0,0,0,0,0,32,0],\"FLAG\":0,\"BASE\":1}";
 
 bool SpCustomHandleCommand(const char* cmd);
+bool SpCustomIsOn();
+
+const char* SpCustomStateText() {
+  return SpCustomIsOn() ? "on" : "off";
+}
+
+bool SpCustomTemplateMatches() {
+  if (USER_MODULE != Settings->module) {
+    return false;
+  }
+  if (strcmp(SettingsText(SET_TEMPLATE_NAME), kSmartplugName)) {
+    return false;
+  }
+  if (Settings->user_template.gp.io[4] != GPIO_REL1) {
+    return false;
+  }
+  if (Settings->user_template.gp.io[6] != GPIO_LED1_INV) {
+    return false;
+  }
+  if (Settings->user_template.gp.io[20] != GPIO_KEY1) {
+    return false;
+  }
+  return true;
+}
+
+void SpCustomEnsureDefaults() {
+  bool changed = false;
+
+  if (strcmp(SettingsText(SET_FRIENDLYNAME1), kSmartplugName)) {
+    SettingsUpdateText(SET_FRIENDLYNAME1, kSmartplugName);
+    changed = true;
+  }
+  if (strcmp(SettingsText(SET_DEVICENAME), kSmartplugName)) {
+    SettingsUpdateText(SET_DEVICENAME, kSmartplugName);
+    changed = true;
+  }
+  if (!SpCustomTemplateMatches()) {
+    char template_json[sizeof(kSmartplugTemplateJson)];
+    strlcpy(template_json, kSmartplugTemplateJson, sizeof(template_json));
+    JsonTemplate(template_json);
+    Settings->last_module = Settings->module;
+    Settings->module = USER_MODULE;
+    SetModuleType();
+    changed = true;
+  }
+
+  if (changed) {
+    AddLog(LOG_LEVEL_INFO, PSTR("SPC: Applied smart plug defaults and requesting restart"));
+    SettingsSave(0);
+    TasmotaGlobal.restart_flag = 2;
+  }
+}
 
 void SpCustomLoadIds() {
   const String unique_id = NetworkUniqueId();
@@ -38,7 +92,7 @@ bool SpCustomIsOn() {
 }
 
 void SpCustomMakeStatusPayload(char* buffer, size_t size) {
-  snprintf_P(buffer, size, PSTR("{\"state\":\"%s\"}"), GetStateText(SpCustomIsOn()));
+  snprintf_P(buffer, size, PSTR("{\"state\":\"%s\"}"), SpCustomStateText());
 }
 
 void SpCustomMakeMetricsPayload(char* buffer, size_t size) {
@@ -52,33 +106,29 @@ void SpCustomMakeMetricsPayload(char* buffer, size_t size) {
     snprintf_P(
       buffer, size,
       PSTR("{\"state\":\"%s\",\"power\":%1_f,\"voltage\":%1_f,\"current\":%3_f,\"daily\":%3_f,\"total\":%3_f}"),
-      GetStateText(SpCustomIsOn()), &power, &voltage, &current, &daily, &total);
+      SpCustomStateText(), &power, &voltage, &current, &daily, &total);
     return;
   }
 
-  snprintf_P(buffer, size, PSTR("{\"state\":\"%s\",\"energy_available\":false}"), GetStateText(SpCustomIsOn()));
+  snprintf_P(buffer, size, PSTR("{\"state\":\"%s\",\"energy_available\":false}"), SpCustomStateText());
 }
 
-void SpCustomPublishPayloadToAliases(const char* suffix, const char* payload) {
+void SpCustomPublishPayloadToUid(const char* suffix, const char* payload) {
   char topic[TOPSZ];
   SpCustomMakeUidTopic(topic, sizeof(topic), suffix);
   MqttPublishPayload(topic, payload);
-  if (strcmp(smartplug_uid, smartplug_topic_id)) {
-    SpCustomMakeTopicIdTopic(topic, sizeof(topic), suffix);
-    MqttPublishPayload(topic, payload);
-  }
 }
 
 void SpCustomPublishStatus() {
   char payload[32];
   SpCustomMakeStatusPayload(payload, sizeof(payload));
-  SpCustomPublishPayloadToAliases("status", payload);
+  SpCustomPublishPayloadToUid("status", payload);
 }
 
 void SpCustomPublishMetrics() {
   char payload[160];
   SpCustomMakeMetricsPayload(payload, sizeof(payload));
-  SpCustomPublishPayloadToAliases("metrics", payload);
+  SpCustomPublishPayloadToUid("metrics", payload);
 }
 
 bool SpCustomTopicMatches(const char* suffix) {
@@ -183,6 +233,7 @@ bool SpCustomHandleMqttData() {
 
 void SpCustomInit() {
   smartplug_seconds_until_publish = kSmartplugStatusPeriodSeconds;
+  SpCustomEnsureDefaults();
   SpCustomLoadIds();
 }
 

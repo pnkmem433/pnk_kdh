@@ -5,7 +5,7 @@
 
 // Force SECTION1 defaults to be reloaded on first boot after reflashing.
 #undef CFG_HOLDER
-#define CFG_HOLDER       4618
+#define CFG_HOLDER       4619
 
 // Keep logs readable but avoid excessive UART traffic on the deployed smart plug.
 #undef SERIAL_LOG_LEVEL
@@ -45,6 +45,19 @@
 // Make the device easier to recognize in the web UI.
 #undef FRIENDLY_NAME
 #define FRIENDLY_NAME     "Tasmota"
+
+#ifdef DEVICE_NAME
+#undef DEVICE_NAME
+#endif
+#define DEVICE_NAME       "Tasmota"
+
+#ifdef ESP32
+#undef USER_TEMPLATE
+#define USER_TEMPLATE     "{\"NAME\":\"Tasmota\",\"GPIO\":[0,0,0,0,224,0,320,0,0,0,0,0,0,0,0,0,0,0,0,0,32,0],\"FLAG\":0,\"BASE\":1}"
+
+#undef MODULE
+#define MODULE            USER_MODULE
+#endif
 
 #ifdef APP_LEDSTATE
 #undef APP_LEDSTATE
