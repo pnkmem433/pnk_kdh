@@ -53,7 +53,7 @@
 
 #ifdef ESP32
 #undef USER_TEMPLATE
-#define USER_TEMPLATE     "{\"NAME\":\"Tasmota\",\"GPIO\":[0,0,0,0,224,0,320,0,0,0,0,0,0,0,0,0,0,0,0,0,32,0],\"FLAG\":0,\"BASE\":1}"
+#define USER_TEMPLATE     "{\"NAME\":\"Tasmota\",\"ARCH\":\"esp32c3\",\"GPIO\":[0,0,0,0,224,0,320,0,0,0,0,0,0,0,0,0,0,0,0,0,32,0],\"FLAG\":0,\"BASE\":1}"
 
 #undef MODULE
 #define MODULE            USER_MODULE

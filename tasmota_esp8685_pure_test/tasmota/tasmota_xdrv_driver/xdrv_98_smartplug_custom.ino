@@ -12,7 +12,7 @@ uint32_t smartplug_seconds_until_publish = kSmartplugStatusPeriodSeconds;
 char smartplug_uid[33] = { 0 };
 char smartplug_topic_id[TOPSZ] = { 0 };
 const char kSmartplugName[] = "Tasmota";
-const char kSmartplugTemplateJson[] = "{\"NAME\":\"Tasmota\",\"GPIO\":[0,0,0,0,224,0,320,0,0,0,0,0,0,0,0,0,0,0,0,0,32,0],\"FLAG\":0,\"BASE\":1}";
+const char kSmartplugTemplateJson[] = "{\"NAME\":\"Tasmota\",\"ARCH\":\"esp32c3\",\"GPIO\":[0,0,0,0,224,0,320,0,0,0,0,0,0,0,0,0,0,0,0,0,32,0],\"FLAG\":0,\"BASE\":1}";
 
 bool SpCustomHandleCommand(const char* cmd);
 bool SpCustomIsOn();
