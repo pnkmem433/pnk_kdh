@@ -5,7 +5,7 @@
 
 // Force SECTION1 defaults to be reloaded on first boot after reflashing.
 #undef CFG_HOLDER
-#define CFG_HOLDER       4619
+#define CFG_HOLDER       4620
 
 // Keep logs readable but avoid excessive UART traffic on the deployed smart plug.
 #undef SERIAL_LOG_LEVEL
@@ -14,6 +14,16 @@
 #undef WEB_LOG_LEVEL
 #define WEB_LOG_LEVEL    LOG_LEVEL_INFO
 
+#undef WEB_SERVER
+#define WEB_SERVER        1
+
+#ifdef WEB_USERNAME
+#undef WEB_USERNAME
+#endif
+#define WEB_USERNAME      "pnkmem433"
+
+#undef WEB_PASSWORD
+#define WEB_PASSWORD      "pnks1111"
 // Default network values for the custom smart-plug test image.
 #undef STA_SSID1
 #define STA_SSID1         "CC-Retail"
@@ -52,11 +62,16 @@
 #define DEVICE_NAME       "Tasmota"
 
 #ifdef ESP32
+// Keep the web credentials, but stop forcing a compile-time template on ESP8685.
+// This allows GPIO changes made in the Web UI to remain in flash settings instead
+// of being reintroduced whenever defaults are regenerated.
+#ifdef USER_TEMPLATE
 #undef USER_TEMPLATE
-#define USER_TEMPLATE     "{\"NAME\":\"Tasmota\",\"ARCH\":\"esp32c3\",\"GPIO\":[0,0,0,0,224,0,320,0,0,0,0,0,0,0,0,0,0,0,0,0,32,0],\"FLAG\":0,\"BASE\":1}"
+#endif
 
+#ifdef MODULE
 #undef MODULE
-#define MODULE            USER_MODULE
+#endif
 #endif
 
 #ifdef APP_LEDSTATE
@@ -67,7 +82,7 @@
 #ifdef APP_ENABLE_LEDLINK
 #undef APP_ENABLE_LEDLINK
 #endif
-#define APP_ENABLE_LEDLINK false
+#define APP_ENABLE_LEDLINK true
 
 #ifndef USE_SMARTPLUG_CUSTOM
 #define USE_SMARTPLUG_CUSTOM
