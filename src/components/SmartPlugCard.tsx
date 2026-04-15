@@ -1,18 +1,8 @@
 import { useState } from "react";
-import { Pencil, Check, Power, Zap, Wifi, Globe } from "lucide-react";
+import { Pencil, Check, Power, Zap, Wifi, Globe, Activity, ChevronDown, ChevronUp } from "lucide-react";
+import type { PlugData } from "@/hooks/useMqttPlugs";
 
-interface SmartPlugCardProps {
-  uuid: string;
-  state: "on" | "off";
-  name: string;
-  lastSeen: number | null;
-  voltage: number | null;
-  offline: boolean;
-  ssid: string | null;
-  ipAddress: string | null;
-  onNameChange: (uuid: string, newName: string) => void;
-  onCommand: (uuid: string, cmd: "on" | "off") => void;
-}
+const WEBSERVER_LABELS: Record<number, string> = { 0: "Off", 1: "User", 2: "Admin" };
 
 function formatLastSeen(ts: number | null): string {
   if (!ts) return "—";
@@ -27,12 +17,19 @@ function formatLastSeen(ts: number | null): string {
   return `${yyyy}-${mm}-${dd} ${ampm} ${h12}:${min}`;
 }
 
-const SmartPlugCard = ({
-  uuid, state, name, lastSeen, voltage, offline, ssid, ipAddress, onNameChange, onCommand,
-}: SmartPlugCardProps) => {
+interface Props {
+  plug: PlugData;
+  onNameChange: (uuid: string, newName: string) => void;
+}
+
+const SmartPlugCard = ({ plug, onNameChange }: Props) => {
+  const { uuid, name, state, webserver, lastSeen, offline, energyAvailable, power, voltage, current, daily, total, ssid, ipAddress, extraFields } = plug;
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(name);
+  const [showExtra, setShowExtra] = useState(false);
   const isOn = state === "on";
+  const hasEnergy = energyAvailable !== false && (power !== null || voltage !== null || current !== null);
+  const extraKeys = Object.keys(extraFields);
 
   const handleSave = () => {
     onNameChange(uuid, editValue.trim() || name);
@@ -42,20 +39,13 @@ const SmartPlugCard = ({
   return (
     <div
       className={`relative rounded-2xl bg-card p-6 transition-all duration-300 ${offline ? "opacity-60" : ""}`}
-      style={{
-        boxShadow: isOn && !offline
-          ? "var(--plug-card-shadow-on)"
-          : "var(--plug-card-shadow)",
-      }}
+      style={{ boxShadow: isOn && !offline ? "var(--plug-card-shadow-on)" : "var(--plug-card-shadow)" }}
     >
-      {/* Top status indicator bar */}
-      <div
-        className={`absolute top-0 left-1/2 -translate-x-1/2 h-1 w-16 rounded-b-full transition-colors duration-300 ${
-          offline ? "bg-yellow-400" : isOn ? "bg-plug-on" : "bg-plug-off/30"
-        }`}
-      />
+      {/* Top status bar */}
+      <div className={`absolute top-0 left-1/2 -translate-x-1/2 h-1 w-16 rounded-b-full transition-colors duration-300 ${
+        offline ? "bg-yellow-400" : isOn ? "bg-plug-on" : "bg-plug-off/30"
+      }`} />
 
-      {/* Offline badge */}
       {offline && (
         <div className="absolute top-3 right-3 text-[10px] font-semibold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">
           오프라인
@@ -63,35 +53,23 @@ const SmartPlugCard = ({
       )}
 
       <div className="flex flex-col items-center gap-4 pt-2">
-        {/* Power icon circle */}
+        {/* Power icon */}
         <div
           className={`flex items-center justify-center w-16 h-16 rounded-full transition-all duration-300 ${
-            offline
-              ? "bg-muted text-muted-foreground"
-              : isOn
-                ? "bg-plug-on-bg text-plug-on"
-                : "bg-plug-off-bg text-plug-off"
+            offline ? "bg-muted text-muted-foreground"
+              : isOn ? "bg-plug-on-bg text-plug-on" : "bg-plug-off-bg text-plug-off"
           }`}
-          style={
-            isOn && !offline
-              ? { boxShadow: "0 0 20px hsl(var(--plug-on-glow) / 0.25)" }
-              : {}
-          }
+          style={isOn && !offline ? { boxShadow: "0 0 20px hsl(var(--plug-on-glow) / 0.25)" } : {}}
         >
           <Power className="w-7 h-7" strokeWidth={2.5} />
         </div>
 
-        {/* Central info box */}
-        <div
-          className={`w-full rounded-xl border px-5 py-4 transition-colors duration-300 ${
-            offline
-              ? "border-yellow-300/30 bg-yellow-50/30"
-              : isOn
-                ? "border-plug-on/20 bg-plug-on-bg/50"
-                : "border-border bg-muted/50"
-          }`}
-        >
-          {/* Name row */}
+        {/* Info box */}
+        <div className={`w-full rounded-xl border px-5 py-4 transition-colors duration-300 ${
+          offline ? "border-yellow-300/30 bg-yellow-50/30"
+            : isOn ? "border-plug-on/20 bg-plug-on-bg/50" : "border-border bg-muted/50"
+        }`}>
+          {/* Name */}
           <div className="flex items-start gap-2 mb-1.5">
             {editing ? (
               <>
@@ -102,25 +80,14 @@ const SmartPlugCard = ({
                   autoFocus
                   className="flex-1 min-w-0 text-sm font-semibold bg-transparent border-b border-foreground/20 outline-none text-foreground py-0.5 break-all"
                 />
-                <button
-                  onClick={handleSave}
-                  className="text-plug-on hover:text-plug-on/80 transition-colors p-0.5 shrink-0 mt-0.5"
-                >
+                <button onClick={handleSave} className="text-plug-on hover:text-plug-on/80 transition-colors p-0.5 shrink-0 mt-0.5">
                   <Check className="w-3.5 h-3.5" />
                 </button>
               </>
             ) : (
               <>
-                <span className="text-sm font-semibold text-foreground break-all leading-snug">
-                  {name}
-                </span>
-                <button
-                  onClick={() => {
-                    setEditValue(name);
-                    setEditing(true);
-                  }}
-                  className="text-muted-foreground hover:text-foreground transition-colors p-0.5 shrink-0 mt-0.5"
-                >
+                <span className="text-sm font-semibold text-foreground break-all leading-snug">{name}</span>
+                <button onClick={() => { setEditValue(name); setEditing(true); }} className="text-muted-foreground hover:text-foreground transition-colors p-0.5 shrink-0 mt-0.5">
                   <Pencil className="w-3 h-3" />
                 </button>
               </>
@@ -128,32 +95,49 @@ const SmartPlugCard = ({
           </div>
 
           {/* UUID */}
-          <p className="text-xs text-muted-foreground font-mono mb-2">
-            {uuid}
-          </p>
+          <p className="text-xs text-muted-foreground font-mono mb-2">{uuid}</p>
 
-          {/* Status badge */}
-          <div className="flex items-center gap-2 mb-2">
-            <span
-              className={`inline-block w-2 h-2 rounded-full transition-colors duration-300 ${
+          {/* State + Webserver badges */}
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <span className={`inline-block w-2 h-2 rounded-full transition-colors duration-300 ${
                 offline ? "bg-yellow-400" : isOn ? "bg-plug-on animate-pulse" : "bg-plug-off/40"
-              }`}
-            />
-            <span
-              className={`text-xs font-semibold uppercase tracking-wider ${
+              }`} />
+              <span className={`text-xs font-semibold uppercase tracking-wider ${
                 offline ? "text-yellow-600" : isOn ? "text-plug-on" : "text-plug-off"
-              }`}
-            >
-              {offline ? "OFFLINE" : isOn ? "ON" : "OFF"}
-            </span>
+              }`}>
+                {state === null ? "UNKNOWN" : offline ? "OFFLINE" : isOn ? "ON" : "OFF"}
+              </span>
+            </div>
+            {webserver !== null && (
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
+                WEB: {WEBSERVER_LABELS[webserver] ?? webserver}
+              </span>
+            )}
           </div>
 
-          {/* Voltage */}
-          {voltage !== null && (
-            <div className="flex items-center gap-1.5 mb-2 text-xs text-muted-foreground">
-              <Zap className="w-3 h-3" />
-              <span>{voltage}V</span>
+          {/* Energy metrics */}
+          {hasEnergy && (
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-2 text-xs text-muted-foreground">
+              {power !== null && (
+                <div className="flex items-center gap-1.5"><Activity className="w-3 h-3 shrink-0" /><span>{power} W</span></div>
+              )}
+              {voltage !== null && (
+                <div className="flex items-center gap-1.5"><Zap className="w-3 h-3 shrink-0" /><span>{voltage} V</span></div>
+              )}
+              {current !== null && (
+                <div className="flex items-center gap-1.5"><span className="w-3 h-3 shrink-0 text-center font-mono text-[10px]">A</span><span>{current} A</span></div>
+              )}
+              {daily !== null && (
+                <div className="flex items-center gap-1.5"><span className="w-3 h-3 shrink-0 text-center font-mono text-[10px]">D</span><span>{daily} kWh</span></div>
+              )}
+              {total !== null && (
+                <div className="flex items-center gap-1.5 col-span-2"><span className="w-3 h-3 shrink-0 text-center font-mono text-[10px]">T</span><span>Total: {total} kWh</span></div>
+              )}
             </div>
+          )}
+          {energyAvailable === false && (
+            <p className="text-[10px] text-muted-foreground/50 mb-2">에너지 측정 불가</p>
           )}
 
           {/* Network info */}
@@ -161,14 +145,12 @@ const SmartPlugCard = ({
             <div className="flex flex-col gap-0.5 mb-2">
               {ssid && (
                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70">
-                  <Wifi className="w-3 h-3 shrink-0" />
-                  <span>{ssid}</span>
+                  <Wifi className="w-3 h-3 shrink-0" /><span>{ssid}</span>
                 </div>
               )}
               {ipAddress && (
                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70">
-                  <Globe className="w-3 h-3 shrink-0" />
-                  <span>{ipAddress}</span>
+                  <Globe className="w-3 h-3 shrink-0" /><span>{ipAddress}</span>
                 </div>
               )}
             </div>
@@ -178,30 +160,29 @@ const SmartPlugCard = ({
           <p className="text-[10px] text-muted-foreground/70">
             마지막 수신: {formatLastSeen(lastSeen)}
           </p>
-        </div>
 
-        {/* ON / OFF buttons */}
-        <div className="flex gap-2 w-full">
-          <button
-            onClick={() => onCommand(uuid, "on")}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
-              isOn && !offline
-                ? "bg-plug-on text-white shadow-sm"
-                : "bg-muted text-muted-foreground hover:bg-plug-on/10 hover:text-plug-on"
-            }`}
-          >
-            ON
-          </button>
-          <button
-            onClick={() => onCommand(uuid, "off")}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
-              !isOn && !offline
-                ? "bg-plug-off text-white shadow-sm"
-                : "bg-muted text-muted-foreground hover:bg-plug-off/10 hover:text-plug-off"
-            }`}
-          >
-            OFF
-          </button>
+          {/* Extra fields (collapsible) */}
+          {extraKeys.length > 0 && (
+            <div className="mt-2 border-t border-border/50 pt-2">
+              <button
+                onClick={() => setShowExtra(!showExtra)}
+                className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showExtra ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                추가 정보 ({extraKeys.length})
+              </button>
+              {showExtra && (
+                <div className="mt-1.5 space-y-0.5">
+                  {extraKeys.map((key) => (
+                    <div key={key} className="flex items-start gap-2 text-[10px] text-muted-foreground/70 font-mono">
+                      <span className="shrink-0 text-muted-foreground">{key}:</span>
+                      <span className="break-all">{JSON.stringify(extraFields[key])}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
