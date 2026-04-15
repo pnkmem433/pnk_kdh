@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { Pencil, Check, Power, Globe, ChevronDown, ChevronUp } from "lucide-react";
+import { Pencil, Check, Power, Globe, Wifi, ChevronDown, ChevronUp } from "lucide-react";
 import type { PlugData } from "@/hooks/useMqttPlugs";
-
-const WEBSERVER_LABELS: Record<number, string> = { 0: "Off", 1: "User", 2: "Admin" };
 
 function formatLastSeen(ts: number | null): string {
   if (!ts) return "—";
