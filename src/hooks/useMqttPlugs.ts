@@ -8,6 +8,8 @@ export interface PlugData {
   lastSeen: number | null;
   voltage: number | null;
   offline: boolean;
+  ssid: string | null;
+  ipAddress: string | null;
 }
 
 type ConnectionStatus = "connected" | "reconnecting" | "disconnected";
