@@ -9,7 +9,7 @@ const statusConfig = {
 } as const;
 
 const Index = () => {
-  const { plugs, updateName, connectionStatus } = useMqttPlugs();
+  const { plugs, updateName, sendCommand, connectionStatus } = useMqttPlugs();
   const status = statusConfig[connectionStatus];
 
   return (
