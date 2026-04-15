@@ -140,10 +140,19 @@ const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
             </button>
           </div>
 
-          {/* IP Address */}
-          {ipAddress && (
-            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 mb-2">
-              <Globe className="w-3 h-3 shrink-0" /><span>{ipAddress}</span>
+          {/* Network info */}
+          {(ssid || ipAddress) && (
+            <div className="flex items-center gap-3 text-[10px] text-muted-foreground/70 mb-2 flex-wrap">
+              {ssid && (
+                <div className="flex items-center gap-1">
+                  <Wifi className="w-3 h-3 shrink-0" /><span>{ssid}</span>
+                </div>
+              )}
+              {ipAddress && (
+                <div className="flex items-center gap-1">
+                  <Globe className="w-3 h-3 shrink-0" /><span>{ipAddress}</span>
+                </div>
+              )}
             </div>
           )}
 
