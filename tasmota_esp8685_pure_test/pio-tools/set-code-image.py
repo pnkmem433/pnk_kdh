@@ -61,29 +61,33 @@ def _validate_newer_version(version_text: str, current_version: str | None) -> s
 def _prompt_version_once() -> str:
     global _VERSION_CACHE
     if _VERSION_CACHE:
+        print(Fore.CYAN + f"[VERSION] 앞에서 선택한 버전 사용 : v{_VERSION_CACHE}", flush=True)
         return _VERSION_CACHE
 
     env_version = os.environ.get("GDRIVE_VERSION", "").strip()
     if env_version:
         _VERSION_CACHE = _sanitize_version(env_version)
+        print(Fore.CYAN + f"[VERSION] 앞에서 선택한 버전 사용 : v{_VERSION_CACHE}", flush=True)
         return _VERSION_CACHE
 
     gdrive_dir = _get_gdrive_dir()
     current_version = _find_current_gdrive_version(gdrive_dir)
 
     if not sys.stdin or not sys.stdin.isatty():
-        raise RuntimeError("[VERSION] 터미널 입력이 없어 GDRIVE_VERSION 환경변수를 먼저 지정해야 합니다.")
-
-    sys.stdout.write("업로드할 파일 버전을 입력하세요 : ")
-    sys.stdout.flush()
-    version_text = sys.stdin.readline().strip()
-    _VERSION_CACHE = _validate_newer_version(version_text, current_version)
-    os.environ["GDRIVE_VERSION"] = _VERSION_CACHE
+        raise RuntimeError(
+            "[VERSION] 터미널 입력을 받을 수 없습니다. VS Code Task 대신 PowerShell에서 직접 실행하거나 "
+            "GDRIVE_VERSION 환경변수를 먼저 지정하세요."
+        )
 
     if current_version:
         print(Fore.CYAN + f"[VERSION] 현재 구글드라이브 버전 : v{current_version}", flush=True)
     else:
         print(Fore.CYAN + "[VERSION] 현재 구글드라이브 버전 : 없음", flush=True)
+
+    print("업로드할 파일 버전을 입력하세요 :", flush=True)
+    version_text = sys.stdin.readline().strip()
+    _VERSION_CACHE = _validate_newer_version(version_text, current_version)
+    os.environ["GDRIVE_VERSION"] = _VERSION_CACHE
 
     print(Fore.CYAN + f"[VERSION] 선택한 버전 : v{_VERSION_CACHE}", flush=True)
     return _VERSION_CACHE

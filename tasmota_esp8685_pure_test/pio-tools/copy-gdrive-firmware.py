@@ -67,21 +67,19 @@ def _prompt_version_text(current_version: str | None) -> str | None:
         print(Fore.YELLOW + "[GDRIVE] 터미널 입력을 사용할 수 없어 복사를 건너뜁니다.", flush=True)
         return None
 
-    sys.stdout.write("업로드할 파일 버전을 입력하세요 : ")
-    sys.stdout.flush()
-    version_text = sys.stdin.readline().strip()
-
     if current_version:
         print(Fore.CYAN + f"[GDRIVE] 현재 구글드라이브 버전 : v{current_version}", flush=True)
     else:
         print(Fore.CYAN + "[GDRIVE] 현재 구글드라이브 버전 : 없음", flush=True)
 
-    return version_text
+    print("업로드할 파일 버전을 입력하세요 :", flush=True)
+    return sys.stdin.readline().strip()
 
 
 def _get_version_text() -> str:
     global _cached_version_text
     if _cached_version_text:
+        print(Fore.CYAN + f"[GDRIVE] 앞에서 선택한 빌드 버전 사용 : v{_cached_version_text}", flush=True)
         return _cached_version_text
 
     env_version = os.environ.get("GDRIVE_VERSION", "").strip()

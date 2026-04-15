@@ -15,7 +15,7 @@
 #define WEB_LOG_LEVEL    LOG_LEVEL_INFO
 
 #undef WEB_SERVER
-#define WEB_SERVER        1
+#define WEB_SERVER        0
 
 #ifdef WEB_USERNAME
 #undef WEB_USERNAME
