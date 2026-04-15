@@ -3,7 +3,7 @@ import SmartPlugCard from "@/components/SmartPlugCard";
 import { useMqttPlugs } from "@/hooks/useMqttPlugs";
 
 const Index = () => {
-  const { plugs, updateName } = useMqttPlugs();
+  const { plugs, updateName, connected } = useMqttPlugs();
 
   return (
     <div className="min-h-screen bg-background">
