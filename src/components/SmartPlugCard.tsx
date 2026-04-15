@@ -22,7 +22,7 @@ interface Props {
 }
 
 const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
-  const { uuid, name, state, webserver, lastSeen, offline, ipAddress, extraFields } = plug;
+  const { uuid, name, state, webserver, lastSeen, offline, ssid, ipAddress, extraFields } = plug;
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(name);
   const [showExtra, setShowExtra] = useState(false);
