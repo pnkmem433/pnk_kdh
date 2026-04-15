@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import mqtt from "mqtt";
 
 export interface PlugData {
   uuid: string;
@@ -6,14 +7,13 @@ export interface PlugData {
   name: string;
 }
 
-/**
- * Mock MQTT hook — simulates smart_plug/{uuid}/status messages.
- * Replace internals with real MQTT.js client when ready.
- */
+const BROKER_URL = "wss://newserver.pnklab.local/mqtt";
+
 export function useMqttPlugs() {
   const [plugs, setPlugs] = useState<Record<string, PlugData>>({});
+  const [connected, setConnected] = useState(false);
+  const clientRef = useRef<mqtt.MqttClient | null>(null);
 
-  // Load saved names from localStorage
   const getSavedName = (uuid: string) => {
     try {
       const names = JSON.parse(localStorage.getItem("plug_names") || "{}");
@@ -31,42 +31,60 @@ export function useMqttPlugs() {
     } catch { /* noop */ }
   };
 
-  // Simulate incoming MQTT messages
   useEffect(() => {
-    const mockDevices = [
-      { uuid: "3C0F021851A4", state: "on" as const },
-      { uuid: "A1B2C3D4E5F6", state: "off" as const },
-      { uuid: "FF00AA11BB22", state: "on" as const },
-      { uuid: "DE4D0C1F2A3B", state: "off" as const },
-    ];
-
-    const initial: Record<string, PlugData> = {};
-    mockDevices.forEach((d) => {
-      initial[d.uuid] = {
-        uuid: d.uuid,
-        state: d.state,
-        name: getSavedName(d.uuid),
-      };
+    console.log("[MQTT] Connecting to", BROKER_URL);
+    const client = mqtt.connect(BROKER_URL, {
+      protocolVersion: 5,
+      reconnectPeriod: 5000,
+      connectTimeout: 10000,
     });
-    setPlugs(initial);
+    clientRef.current = client;
 
-    // Simulate random state changes every 8s
-    const interval = setInterval(() => {
-      setPlugs((prev) => {
-        const uuids = Object.keys(prev);
-        if (uuids.length === 0) return prev;
-        const randomUuid = uuids[Math.floor(Math.random() * uuids.length)];
-        return {
-          ...prev,
-          [randomUuid]: {
-            ...prev[randomUuid],
-            state: prev[randomUuid].state === "on" ? "off" : "on",
-          },
-        };
+    client.on("connect", () => {
+      console.log("[MQTT] Connected!");
+      setConnected(true);
+      // Subscribe to all plug status topics
+      client.subscribe("smart_plug/+/status", (err) => {
+        if (err) console.error("[MQTT] Subscribe error:", err);
+        else console.log("[MQTT] Subscribed to smart_plug/+/status");
       });
-    }, 8000);
+    });
 
-    return () => clearInterval(interval);
+    client.on("message", (topic, payload) => {
+      // Parse topic: smart_plug/{uuid}/status
+      const parts = topic.split("/");
+      if (parts.length !== 3 || parts[0] !== "smart_plug" || parts[2] !== "status") return;
+
+      const uuid = parts[1];
+      try {
+        const data = JSON.parse(payload.toString());
+        const state: "on" | "off" = data.state === "on" ? "on" : "off";
+
+        setPlugs((prev) => ({
+          ...prev,
+          [uuid]: {
+            uuid,
+            state,
+            name: prev[uuid]?.name || getSavedName(uuid),
+          },
+        }));
+      } catch (e) {
+        console.error("[MQTT] Failed to parse message:", e);
+      }
+    });
+
+    client.on("error", (err) => {
+      console.error("[MQTT] Error:", err);
+    });
+
+    client.on("close", () => {
+      console.log("[MQTT] Disconnected");
+      setConnected(false);
+    });
+
+    return () => {
+      client.end();
+    };
   }, []);
 
   const updateName = useCallback((uuid: string, newName: string) => {
@@ -77,5 +95,5 @@ export function useMqttPlugs() {
     }));
   }, []);
 
-  return { plugs: Object.values(plugs), updateName };
+  return { plugs: Object.values(plugs), updateName, connected };
 }
