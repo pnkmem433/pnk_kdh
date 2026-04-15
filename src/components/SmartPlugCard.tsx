@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pencil, Check, Power, Zap, Wifi, Globe, Activity, ChevronDown, ChevronUp } from "lucide-react";
+import { Pencil, Check, Power, Globe, ChevronDown, ChevronUp } from "lucide-react";
 import type { PlugData } from "@/hooks/useMqttPlugs";
 
 const WEBSERVER_LABELS: Record<number, string> = { 0: "Off", 1: "User", 2: "Admin" };
@@ -20,15 +20,15 @@ function formatLastSeen(ts: number | null): string {
 interface Props {
   plug: PlugData;
   onNameChange: (uuid: string, newName: string) => void;
+  onCommand: (uuid: string, cmd: "on" | "off") => void;
 }
 
-const SmartPlugCard = ({ plug, onNameChange }: Props) => {
-  const { uuid, name, state, webserver, lastSeen, offline, energyAvailable, power, voltage, current, daily, total, ssid, ipAddress, extraFields } = plug;
+const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
+  const { uuid, name, state, webserver, lastSeen, offline, ipAddress, extraFields } = plug;
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(name);
   const [showExtra, setShowExtra] = useState(false);
   const isOn = state === "on";
-  const hasEnergy = energyAvailable !== false && (power !== null || voltage !== null || current !== null);
   const extraKeys = Object.keys(extraFields);
 
   const handleSave = () => {
@@ -116,43 +116,36 @@ const SmartPlugCard = ({ plug, onNameChange }: Props) => {
             )}
           </div>
 
-          {/* Energy metrics */}
-          {hasEnergy && (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-2 text-xs text-muted-foreground">
-              {power !== null && (
-                <div className="flex items-center gap-1.5"><Activity className="w-3 h-3 shrink-0" /><span>{power} W</span></div>
-              )}
-              {voltage !== null && (
-                <div className="flex items-center gap-1.5"><Zap className="w-3 h-3 shrink-0" /><span>{voltage} V</span></div>
-              )}
-              {current !== null && (
-                <div className="flex items-center gap-1.5"><span className="w-3 h-3 shrink-0 text-center font-mono text-[10px]">A</span><span>{current} A</span></div>
-              )}
-              {daily !== null && (
-                <div className="flex items-center gap-1.5"><span className="w-3 h-3 shrink-0 text-center font-mono text-[10px]">D</span><span>{daily} kWh</span></div>
-              )}
-              {total !== null && (
-                <div className="flex items-center gap-1.5 col-span-2"><span className="w-3 h-3 shrink-0 text-center font-mono text-[10px]">T</span><span>Total: {total} kWh</span></div>
-              )}
-            </div>
-          )}
-          {energyAvailable === false && (
-            <p className="text-[10px] text-muted-foreground/50 mb-2">에너지 측정 불가</p>
-          )}
+          {/* ON/OFF buttons */}
+          <div className="flex gap-2 mb-3">
+            <button
+              onClick={() => onCommand(uuid, "on")}
+              disabled={offline}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                isOn
+                  ? "bg-plug-on text-white shadow-sm"
+                  : "bg-muted text-muted-foreground hover:bg-plug-on/10 hover:text-plug-on"
+              } disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              ON
+            </button>
+            <button
+              onClick={() => onCommand(uuid, "off")}
+              disabled={offline}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                !isOn && state !== null
+                  ? "bg-plug-off text-white shadow-sm"
+                  : "bg-muted text-muted-foreground hover:bg-plug-off/10 hover:text-plug-off"
+              } disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              OFF
+            </button>
+          </div>
 
-          {/* Network info */}
-          {(ssid || ipAddress) && (
-            <div className="flex flex-col gap-0.5 mb-2">
-              {ssid && (
-                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70">
-                  <Wifi className="w-3 h-3 shrink-0" /><span>{ssid}</span>
-                </div>
-              )}
-              {ipAddress && (
-                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70">
-                  <Globe className="w-3 h-3 shrink-0" /><span>{ipAddress}</span>
-                </div>
-              )}
+          {/* IP Address */}
+          {ipAddress && (
+            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 mb-2">
+              <Globe className="w-3 h-3 shrink-0" /><span>{ipAddress}</span>
             </div>
           )}
 

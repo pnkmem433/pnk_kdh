@@ -234,9 +234,17 @@ export function useMqttPlugs() {
     }));
   }, []);
 
+  const sendCommand = useCallback((uuid: string, cmd: "on" | "off") => {
+    const client = clientRef.current;
+    if (client && client.connected) {
+      client.publish(`smart_plug/${uuid}/command`, JSON.stringify({ cmd }));
+    }
+  }, []);
+
   return {
     plugs: Object.values(plugs),
     updateName,
+    sendCommand,
     connectionStatus,
   };
 }

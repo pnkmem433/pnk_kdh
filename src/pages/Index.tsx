@@ -9,7 +9,7 @@ const statusConfig = {
 } as const;
 
 const Index = () => {
-  const { plugs, updateName, connectionStatus } = useMqttPlugs();
+  const { plugs, updateName, sendCommand, connectionStatus } = useMqttPlugs();
   const status = statusConfig[connectionStatus];
 
   return (
@@ -44,7 +44,7 @@ const Index = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {plugs.map((plug) => (
-              <SmartPlugCard key={plug.uuid} plug={plug} onNameChange={updateName} />
+              <SmartPlugCard key={plug.uuid} plug={plug} onNameChange={updateName} onCommand={sendCommand} />
             ))}
           </div>
         )}
