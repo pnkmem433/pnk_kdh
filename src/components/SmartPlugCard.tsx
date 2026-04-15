@@ -109,7 +109,7 @@ const SmartPlugCard = ({
               </>
             ) : (
               <>
-                <span className="text-sm font-semibold text-foreground truncate">
+                <span className="text-sm font-semibold text-foreground break-all">
                   {name}
                 </span>
                 <button
