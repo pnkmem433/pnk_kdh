@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { Pencil, Check, Power, Globe, ChevronDown, ChevronUp } from "lucide-react";
+import { Pencil, Check, Power, Globe, Wifi, ChevronDown, ChevronUp } from "lucide-react";
 import type { PlugData } from "@/hooks/useMqttPlugs";
-
-const WEBSERVER_LABELS: Record<number, string> = { 0: "Off", 1: "User", 2: "Admin" };
 
 function formatLastSeen(ts: number | null): string {
   if (!ts) return "—";
@@ -24,7 +22,7 @@ interface Props {
 }
 
 const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
-  const { uuid, name, state, webserver, lastSeen, offline, ipAddress, extraFields } = plug;
+  const { uuid, name, state, webserver, lastSeen, offline, ssid, ipAddress, extraFields } = plug;
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(name);
   const [showExtra, setShowExtra] = useState(false);
@@ -111,7 +109,7 @@ const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
             </div>
             {webserver !== null && (
               <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
-                WEB: {WEBSERVER_LABELS[webserver] ?? webserver}
+                WEB {webserver}
               </span>
             )}
           </div>
@@ -142,10 +140,19 @@ const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
             </button>
           </div>
 
-          {/* IP Address */}
-          {ipAddress && (
-            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 mb-2">
-              <Globe className="w-3 h-3 shrink-0" /><span>{ipAddress}</span>
+          {/* Network info */}
+          {(ssid || ipAddress) && (
+            <div className="flex items-center gap-3 text-[10px] text-muted-foreground/70 mb-2 flex-wrap">
+              {ssid && (
+                <div className="flex items-center gap-1">
+                  <Wifi className="w-3 h-3 shrink-0" /><span>{ssid}</span>
+                </div>
+              )}
+              {ipAddress && (
+                <div className="flex items-center gap-1">
+                  <Globe className="w-3 h-3 shrink-0" /><span>{ipAddress}</span>
+                </div>
+              )}
             </div>
           )}
 
