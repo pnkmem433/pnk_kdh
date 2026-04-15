@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pencil, Check, Power, Zap } from "lucide-react";
+import { Pencil, Check, Power, Zap, Wifi, Globe } from "lucide-react";
 
 interface SmartPlugCardProps {
   uuid: string;
@@ -8,6 +8,8 @@ interface SmartPlugCardProps {
   lastSeen: number | null;
   voltage: number | null;
   offline: boolean;
+  ssid: string | null;
+  ipAddress: string | null;
   onNameChange: (uuid: string, newName: string) => void;
   onCommand: (uuid: string, cmd: "on" | "off") => void;
 }
@@ -26,7 +28,7 @@ function formatLastSeen(ts: number | null): string {
 }
 
 const SmartPlugCard = ({
-  uuid, state, name, lastSeen, voltage, offline, onNameChange, onCommand,
+  uuid, state, name, lastSeen, voltage, offline, ssid, ipAddress, onNameChange, onCommand,
 }: SmartPlugCardProps) => {
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(name);
@@ -90,7 +92,7 @@ const SmartPlugCard = ({
           }`}
         >
           {/* Name row */}
-          <div className="flex items-center gap-2 mb-1.5">
+          <div className="flex items-start gap-2 mb-1.5">
             {editing ? (
               <>
                 <input
@@ -98,18 +100,18 @@ const SmartPlugCard = ({
                   onChange={(e) => setEditValue(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSave()}
                   autoFocus
-                  className="flex-1 min-w-0 text-sm font-semibold bg-transparent border-b border-foreground/20 outline-none text-foreground py-0.5"
+                  className="flex-1 min-w-0 text-sm font-semibold bg-transparent border-b border-foreground/20 outline-none text-foreground py-0.5 break-all"
                 />
                 <button
                   onClick={handleSave}
-                  className="text-plug-on hover:text-plug-on/80 transition-colors p-0.5"
+                  className="text-plug-on hover:text-plug-on/80 transition-colors p-0.5 shrink-0 mt-0.5"
                 >
                   <Check className="w-3.5 h-3.5" />
                 </button>
               </>
             ) : (
               <>
-                <span className="text-sm font-semibold text-foreground break-all">
+                <span className="text-sm font-semibold text-foreground break-all leading-snug">
                   {name}
                 </span>
                 <button
@@ -117,7 +119,7 @@ const SmartPlugCard = ({
                     setEditValue(name);
                     setEditing(true);
                   }}
-                  className="text-muted-foreground hover:text-foreground transition-colors p-0.5 shrink-0"
+                  className="text-muted-foreground hover:text-foreground transition-colors p-0.5 shrink-0 mt-0.5"
                 >
                   <Pencil className="w-3 h-3" />
                 </button>
@@ -151,6 +153,24 @@ const SmartPlugCard = ({
             <div className="flex items-center gap-1.5 mb-2 text-xs text-muted-foreground">
               <Zap className="w-3 h-3" />
               <span>{voltage}V</span>
+            </div>
+          )}
+
+          {/* Network info */}
+          {(ssid || ipAddress) && (
+            <div className="flex flex-col gap-0.5 mb-2">
+              {ssid && (
+                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70">
+                  <Wifi className="w-3 h-3 shrink-0" />
+                  <span>{ssid}</span>
+                </div>
+              )}
+              {ipAddress && (
+                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70">
+                  <Globe className="w-3 h-3 shrink-0" />
+                  <span>{ipAddress}</span>
+                </div>
+              )}
             </div>
           )}
 

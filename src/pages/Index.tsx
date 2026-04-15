@@ -68,6 +68,8 @@ const Index = () => {
                 lastSeen={plug.lastSeen}
                 voltage={plug.voltage}
                 offline={plug.offline}
+                ssid={plug.ssid}
+                ipAddress={plug.ipAddress}
                 onNameChange={updateName}
                 onCommand={sendCommand}
               />
