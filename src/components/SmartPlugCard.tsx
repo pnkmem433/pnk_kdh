@@ -109,7 +109,7 @@ const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
             </div>
             {webserver !== null && (
               <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
-                WEB: {WEBSERVER_LABELS[webserver] ?? webserver}
+                WEB {webserver}
               </span>
             )}
           </div>
