@@ -8,6 +8,8 @@ export interface PlugData {
   lastSeen: number | null;
   voltage: number | null;
   offline: boolean;
+  ssid: string | null;
+  ipAddress: string | null;
 }
 
 type ConnectionStatus = "connected" | "reconnecting" | "disconnected";
@@ -95,6 +97,8 @@ export function useMqttPlugs() {
             lastSeen: Date.now(),
             voltage: prev[uuid]?.voltage ?? null,
             offline: false,
+            ssid: prev[uuid]?.ssid ?? null,
+            ipAddress: prev[uuid]?.ipAddress ?? null,
           },
         }));
         return;
@@ -145,6 +149,10 @@ export function useMqttPlugs() {
       // tele/tasmota_XXXXXX/STATE
       if (parts[0] === "tele" && parts[2] === "STATE") {
         const shortId = parts[1].replace("tasmota_", "");
+        const wifi = payloadObj.Wifi as Record<string, unknown> | undefined;
+        const ssid = typeof wifi?.SSId === "string" ? wifi.SSId : null;
+        const ip = typeof payloadObj.IPAddress === "string" ? payloadObj.IPAddress as string : null;
+
         setPlugs((prev) => {
           const fullUuid = findUuidByShortId(shortId, prev);
           if (!fullUuid) return prev;
@@ -154,6 +162,8 @@ export function useMqttPlugs() {
               ...prev[fullUuid],
               lastSeen: Date.now(),
               offline: false,
+              ssid: ssid ?? prev[fullUuid].ssid,
+              ipAddress: ip ?? prev[fullUuid].ipAddress,
             },
           };
         });
