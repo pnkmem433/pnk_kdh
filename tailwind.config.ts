@@ -47,6 +47,13 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        plug: {
+          on: "hsl(var(--plug-on))",
+          "on-bg": "hsl(var(--plug-on-bg))",
+          "on-glow": "hsl(var(--plug-on-glow))",
+          off: "hsl(var(--plug-off))",
+          "off-bg": "hsl(var(--plug-off-bg))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
