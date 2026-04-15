@@ -17,8 +17,9 @@ const Index = () => {
             <h1 className="text-lg font-bold text-foreground leading-tight">
               Smart Plug Dashboard
             </h1>
-            <p className="text-xs text-muted-foreground">
-              MQTT · {plugs.length} device{plugs.length !== 1 ? "s" : ""}
+            <p className="text-xs text-muted-foreground flex items-center gap-2">
+              <span className={`inline-block w-2 h-2 rounded-full ${connected ? "bg-green-500" : "bg-red-500 animate-pulse"}`} />
+              {connected ? "Connected" : "Connecting…"} · {plugs.length} device{plugs.length !== 1 ? "s" : ""}
             </p>
           </div>
         </div>
