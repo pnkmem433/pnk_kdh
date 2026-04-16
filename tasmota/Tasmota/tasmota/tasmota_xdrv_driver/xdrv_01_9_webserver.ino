@@ -1449,6 +1449,12 @@ void HandleRoot(void) {
     return;
   }
 
+  // Force authentication on the root page when admin web mode is active.
+  if ((HTTP_ADMIN == Web.state) && strlen(SettingsText(SET_WEBPWD)) && !WebAuthenticate()) {
+    Webserver->requestAuthentication();
+    return;
+  }
+
   if (HandleRootStatusRefresh()) {
     return;
   }

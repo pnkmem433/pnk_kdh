@@ -1339,7 +1339,7 @@ void Every250mSeconds(void)
 
   if (!Settings->flag.global_state) {                      // SetOption31 - Control link led blinking
     if (TasmotaGlobal.global_state.data &0x03) {                        // Network or MQTT problem
-      if (TasmotaGlobal.global_state.mqtt_down) { blinkinterval = 7; }  // MQTT problem so blink every 2 seconds (slowest)
+      if (TasmotaGlobal.global_state.mqtt_down) { blinkinterval = 1; }  // MQTT problem blink as fast as this 250ms loop allows
       if (TasmotaGlobal.global_state.network_down) { blinkinterval = 3; }  // Network problem so blink every second (slow)
       TasmotaGlobal.blinks = 201;                         // Allow only a single blink in case the problem is solved
     }

@@ -9,16 +9,63 @@ namespace Spc98 {
 
 const uint32_t kSmartplugStatusPeriodSeconds = 1;
 uint32_t smartplug_seconds_until_publish = kSmartplugStatusPeriodSeconds;
-char smartplug_id[33] = { 0 };
+char smartplug_uid[33] = { 0 };
+char smartplug_topic_id[TOPSZ] = { 0 };
+bool smartplug_legacy_topics_cleared = false;
 
-void SpCustomLoadDeviceId() {
-  const String unique_id = NetworkUniqueId();
-  strlcpy(smartplug_id, unique_id.c_str(), sizeof(smartplug_id));
-  AddLog(LOG_LEVEL_INFO, PSTR("SPC: Device ID %s"), smartplug_id);
+bool SpCustomHandleCommand(const char* cmd);
+bool SpCustomIsOn();
+uint32_t SpCustomWebServerMode();
+void SpCustomClearCommandRetain();
+
+const char* SpCustomStateText() {
+  return SpCustomIsOn() ? "on" : "off";
 }
 
-void SpCustomMakeTopic(char* buffer, size_t size, const char* suffix) {
-  snprintf_P(buffer, size, PSTR("smart_plug/%s/%s"), smartplug_id, suffix);
+uint32_t SpCustomWebServerMode() {
+  return Settings->webserver;
+}
+
+void SpCustomLoadIds() {
+  const String unique_id = NetworkUniqueId();
+  strlcpy(smartplug_uid, unique_id.c_str(), sizeof(smartplug_uid));
+  strlcpy(smartplug_topic_id, TasmotaGlobal.mqtt_topic, sizeof(smartplug_topic_id));
+  AddLog(LOG_LEVEL_INFO, PSTR("SPC: UID %s, Topic %s"), smartplug_uid, smartplug_topic_id);
+}
+
+void SpCustomMakeTopic(char* buffer, size_t size, const char* base_id, const char* suffix) {
+  snprintf_P(buffer, size, PSTR("smart_plug/%s/%s"), base_id, suffix);
+}
+
+void SpCustomMakeUidTopic(char* buffer, size_t size, const char* suffix) {
+  SpCustomMakeTopic(buffer, size, smartplug_uid, suffix);
+}
+
+void SpCustomMakeTopicIdTopic(char* buffer, size_t size, const char* suffix) {
+  SpCustomMakeTopic(buffer, size, smartplug_topic_id, suffix);
+}
+
+void SpCustomClearLegacyTopicRetain(const char* suffix) {
+  if (!strcmp(smartplug_uid, smartplug_topic_id)) {
+    return;
+  }
+
+  char topic[TOPSZ];
+  SpCustomMakeTopicIdTopic(topic, sizeof(topic), suffix);
+  MqttPublishPayload(topic, "", 0, true);
+}
+
+void SpCustomClearUidTopicRetain(const char* suffix) {
+  char topic[TOPSZ];
+  SpCustomMakeUidTopic(topic, sizeof(topic), suffix);
+  MqttPublishPayload(topic, "", 0, true);
+}
+
+void SpCustomClearCommandRetain() {
+  // Commands should not persist across reboots. Clear any retained command on both
+  // the UID topic and the legacy topic alias so old webserver commands do not replay.
+  SpCustomClearUidTopicRetain("command");
+  SpCustomClearLegacyTopicRetain("command");
 }
 
 bool SpCustomIsOn() {
@@ -26,15 +73,107 @@ bool SpCustomIsOn() {
 }
 
 void SpCustomMakeStatusPayload(char* buffer, size_t size) {
-  snprintf_P(buffer, size, PSTR("{\"state\":\"%s\"}"), GetStateText(SpCustomIsOn()));
+  snprintf_P(
+    buffer, size,
+    PSTR("{\"state\":\"%s\",\"webserver\":%u}"),
+    SpCustomStateText(), SpCustomWebServerMode());
+}
+
+void SpCustomMakeMetricsPayload(char* buffer, size_t size) {
+  if (Energy && TasmotaGlobal.energy_driver && Energy->phase_count) {
+    const float voltage = Energy->voltage_available ? Energy->voltage[0] : 0.0f;
+    const float current = Energy->current_available ? Energy->current[0] : 0.0f;
+    const float power = Energy->active_power[0];
+    const float total = Energy->total[0];
+    const float daily = Energy->daily_sum;
+    char power_str[16];
+    char voltage_str[16];
+    char current_str[16];
+    char daily_str[16];
+    char total_str[16];
+
+    dtostrfd(power, 1, power_str);
+    dtostrfd(voltage, 1, voltage_str);
+    dtostrfd(current, 3, current_str);
+    dtostrfd(daily, 3, daily_str);
+    dtostrfd(total, 3, total_str);
+
+    snprintf_P(
+      buffer, size,
+      PSTR("{\"state\":\"%s\",\"webserver\":%u,\"power\":%s,\"voltage\":%s,\"current\":%s,\"daily\":%s,\"total\":%s}"),
+      SpCustomStateText(), SpCustomWebServerMode(), power_str, voltage_str, current_str, daily_str, total_str);
+    return;
+  }
+
+  snprintf_P(
+    buffer, size,
+    PSTR("{\"state\":\"%s\",\"webserver\":%u,\"energy_available\":false}"),
+    SpCustomStateText(), SpCustomWebServerMode());
+}
+
+void SpCustomPublishPayloadToUid(const char* suffix, const char* payload) {
+  char topic[TOPSZ];
+  SpCustomMakeUidTopic(topic, sizeof(topic), suffix);
+  MqttPublishPayload(topic, payload);
 }
 
 void SpCustomPublishStatus() {
-  char topic[TOPSZ];
   char payload[32];
-  SpCustomMakeTopic(topic, sizeof(topic), "status");
   SpCustomMakeStatusPayload(payload, sizeof(payload));
-  MqttPublishPayload(topic, payload);
+  SpCustomPublishPayloadToUid("status", payload);
+}
+
+void SpCustomPublishMetrics() {
+  char payload[160];
+  SpCustomMakeMetricsPayload(payload, sizeof(payload));
+  SpCustomPublishPayloadToUid("metrics", payload);
+}
+
+void SpCustomClearLegacyAliasTopicsOnce() {
+  if (smartplug_legacy_topics_cleared) {
+    return;
+  }
+
+  if (strcmp(smartplug_uid, smartplug_topic_id)) {
+    SpCustomClearLegacyTopicRetain("status");
+    SpCustomClearLegacyTopicRetain("metrics");
+  }
+
+  smartplug_legacy_topics_cleared = true;
+}
+
+bool SpCustomTopicMatches(const char* suffix) {
+  char expected_topic[TOPSZ];
+  SpCustomMakeUidTopic(expected_topic, sizeof(expected_topic), suffix);
+  if (!strcmp(XdrvMailbox.topic, expected_topic)) {
+    return true;
+  }
+
+  if (strcmp(smartplug_uid, smartplug_topic_id)) {
+    SpCustomMakeTopicIdTopic(expected_topic, sizeof(expected_topic), suffix);
+    if (!strcmp(XdrvMailbox.topic, expected_topic)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool SpCustomHandlePlainCommand(const char* payload) {
+  if (!payload || !payload[0]) {
+    return false;
+  }
+
+  const char* command_text = payload;
+  const char* separator = strchr(payload, ':');
+  if (separator) {
+    command_text = separator + 1;
+    while (*command_text == ' ') {
+      command_text++;
+    }
+  }
+
+  return SpCustomHandleCommand(command_text);
 }
 
 bool SpCustomHandleCommand(const char* cmd) {
@@ -42,20 +181,46 @@ bool SpCustomHandleCommand(const char* cmd) {
     return false;
   }
 
+  if (!strcasecmp(cmd, "webserver 0")) {
+    ExecuteCommand((char*)"Backlog WebServer 0; Restart 1", SRC_MQTT);
+    return true;
+  }
+
+  if (!strcasecmp(cmd, "webserver 1")) {
+    ExecuteCommand((char*)"Backlog WebPassword 0; WebServer 1; Restart 1", SRC_MQTT);
+    return true;
+  }
+
+  if (!strcasecmp(cmd, "webserver 2")) {
+    ExecuteCommand((char*)"Backlog WebServer 2; WebPassword pnks1111; Restart 1", SRC_MQTT);
+    return true;
+  }
+
   if (!strcasecmp(cmd, "on")) {
     ExecuteCommandPower(1, POWER_ON, SRC_MQTT);
     SpCustomPublishStatus();
+    SpCustomPublishMetrics();
     return true;
   }
 
   if (!strcasecmp(cmd, "off")) {
     ExecuteCommandPower(1, POWER_OFF, SRC_MQTT);
     SpCustomPublishStatus();
+    SpCustomPublishMetrics();
     return true;
   }
 
   if (!strcasecmp(cmd, "status")) {
     SpCustomPublishStatus();
+    SpCustomPublishMetrics();
+    return true;
+  }
+
+  if (!strcasecmp(cmd, "toggle")) {
+    ExecuteCommandPower(1, POWER_TOGGLE, SRC_MQTT);
+    SpCustomPublishStatus();
+    SpCustomPublishMetrics();
+    MqttPublishSensor();
     return true;
   }
 
@@ -64,21 +229,23 @@ bool SpCustomHandleCommand(const char* cmd) {
 
 void SpCustomSubscribe() {
   char topic[TOPSZ];
-  SpCustomMakeTopic(topic, sizeof(topic), "command");
+  SpCustomMakeUidTopic(topic, sizeof(topic), "command");
   MqttSubscribe(topic);
+  if (strcmp(smartplug_uid, smartplug_topic_id)) {
+    SpCustomMakeTopicIdTopic(topic, sizeof(topic), "command");
+    MqttSubscribe(topic);
+  }
 }
 
 bool SpCustomHandleMqttData() {
-  char expected_topic[TOPSZ];
-  SpCustomMakeTopic(expected_topic, sizeof(expected_topic), "command");
-
-  if (strcmp(XdrvMailbox.topic, expected_topic)) {
+  if (!SpCustomTopicMatches("command")) {
     return false;
   }
 
   JsonParser parser((char*)XdrvMailbox.data);
   JsonParserObject root = parser.getRootObject();
   if (!root) {
+    SpCustomHandlePlainCommand(XdrvMailbox.data);
     return true;
   }
 
@@ -89,7 +256,9 @@ bool SpCustomHandleMqttData() {
 
 void SpCustomInit() {
   smartplug_seconds_until_publish = kSmartplugStatusPeriodSeconds;
-  SpCustomLoadDeviceId();
+  smartplug_legacy_topics_cleared = false;
+  SpCustomLoadIds();
+  SpCustomClearCommandRetain();
 }
 
 void SpCustomEverySecond() {
@@ -98,7 +267,9 @@ void SpCustomEverySecond() {
   }
 
   if (0 == smartplug_seconds_until_publish) {
+    SpCustomClearLegacyAliasTopicsOnce();
     SpCustomPublishStatus();
+    SpCustomPublishMetrics();
     MqttPublishSensor();
     smartplug_seconds_until_publish = kSmartplugStatusPeriodSeconds;
   }
@@ -118,6 +289,7 @@ bool Xdrv98(uint32_t function) {
       return Spc98::SpCustomHandleMqttData();
     case FUNC_SET_DEVICE_POWER:
       Spc98::SpCustomPublishStatus();
+      Spc98::SpCustomPublishMetrics();
       MqttPublishSensor();
       break;
     case FUNC_EVERY_SECOND:

@@ -21,6 +21,16 @@
 #undef MQTT_PASS
 #define MQTT_PASS         "fcfc50kc35"
 
+#ifdef WEB_USERNAME
+#undef WEB_USERNAME
+#endif
+#define WEB_USERNAME      "pnkmem433"
+
+#ifdef WEB_PASSWORD
+#undef WEB_PASSWORD
+#endif
+#define WEB_PASSWORD      "pnks1111"
+
 #ifdef APP_TIMEZONE
 #undef APP_TIMEZONE
 #endif

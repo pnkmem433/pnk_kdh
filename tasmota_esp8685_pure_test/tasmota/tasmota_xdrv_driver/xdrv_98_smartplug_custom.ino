@@ -15,9 +15,15 @@ bool smartplug_legacy_topics_cleared = false;
 
 bool SpCustomHandleCommand(const char* cmd);
 bool SpCustomIsOn();
+uint32_t SpCustomWebServerMode();
+void SpCustomClearCommandRetain();
 
 const char* SpCustomStateText() {
   return SpCustomIsOn() ? "on" : "off";
+}
+
+uint32_t SpCustomWebServerMode() {
+  return Settings->webserver;
 }
 
 void SpCustomLoadIds() {
@@ -49,12 +55,28 @@ void SpCustomClearLegacyTopicRetain(const char* suffix) {
   MqttPublishPayload(topic, "", 0, true);
 }
 
+void SpCustomClearUidTopicRetain(const char* suffix) {
+  char topic[TOPSZ];
+  SpCustomMakeUidTopic(topic, sizeof(topic), suffix);
+  MqttPublishPayload(topic, "", 0, true);
+}
+
+void SpCustomClearCommandRetain() {
+  // Commands should not persist across reboots. Clear any retained command on both
+  // the UID topic and the legacy topic alias so old webserver commands do not replay.
+  SpCustomClearUidTopicRetain("command");
+  SpCustomClearLegacyTopicRetain("command");
+}
+
 bool SpCustomIsOn() {
   return bitRead(TasmotaGlobal.power, 0);
 }
 
 void SpCustomMakeStatusPayload(char* buffer, size_t size) {
-  snprintf_P(buffer, size, PSTR("{\"state\":\"%s\"}"), SpCustomStateText());
+  snprintf_P(
+    buffer, size,
+    PSTR("{\"state\":\"%s\",\"webserver\":%u}"),
+    SpCustomStateText(), SpCustomWebServerMode());
 }
 
 void SpCustomMakeMetricsPayload(char* buffer, size_t size) {
@@ -64,15 +86,29 @@ void SpCustomMakeMetricsPayload(char* buffer, size_t size) {
     const float power = Energy->active_power[0];
     const float total = Energy->total[0];
     const float daily = Energy->daily_sum;
+    char power_str[16];
+    char voltage_str[16];
+    char current_str[16];
+    char daily_str[16];
+    char total_str[16];
+
+    dtostrfd(power, 1, power_str);
+    dtostrfd(voltage, 1, voltage_str);
+    dtostrfd(current, 3, current_str);
+    dtostrfd(daily, 3, daily_str);
+    dtostrfd(total, 3, total_str);
 
     snprintf_P(
       buffer, size,
-      PSTR("{\"state\":\"%s\",\"power\":%1_f,\"voltage\":%1_f,\"current\":%3_f,\"daily\":%3_f,\"total\":%3_f}"),
-      SpCustomStateText(), &power, &voltage, &current, &daily, &total);
+      PSTR("{\"state\":\"%s\",\"webserver\":%u,\"power\":%s,\"voltage\":%s,\"current\":%s,\"daily\":%s,\"total\":%s}"),
+      SpCustomStateText(), SpCustomWebServerMode(), power_str, voltage_str, current_str, daily_str, total_str);
     return;
   }
 
-  snprintf_P(buffer, size, PSTR("{\"state\":\"%s\",\"energy_available\":false}"), SpCustomStateText());
+  snprintf_P(
+    buffer, size,
+    PSTR("{\"state\":\"%s\",\"webserver\":%u,\"energy_available\":false}"),
+    SpCustomStateText(), SpCustomWebServerMode());
 }
 
 void SpCustomPublishPayloadToUid(const char* suffix, const char* payload) {
@@ -146,6 +182,21 @@ bool SpCustomHandleCommand(const char* cmd) {
     return false;
   }
 
+  if (!strcasecmp(cmd, "webserver 0")) {
+    ExecuteCommand((char*)"Backlog WebServer 0; Restart 1", SRC_MQTT);
+    return true;
+  }
+
+  if (!strcasecmp(cmd, "webserver 1")) {
+    ExecuteCommand((char*)"Backlog WebPassword 0; WebServer 1; Restart 1", SRC_MQTT);
+    return true;
+  }
+
+  if (!strcasecmp(cmd, "webserver 2")) {
+    ExecuteCommand((char*)"Backlog WebServer 2; WebPassword pnks1111; Restart 1", SRC_MQTT);
+    return true;
+  }
+
   if (!strcasecmp(cmd, "on")) {
     ExecuteCommandPower(1, POWER_ON, SRC_MQTT);
     SpCustomPublishStatus();
@@ -210,6 +261,7 @@ void SpCustomInit() {
   smartplug_seconds_until_publish = kSmartplugStatusPeriodSeconds;
   smartplug_legacy_topics_cleared = false;
   SpCustomLoadIds();
+  SpCustomClearCommandRetain();
 }
 
 void SpCustomEverySecond() {
