@@ -1,190 +1,190 @@
 Import("env")
 
+import os
 import pathlib
 import re
 import shutil
 import subprocess
+import sys
+
 from colorama import Fore
 
 import tasmotapiolib
 
 
-# Local Google Drive folder used to archive every versioned OTA artifact.
-GDRIVE_DIR = pathlib.Path(env.GetProjectOption("custom_gdrive_copy_dir"))
+TARGET_ENVIRONMENTS = {"tasmota-smartplug"}
+OUTPUT_BASENAME = "esp02s_tasmota.bin.gz"
+SERVER_HOST = "gha-runner@192.168.0.15"
+SERVER_TARGET_DIR = "/ota/tasmota/esp02s"
+SERVER_UPDATE_SCRIPT = "/ota/tasmota/update_latest.py"
+MINIMAL_SOURCE_PATH = pathlib.Path(r"C:\Users\pnks\Downloads\tasmota-minimal.bin.gz")
+MINIMAL_TARGET_NAME = "esp02s_tasmota-minimal.bin.gz"
 
-# Remote server connection details.
-SSH_TARGET = "gha-runner@192.168.0.15"
-SSH_REMOTE_DIR = "/ota/tasmota"
-SSH_UPDATE_SCRIPT = "/ota/tasmota/update_latest.py"
-
-# Base firmware name. The versioned artifact name becomes:
-#   v<version>_tasmota-smartplug.bin.gz
-BASE_FILENAME = "tasmota-smartplug.bin.gz"
-VERSIONED_PATTERN = re.compile(rf"^v(\d+)_{re.escape(BASE_FILENAME)}$")
-
-# Cache the chosen versioned artifact name so both post actions
-# (Google Drive copy + server upload) use the exact same filename.
-_cached_versioned_name = None
+_cached_version_text = None
 
 
-def _find_latest_version():
-    """
-    Scan the local archive folder and return the highest known version.
+def _log(step: str, message: str, color: str = Fore.CYAN) -> None:
+    print(color + f"[ESP02S][{step}] {message}", flush=True)
 
-    Returns:
-        tuple[int | None, str | None]:
-            (latest_version_number, latest_filename)
-    """
-    if not GDRIVE_DIR.exists():
-        return None, None
 
+def _should_run() -> bool:
+    return env["PIOENV"] in TARGET_ENVIRONMENTS
+
+
+def _get_gdrive_dir() -> pathlib.Path:
+    project_config = env.GetProjectConfig()
+    gdrive_dir = project_config.get("env:tasmota-smartplug", "custom_gdrive_copy_dir", "")
+    if not gdrive_dir:
+        raise RuntimeError("[ESP02S][설정] platformio 설정에 custom_gdrive_copy_dir 값이 없습니다")
+    return pathlib.Path(gdrive_dir)
+
+
+def _sanitize_version(version_text: str) -> str:
+    sanitized = "".join(ch for ch in version_text.strip() if ch.isdigit())
+    if not sanitized:
+        raise RuntimeError("[ESP02S][버전] 버전 번호는 숫자로 입력해야 합니다. 예: 24")
+    return sanitized
+
+
+def _find_current_gdrive_version(gdrive_dir: pathlib.Path) -> str | None:
+    version_pattern = re.compile(r"^v(\d+)_esp02s_tasmota\.bin\.gz$", re.IGNORECASE)
     latest_version = None
-    latest_name = None
-    for path in GDRIVE_DIR.iterdir():
-        if not path.is_file():
-            continue
+    latest_mtime = None
 
-        match = VERSIONED_PATTERN.match(path.name)
+    if not gdrive_dir.exists():
+        return None
+
+    for entry in gdrive_dir.iterdir():
+        if not entry.is_file():
+            continue
+        match = version_pattern.match(entry.name)
         if not match:
             continue
+        entry_mtime = entry.stat().st_mtime
+        if latest_mtime is None or entry_mtime > latest_mtime:
+            latest_mtime = entry_mtime
+            latest_version = match.group(1)
 
-        version = int(match.group(1))
-        if (latest_version is None) or (version > latest_version):
-            latest_version = version
-            latest_name = path.name
-
-    return latest_version, latest_name
+    return latest_version
 
 
-def _get_versioned_name():
-    """
-    Ask the user for the next OTA version number once per build.
-
-    The function refuses versions that are not numeric or are not strictly
-    greater than the latest archived version. The chosen filename is cached
-    so later steps reuse it without asking again.
-    """
-    global _cached_versioned_name
-    if _cached_versioned_name:
-        return _cached_versioned_name
-
-    print(Fore.CYAN + "[0/3] OTA 버전 입력 단계 시작")
-    latest_version, latest_name = _find_latest_version()
-    if latest_version is None:
-        print(Fore.CYAN + "서버의 최신버전 : 없음")
-    else:
-        print(Fore.CYAN + f"서버의 최신버전 : v{latest_version} ({latest_name})")
-
-    print(Fore.CYAN + "업로드할 버전을 직접 입력해야 합니다.")
-    version_number = input("업로드할 버전 : ").strip()
-    if not version_number:
-        raise RuntimeError("OTA 버전 번호를 입력해야 합니다")
-
-    # Keep only digits so accidental spaces or letters do not leak
-    # into the final filename.
-    safe_version = "".join(ch for ch in version_number if ch.isdigit())
-    if not safe_version:
-        raise RuntimeError(f"잘못된 OTA 버전 번호입니다: {version_number}")
-
-    version_value = int(safe_version)
-    if (latest_version is not None) and (version_value <= latest_version):
+def _validate_newer_version(version_text: str, current_version: str | None) -> str:
+    sanitized = _sanitize_version(version_text)
+    if current_version is not None and int(sanitized) <= int(current_version):
         raise RuntimeError(
-            f"업로드할 버전은 현재 최신 버전 v{latest_version}보다 커야 합니다"
+            f"[ESP02S][버전] 새 버전은 현재 구글드라이브 버전 v{current_version}보다 커야 합니다"
         )
-
-    _cached_versioned_name = f"v{version_value}_{BASE_FILENAME}"
-    print(Fore.CYAN + f"업로드 파일 이름 : {_cached_versioned_name}")
-    print(Fore.GREEN + "[0/3] OTA 버전 입력 단계 완료")
-    return _cached_versioned_name
+    return sanitized
 
 
-def _copy_gzip_firmware(source, target, env):
-    """
-    Copy the freshly built gzip firmware into the version archive folder.
+def _prompt_version_text(current_version: str | None) -> str | None:
+    if not sys.stdin or not sys.stdin.isatty():
+        _log("버전", "대화형 입력을 사용할 수 없어 복사 단계를 건너뜁니다", Fore.YELLOW)
+        return None
 
-    This keeps a local version history before anything is uploaded to the server.
-    """
-    source_bin = pathlib.Path(tasmotapiolib.get_final_bin_path(env))
-    source_gz = source_bin.with_suffix(".bin.gz")
-    print(Fore.CYAN + "[1/3] 구글드라이브 복사 단계 시작")
-    if not source_gz.is_file():
-        print(Fore.YELLOW + f"gzip 펌웨어를 찾지 못해 구글드라이브 복사를 건너뜁니다: {source_gz}")
+    if current_version:
+        _log("버전", f"현재 구글드라이브 버전: v{current_version}")
+    else:
+        _log("버전", "현재 구글드라이브 버전: 없음")
+
+    print("업로드할 파일 버전을 입력하세요 :", flush=True)
+    return sys.stdin.readline().strip()
+
+
+def _get_version_text() -> str:
+    global _cached_version_text
+    if _cached_version_text:
+        _log("버전", f"앞에서 선택한 버전을 재사용합니다: v{_cached_version_text}")
+        return _cached_version_text
+
+    env_version = os.environ.get("GDRIVE_VERSION", "").strip()
+    if env_version:
+        _cached_version_text = _sanitize_version(env_version)
+        _log("버전", f"환경변수에서 선택된 버전을 사용합니다: v{_cached_version_text}")
+        return _cached_version_text
+
+    gdrive_dir = _get_gdrive_dir()
+    current_version = _find_current_gdrive_version(gdrive_dir)
+
+    _log("시작", "빌드 후 배포 파이프라인을 시작합니다")
+    version_text = _prompt_version_text(current_version)
+    if not version_text:
+        return ""
+
+    _cached_version_text = _validate_newer_version(version_text, current_version)
+    _log("버전", f"선택한 버전: v{_cached_version_text}")
+    return _cached_version_text
+
+
+def _run_command(command: list[str], start_message: str, success_message: str) -> None:
+    _log("CMD", start_message)
+    _log("CMD", " ".join(command))
+    try:
+        subprocess.run(command, check=True)
+        _log("CMD", success_message, Fore.GREEN)
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(f"[ESP02S][명령] 명령 실행에 실패했습니다: {' '.join(command)}") from exc
+
+
+def _upload_to_server(firmware_path: pathlib.Path) -> None:
+    _run_command(
+        ["scp", str(firmware_path), f"{SERVER_HOST}:{SERVER_TARGET_DIR}/"],
+        f"서버에 펌웨어 업로드 시작: {firmware_path.name}",
+        f"서버 업로드 완료: {SERVER_TARGET_DIR}/{firmware_path.name}",
+    )
+
+
+def _upload_minimal_if_present() -> None:
+    if not MINIMAL_SOURCE_PATH.is_file():
+        _log("미니멀", f"minimal 파일이 없어 건너뜁니다: {MINIMAL_SOURCE_PATH}", Fore.YELLOW)
         return
 
-    destination_name = _get_versioned_name()
-    GDRIVE_DIR.mkdir(parents=True, exist_ok=True)
-    destination_file = GDRIVE_DIR / destination_name
-
-    # Overwrite the same version file if it already exists.
-    shutil.copyfile(source_gz, destination_file)
-    print(Fore.GREEN + f"구글드라이브 복사 완료: {destination_file}")
-    print(Fore.GREEN + "[1/3] 구글드라이브 복사 단계 완료")
+    _run_command(
+        ["scp", str(MINIMAL_SOURCE_PATH), f"{SERVER_HOST}:{SERVER_TARGET_DIR}/{MINIMAL_TARGET_NAME}"],
+        f"minimal 파일 업로드 시작: {MINIMAL_SOURCE_PATH.name}",
+        f"minimal 업로드 완료: {SERVER_TARGET_DIR}/{MINIMAL_TARGET_NAME}",
+    )
 
 
-def _upload_gzip_firmware(source, target, env):
-    """
-    Upload the same versioned gzip artifact to the OTA server and then ask
-    the server-side helper script to refresh the latest symlink.
-    """
-    source_bin = pathlib.Path(tasmotapiolib.get_final_bin_path(env))
-    source_gz = source_bin.with_suffix(".bin.gz")
-    print(Fore.CYAN + "[2/3] 서버 업로드 단계 시작")
-    if not source_gz.is_file():
-        print(Fore.YELLOW + f"gzip 펌웨어를 찾지 못해 서버 업로드를 건너뜁니다: {source_gz}")
+def _refresh_server_symlink() -> None:
+    _run_command(
+        ["ssh", SERVER_HOST, f"python3 {SERVER_UPDATE_SCRIPT}"],
+        "서버 심볼릭 링크 갱신 스크립트 실행",
+        "서버 심볼릭 링크 갱신 완료",
+    )
+
+
+def _copy_versioned_firmware(source, target, env):
+    if not _should_run():
         return
 
-    remote_name = _get_versioned_name()
+    source_bin = pathlib.Path(tasmotapiolib.get_final_bin_path(env)).with_suffix(".bin.gz")
+    if not source_bin.is_file():
+        _log("빌드", f"gzip 산출물을 찾지 못해 건너뜁니다: {source_bin}", Fore.YELLOW)
+        return
 
-    # Ensure the remote OTA folder exists before uploading.
-    mkdir_cmd = [
-        "ssh",
-        "-o",
-        "StrictHostKeyChecking=accept-new",
-        SSH_TARGET,
-        f"mkdir -p '{SSH_REMOTE_DIR}'",
-    ]
+    _log("빌드", f"빌드 산출물 확인: {source_bin}")
+    version_text = _get_version_text()
+    if not version_text:
+        return
 
-    # Upload the exact versioned file to the server archive folder.
-    copy_cmd = [
-        "scp",
-        "-o",
-        "StrictHostKeyChecking=accept-new",
-        str(source_gz),
-        f"{SSH_TARGET}:{SSH_REMOTE_DIR}/{remote_name}",
-    ]
+    destination_name = f"v{version_text}_{OUTPUT_BASENAME}"
+    gdrive_dir = _get_gdrive_dir()
+    destination_path = gdrive_dir / destination_name
 
-    # After upload, let the server decide which version is the newest and
-    # update the stable symlink name on the server side.
-    update_cmd = [
-        "ssh",
-        "-o",
-        "StrictHostKeyChecking=accept-new",
-        SSH_TARGET,
-        "python3",
-        SSH_UPDATE_SCRIPT,
-    ]
+    if not gdrive_dir.exists():
+        raise RuntimeError(f"[ESP02S][구글드라이브] 폴더를 찾지 못했습니다: {gdrive_dir}")
 
-    print(Fore.CYAN + f"서버 업로드 대상: {SSH_TARGET}:{SSH_REMOTE_DIR}/{remote_name}")
-    subprocess.run(mkdir_cmd, check=True)
-    subprocess.run(copy_cmd, check=True)
-    print(Fore.GREEN + f"서버 업로드 완료: {SSH_TARGET}:{SSH_REMOTE_DIR}/{remote_name}")
-    print(Fore.GREEN + "[2/3] 서버 업로드 단계 완료")
+    _log("구글드라이브", f"구글드라이브로 펌웨어 복사: {destination_path}")
+    shutil.copyfile(source_bin, destination_path)
+    _log("구글드라이브", f"복사 완료: {destination_path}", Fore.GREEN)
 
-    print(Fore.CYAN + "[3/3] 서버 최신 링크 갱신 단계 시작")
-    print(Fore.CYAN + "서버 최신 링크 갱신 스크립트 호출중...")
-    print(Fore.CYAN + f"서버 스크립트 실행: {SSH_UPDATE_SCRIPT}")
-    subprocess.run(update_cmd, check=True)
-    print(Fore.GREEN + "[3/3] 서버 최신 링크 갱신 단계 완료")
-    print(Fore.GREEN + "서버 최신 심볼릭 링크 갱신 완료")
+    _upload_to_server(destination_path)
+    _upload_minimal_if_present()
+    _refresh_server_symlink()
+    _log("완료", "빌드 후 배포 파이프라인이 끝났습니다", Fore.GREEN)
 
 
-# Post action 1: archive the gzip artifact locally after firmware.bin is produced.
-copy_action = env.Action(_copy_gzip_firmware)
+copy_action = env.Action(_copy_versioned_firmware)
 copy_action.strfunction = lambda target, source, env: ""
 env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", copy_action)
-
-# Post action 2: upload the same versioned artifact to the server and refresh
-# the server-side stable symlink.
-upload_action = env.Action(_upload_gzip_firmware)
-upload_action.strfunction = lambda target, source, env: ""
-env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", upload_action)

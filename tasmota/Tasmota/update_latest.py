@@ -3,10 +3,10 @@
 Deploy this file to: /ota/tasmota/update_latest.py
 
 Purpose:
-- find the newest versioned smartplug firmware in /ota/tasmota
-- update the stable filename symlink:
-    /ota/tasmota/tasmota-smartplug.bin.gz
-- print enough logs so the caller can see what happened on the server
+- scan the esp32 and esp02s OTA folders
+- find the newest versioned firmware by modified time
+- refresh the stable symlink for each target
+- print detailed server-side logs for every step
 """
 
 from __future__ import annotations
@@ -17,83 +17,89 @@ import sys
 from pathlib import Path
 
 
-# Server-side OTA folder that stores all versioned full firmware files.
 BASE_DIR = Path("/ota/tasmota")
 
-# Stable filename that Tasmota devices will point at in the OTA URL.
-BASE_NAME = "tasmota-smartplug.bin.gz"
+TARGETS = {
+    "esp32": {
+        "search_dir": BASE_DIR / "esp32",
+        "pattern": re.compile(r"^v\d+_esp8685_tasmota\.bin$"),
+        "link_path": BASE_DIR / "esp32" / "esp8685_tasmota.bin",
+    },
+    "esp02s": {
+        "search_dir": BASE_DIR / "esp02s",
+        "pattern": re.compile(r"^v\d+_esp02s_tasmota\.bin\.gz$"),
+        "link_path": BASE_DIR / "esp02s" / "esp02s_tasmota.bin.gz",
+    },
+}
 
-# Versioned full firmware naming rule produced by the local build script.
-VERSION_RE = re.compile(r"^v(\d+)_tasmota-smartplug\.bin\.gz$")
+
+def log(step: str, message: str) -> None:
+    print(f"[SERVER][{step}] {message}", flush=True)
 
 
-def find_latest_versioned_file(base_dir: Path) -> Path:
-    """
-    Return the highest versioned smartplug artifact in the OTA folder.
-
-    Expected examples:
-    - v2_tasmota-smartplug.bin.gz
-    - v7_tasmota-smartplug.bin.gz
-    """
-    latest_path: Path | None = None
-    latest_version: int | None = None
-
-    for path in base_dir.iterdir():
+def find_latest_by_mtime(search_dir: Path, pattern: re.Pattern[str]) -> Path:
+    candidates: list[Path] = []
+    for path in search_dir.iterdir():
         if not path.is_file():
             continue
+        if pattern.match(path.name):
+            candidates.append(path)
 
-        match = VERSION_RE.match(path.name)
-        if not match:
-            continue
+    if not candidates:
+        raise FileNotFoundError(f"No matching versioned files found in {search_dir}")
 
-        version = int(match.group(1))
-        if latest_version is None or version > latest_version:
-            latest_version = version
-            latest_path = path
-
-    if latest_path is None:
-        raise FileNotFoundError("No versioned smartplug firmware files were found.")
-
-    return latest_path
+    candidates.sort(key=lambda path: path.stat().st_mtime, reverse=True)
+    return candidates[0]
 
 
-def update_symlink(base_dir: Path, latest_file: Path) -> Path:
-    """
-    Replace the stable OTA symlink so it points to the latest versioned file.
-
-    A relative symlink is used so the folder can be moved without breaking
-    the link target inside the same directory.
-    """
-    link_path = base_dir / BASE_NAME
+def refresh_symlink(link_path: Path, latest: Path) -> None:
     if link_path.exists() or link_path.is_symlink():
+        log("링크", f"기존 링크 또는 파일 삭제: {link_path}")
         link_path.unlink()
 
-    os.symlink(latest_file.name, link_path)
-    return link_path
+    os.symlink(latest.name, link_path)
+    log("링크", f"심볼릭 링크 생성: {link_path} -> {latest.name}")
+
+
+def process_target(name: str, config: dict[str, object]) -> None:
+    search_dir = config["search_dir"]
+    pattern = config["pattern"]
+    link_path = config["link_path"]
+
+    log("대상", f"처리 시작: {name}")
+    log("대상", f"검색 폴더: {search_dir}")
+    log("대상", f"고정 링크 경로: {link_path}")
+
+    if not isinstance(search_dir, Path) or not isinstance(link_path, Path):
+        raise TypeError(f"대상 {name}의 경로 설정이 올바르지 않습니다")
+    if not isinstance(pattern, re.Pattern):
+        raise TypeError(f"대상 {name}의 정규식 설정이 올바르지 않습니다")
+
+    if not search_dir.is_dir():
+        raise FileNotFoundError(f"대상 폴더를 찾지 못했습니다: {search_dir}")
+
+    latest = find_latest_by_mtime(search_dir, pattern)
+    log("대상", f"최신 파일 선택: {latest.name}")
+    refresh_symlink(link_path, latest)
+    log("대상", f"처리 완료: {name}")
 
 
 def main() -> int:
-    print("[서버] update_latest.py 실행 시작")
-    print(f"[서버] 작업 폴더: {BASE_DIR}")
+    log("시작", "update_latest.py 실행 시작")
+    log("시작", f"기준 폴더: {BASE_DIR}")
 
     if not BASE_DIR.is_dir():
-        print(f"ERROR: OTA directory not found: {BASE_DIR}", file=sys.stderr)
+        print(f"오류: OTA 기준 폴더를 찾지 못했습니다: {BASE_DIR}", file=sys.stderr)
         return 1
 
     try:
-        print("[서버] 최신 버전 파일 검색중...")
-        latest = find_latest_versioned_file(BASE_DIR)
-        print(f"[서버] 최신 버전 파일 확인: {latest.name}")
-
-        print("[서버] 심볼릭 링크 갱신중...")
-        link_path = update_symlink(BASE_DIR, latest)
+        for name, config in TARGETS.items():
+            process_target(name, config)
     except Exception as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+        print(f"오류: {exc}", file=sys.stderr)
         return 1
 
-    print(f"[서버] 최신 버전 파일: {latest.name}")
-    print(f"[서버] 심볼릭 링크 갱신 완료: {link_path} -> {latest.name}")
-    print("[서버] update_latest.py 실행 완료")
+    log("완료", "update_latest.py 실행 완료")
     return 0
 
 
