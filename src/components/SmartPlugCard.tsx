@@ -45,7 +45,11 @@ const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
         offline ? "bg-yellow-400" : isOn ? "bg-plug-on" : "bg-plug-off/30"
       }`} />
 
-      {offline && (
+      {isLwtOffline ? (
+        <div className="absolute top-3 right-3 text-[10px] font-semibold text-destructive bg-destructive/15 px-2 py-0.5 rounded-full">
+          MQTT 연결 안됨
+        </div>
+      ) : offline && (
         <div className="absolute top-3 right-3 text-[10px] font-semibold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">
           오프라인
         </div>
@@ -113,16 +117,9 @@ const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
                 WEB {webserver}
               </span>
             )}
-            {lwt !== null && (
-              <span
-                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                  isLwtOffline
-                    ? "bg-destructive/15 text-destructive"
-                    : "bg-plug-on-bg text-plug-on"
-                }`}
-                title="MQTT LWT (Tasmota 연결 상태)"
-              >
-                MQTT {lwt === "Online" ? "ON" : "OFF"}
+            {webserver !== null && (
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
+                WEB {webserver}
               </span>
             )}
           </div>
