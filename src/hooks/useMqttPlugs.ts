@@ -18,6 +18,8 @@ export interface PlugData {
   // Network (from tele STATE)
   ssid: string | null;
   ipAddress: string | null;
+  // LWT (Last Will & Testament) — Tasmota Online/Offline
+  lwt: "Online" | "Offline" | null;
   // Extra fields not explicitly handled
   extraFields: Record<string, unknown>;
 }
