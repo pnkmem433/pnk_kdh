@@ -58,7 +58,7 @@ function makeDefaultPlug(uuid: string, name: string): PlugData {
   return {
     uuid, name, state: null, webserver: null, lastSeen: null, offline: false,
     energyAvailable: null, power: null, voltage: null, current: null, daily: null, total: null,
-    ssid: null, ipAddress: null, extraFields: {},
+    ssid: null, ipAddress: null, lwt: null, extraFields: {},
   };
 }
 
