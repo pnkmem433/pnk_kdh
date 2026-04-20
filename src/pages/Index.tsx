@@ -42,11 +42,42 @@ const Index = () => {
             {connectionStatus === "reconnecting" && <p className="text-xs mt-1 text-yellow-600">브로커에 재연결 시도 중…</p>}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {plugs.map((plug) => (
-              <SmartPlugCard key={plug.uuid} plug={plug} onNameChange={updateName} onCommand={sendCommand} />
-            ))}
-          </div>
+          (() => {
+            // Group plugs by location (text before " - "). Ungrouped plugs go under "기타".
+            const groups = new Map<string, typeof plugs>();
+            for (const plug of plugs) {
+              const idx = plug.name.indexOf(" - ");
+              const location = idx > 0 ? plug.name.slice(0, idx).trim() : "기타";
+              if (!groups.has(location)) groups.set(location, []);
+              groups.get(location)!.push(plug);
+            }
+            const sortedGroups = Array.from(groups.entries()).sort(([a], [b]) => {
+              if (a === "기타") return 1;
+              if (b === "기타") return -1;
+              return a.localeCompare(b, "ko");
+            });
+
+            return (
+              <div className="space-y-8">
+                {sortedGroups.map(([location, items]) => (
+                  <section key={location}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <h2 className="text-base font-bold text-foreground">{location}</h2>
+                      <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-muted">
+                        {items.length}
+                      </span>
+                      <div className="flex-1 h-px bg-border" />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                      {items.map((plug) => (
+                        <SmartPlugCard key={plug.uuid} plug={plug} onNameChange={updateName} onCommand={sendCommand} />
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            );
+          })()
         )}
       </main>
     </div>
