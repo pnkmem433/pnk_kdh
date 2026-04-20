@@ -106,8 +106,25 @@ export function useMqttPlugs() {
 
     client.on("message", (topic, payload) => {
       const parts = topic.split("/");
+      const payloadStr = payload.toString();
+
+      // tele/tasmota_XXXXXX/LWT — plain text "Online" / "Offline"
+      if (parts[0] === "tele" && parts[2] === "LWT") {
+        const shortId = parts[1].replace("tasmota_", "");
+        const lwtVal = payloadStr === "Online" ? "Online" : "Offline";
+        setPlugs((prev) => {
+          const fullUuid = findUuidByShortId(shortId, prev);
+          if (!fullUuid) return prev;
+          return {
+            ...prev,
+            [fullUuid]: { ...prev[fullUuid], lwt: lwtVal },
+          };
+        });
+        return;
+      }
+
       let obj: Record<string, unknown>;
-      try { obj = JSON.parse(payload.toString()); } catch { return; }
+      try { obj = JSON.parse(payloadStr); } catch { return; }
 
       // smart_plug/{uuid}/status
       if (parts[0] === "smart_plug" && parts[2] === "status") {
