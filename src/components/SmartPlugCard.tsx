@@ -113,6 +113,18 @@ const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
                 WEB {webserver}
               </span>
             )}
+            {lwt !== null && (
+              <span
+                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                  isLwtOffline
+                    ? "bg-destructive/15 text-destructive"
+                    : "bg-plug-on-bg text-plug-on"
+                }`}
+                title="MQTT LWT (Tasmota 연결 상태)"
+              >
+                MQTT {lwt === "Online" ? "ON" : "OFF"}
+              </span>
+            )}
           </div>
 
           {/* ON/OFF buttons */}
