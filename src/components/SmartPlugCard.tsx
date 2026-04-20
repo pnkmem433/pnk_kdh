@@ -109,7 +109,7 @@ const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
               <span className={`text-xs font-semibold uppercase tracking-wider ${
                 offline ? "text-yellow-600" : isOn ? "text-plug-on" : "text-plug-off"
               }`}>
-                {state === null ? "UNKNOWN" : offline ? "OFFLINE" : isOn ? "ON" : "OFF"}
+                {state === null ? "UNKNOWN" : isOn ? "ON" : "OFF"}
               </span>
             </div>
             {webserver !== null && (
