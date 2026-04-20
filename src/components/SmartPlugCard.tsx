@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Pencil, Check, Power, Globe, Wifi, ChevronDown, ChevronUp } from "lucide-react";
+import { Pencil, Check, Power, Globe, Wifi, ChevronDown, ChevronUp, X } from "lucide-react";
 import type { PlugData } from "@/hooks/useMqttPlugs";
+import { UNASSIGNED_LOCATION } from "@/hooks/useLocations";
 
 function formatLastSeen(ts: number | null): string {
   if (!ts) return "—";
@@ -17,22 +18,40 @@ function formatLastSeen(ts: number | null): string {
 
 interface Props {
   plug: PlugData;
+  location: string;
+  locations: string[];
   onNameChange: (uuid: string, newName: string) => void;
+  onLocationChange: (uuid: string, location: string) => void;
+  onAddLocation: (name: string) => void;
   onCommand: (uuid: string, cmd: "on" | "off") => void;
 }
 
-const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
+const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChange, onAddLocation, onCommand }: Props) => {
   const { uuid, name, state, webserver, lastSeen, offline, ssid, ipAddress, lwt, extraFields } = plug;
   const [editing, setEditing] = useState(false);
-  const [editValue, setEditValue] = useState(name);
+  const [editName, setEditName] = useState(name);
+  const [editLocation, setEditLocation] = useState(location);
+  const [showLocPicker, setShowLocPicker] = useState(false);
+  const [newLocInput, setNewLocInput] = useState("");
   const [showExtra, setShowExtra] = useState(false);
   const isOn = state === "on";
   const isLwtOffline = lwt === "Offline";
   const extraKeys = Object.keys(extraFields);
 
   const handleSave = () => {
-    onNameChange(uuid, editValue.trim() || name);
+    onNameChange(uuid, editName.trim() || name);
+    onLocationChange(uuid, editLocation);
     setEditing(false);
+    setShowLocPicker(false);
+  };
+
+  const handleAddNewLoc = () => {
+    const v = newLocInput.trim();
+    if (!v) return;
+    onAddLocation(v);
+    setEditLocation(v);
+    setNewLocInput("");
+    setShowLocPicker(false);
   };
 
   return (
