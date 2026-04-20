@@ -117,11 +117,6 @@ const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
                 WEB {webserver}
               </span>
             )}
-            {webserver !== null && (
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
-                WEB {webserver}
-              </span>
-            )}
           </div>
 
           {/* ON/OFF buttons */}
