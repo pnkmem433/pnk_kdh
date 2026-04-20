@@ -91,25 +91,79 @@ const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChan
           offline ? "border-yellow-300/30 bg-yellow-50/30"
             : isOn ? "border-plug-on/20 bg-plug-on-bg/50" : "border-border bg-muted/50"
         }`}>
-          {/* Name */}
+          {/* Name + Location editor */}
           <div className="flex items-start gap-2 mb-1.5">
             {editing ? (
-              <>
-                <input
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSave()}
-                  autoFocus
-                  className="flex-1 min-w-0 text-sm font-semibold bg-transparent border-b border-foreground/20 outline-none text-foreground py-0.5 break-all"
-                />
-                <button onClick={handleSave} className="text-plug-on hover:text-plug-on/80 transition-colors p-0.5 shrink-0 mt-0.5">
-                  <Check className="w-3.5 h-3.5" />
-                </button>
-              </>
+              <div className="flex-1 min-w-0 space-y-2">
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowLocPicker((v) => !v)}
+                    className="w-full flex items-center justify-between text-[11px] font-medium px-2 py-1 rounded border border-border bg-background text-foreground hover:bg-muted transition-colors"
+                  >
+                    <span className="truncate">📍 {editLocation || UNASSIGNED_LOCATION}</span>
+                    <ChevronDown className="w-3 h-3 shrink-0" />
+                  </button>
+                  {showLocPicker && (
+                    <div className="absolute z-10 left-0 right-0 mt-1 rounded-md border border-border bg-popover shadow-lg p-1 max-h-56 overflow-auto">
+                      <button
+                        type="button"
+                        onClick={() => { setEditLocation(UNASSIGNED_LOCATION); setShowLocPicker(false); }}
+                        className="w-full text-left text-[11px] px-2 py-1 rounded hover:bg-muted text-muted-foreground"
+                      >
+                        {UNASSIGNED_LOCATION} (지정 안함)
+                      </button>
+                      {locations.map((loc) => (
+                        <button
+                          key={loc}
+                          type="button"
+                          onClick={() => { setEditLocation(loc); setShowLocPicker(false); }}
+                          className={`w-full text-left text-[11px] px-2 py-1 rounded hover:bg-muted ${editLocation === loc ? "bg-muted font-semibold" : ""}`}
+                        >
+                          {loc}
+                        </button>
+                      ))}
+                      <div className="flex items-center gap-1 border-t border-border mt-1 pt-1">
+                        <input
+                          value={newLocInput}
+                          onChange={(e) => setNewLocInput(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddNewLoc(); } }}
+                          placeholder="새 장소 추가"
+                          className="flex-1 min-w-0 text-[11px] px-2 py-1 rounded bg-background border border-border outline-none focus:border-foreground/40"
+                        />
+                        <button type="button" onClick={handleAddNewLoc} className="text-[11px] px-2 py-1 rounded bg-primary text-primary-foreground hover:opacity-90">
+                          추가
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSave()}
+                    placeholder="이름/설명"
+                    autoFocus
+                    className="flex-1 min-w-0 text-sm font-semibold bg-transparent border-b border-foreground/20 outline-none text-foreground py-0.5 break-all"
+                  />
+                  <button onClick={handleSave} className="text-plug-on hover:text-plug-on/80 transition-colors p-0.5 shrink-0">
+                    <Check className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={() => { setEditing(false); setShowLocPicker(false); }} className="text-muted-foreground hover:text-foreground transition-colors p-0.5 shrink-0">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
             ) : (
               <>
-                <span className="text-sm font-semibold text-foreground break-all leading-snug">{name}</span>
-                <button onClick={() => { setEditValue(name); setEditing(true); }} className="text-muted-foreground hover:text-foreground transition-colors p-0.5 shrink-0 mt-0.5">
+                <div className="flex-1 min-w-0">
+                  {location && location !== UNASSIGNED_LOCATION && (
+                    <div className="text-[10px] font-medium text-muted-foreground mb-0.5">📍 {location}</div>
+                  )}
+                  <span className="text-sm font-semibold text-foreground break-all leading-snug">{name}</span>
+                </div>
+                <button onClick={() => { setEditName(name); setEditLocation(location); setEditing(true); }} className="text-muted-foreground hover:text-foreground transition-colors p-0.5 shrink-0 mt-0.5">
                   <Pencil className="w-3 h-3" />
                 </button>
               </>
