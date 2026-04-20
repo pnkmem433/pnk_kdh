@@ -45,7 +45,11 @@ const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
         offline ? "bg-yellow-400" : isOn ? "bg-plug-on" : "bg-plug-off/30"
       }`} />
 
-      {offline && (
+      {isLwtOffline ? (
+        <div className="absolute top-3 right-3 text-[10px] font-semibold text-destructive bg-destructive/15 px-2 py-0.5 rounded-full">
+          MQTT 연결 안됨
+        </div>
+      ) : offline && (
         <div className="absolute top-3 right-3 text-[10px] font-semibold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">
           오프라인
         </div>
