@@ -18,6 +18,8 @@ export interface PlugData {
   // Network (from tele STATE)
   ssid: string | null;
   ipAddress: string | null;
+  // LWT (Last Will & Testament) — Tasmota Online/Offline
+  lwt: "Online" | "Offline" | null;
   // Extra fields not explicitly handled
   extraFields: Record<string, unknown>;
 }
@@ -56,7 +58,7 @@ function makeDefaultPlug(uuid: string, name: string): PlugData {
   return {
     uuid, name, state: null, webserver: null, lastSeen: null, offline: false,
     energyAvailable: null, power: null, voltage: null, current: null, daily: null, total: null,
-    ssid: null, ipAddress: null, extraFields: {},
+    ssid: null, ipAddress: null, lwt: null, extraFields: {},
   };
 }
 
@@ -95,7 +97,7 @@ export function useMqttPlugs() {
     client.on("connect", () => {
       setConnectionStatus("connected");
       client.subscribe(
-        ["smart_plug/+/status", "smart_plug/+/metrics", "tele/+/STATE", "tele/+/SENSOR"],
+        ["smart_plug/+/status", "smart_plug/+/metrics", "tele/+/STATE", "tele/+/SENSOR", "tele/+/LWT"],
         (err) => { if (err) console.error("[MQTT] Subscribe error:", err); }
       );
     });
@@ -104,8 +106,25 @@ export function useMqttPlugs() {
 
     client.on("message", (topic, payload) => {
       const parts = topic.split("/");
+      const payloadStr = payload.toString();
+
+      // tele/tasmota_XXXXXX/LWT — plain text "Online" / "Offline"
+      if (parts[0] === "tele" && parts[2] === "LWT") {
+        const shortId = parts[1].replace("tasmota_", "");
+        const lwtVal = payloadStr === "Online" ? "Online" : "Offline";
+        setPlugs((prev) => {
+          const fullUuid = findUuidByShortId(shortId, prev);
+          if (!fullUuid) return prev;
+          return {
+            ...prev,
+            [fullUuid]: { ...prev[fullUuid], lwt: lwtVal },
+          };
+        });
+        return;
+      }
+
       let obj: Record<string, unknown>;
-      try { obj = JSON.parse(payload.toString()); } catch { return; }
+      try { obj = JSON.parse(payloadStr); } catch { return; }
 
       // smart_plug/{uuid}/status
       if (parts[0] === "smart_plug" && parts[2] === "status") {

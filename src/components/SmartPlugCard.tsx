@@ -22,11 +22,12 @@ interface Props {
 }
 
 const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
-  const { uuid, name, state, webserver, lastSeen, offline, ssid, ipAddress, extraFields } = plug;
+  const { uuid, name, state, webserver, lastSeen, offline, ssid, ipAddress, lwt, extraFields } = plug;
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(name);
   const [showExtra, setShowExtra] = useState(false);
   const isOn = state === "on";
+  const isLwtOffline = lwt === "Offline";
   const extraKeys = Object.keys(extraFields);
 
   const handleSave = () => {
@@ -110,6 +111,18 @@ const SmartPlugCard = ({ plug, onNameChange, onCommand }: Props) => {
             {webserver !== null && (
               <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
                 WEB {webserver}
+              </span>
+            )}
+            {lwt !== null && (
+              <span
+                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                  isLwtOffline
+                    ? "bg-destructive/15 text-destructive"
+                    : "bg-plug-on-bg text-plug-on"
+                }`}
+                title="MQTT LWT (Tasmota 연결 상태)"
+              >
+                MQTT {lwt === "Online" ? "ON" : "OFF"}
               </span>
             )}
           </div>
