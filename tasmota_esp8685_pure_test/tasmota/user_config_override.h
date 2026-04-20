@@ -24,6 +24,7 @@
 
 #undef WEB_PASSWORD
 #define WEB_PASSWORD      "pnks1111"
+
 // Default network values for the custom smart-plug test image.
 #undef STA_SSID1
 #define STA_SSID1         "CC-Retail"
@@ -47,6 +48,12 @@
 // tele/tasmota_xxxxxx/SENSOR by default.
 #undef MQTT_TOPIC
 #define MQTT_TOPIC        "tasmota_%06X"
+
+// Use the same readable unique name for AP mode and DHCP hostname.
+#ifdef WIFI_DEFAULT_HOSTNAME
+#undef WIFI_DEFAULT_HOSTNAME
+#endif
+#define WIFI_DEFAULT_HOSTNAME "Pnks-%06X"
 
 // Publish telemetry frequently enough to verify ENERGY payloads while testing.
 #undef TELE_PERIOD
