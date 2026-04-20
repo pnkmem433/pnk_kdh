@@ -26,7 +26,7 @@ export interface PlugData {
 
 type ConnectionStatus = "connected" | "reconnecting" | "disconnected";
 
-const BROKER_URL = "wss://newserver.pnklab.local/mqtt";
+const BROKER_URL = "wss://api.pnkslab.com/mqtt";
 const OFFLINE_THRESHOLD = 35_000;
 
 // Known fields we extract explicitly — everything else goes to extraFields
@@ -90,7 +90,7 @@ export function useMqttPlugs() {
   useEffect(() => {
     const client = mqtt.connect(BROKER_URL, {
       protocolVersion: 5, reconnectPeriod: 3000, connectTimeout: 10000,
-      username: "plugtest", password: "fcfc50kc35",
+      username: "pnks", password: "pnks1111",
     });
     clientRef.current = client;
 
