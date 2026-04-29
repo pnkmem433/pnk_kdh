@@ -97,7 +97,7 @@ export function useMqttPlugs() {
     client.on("connect", () => {
       setConnectionStatus("connected");
       client.subscribe(
-        ["smart_plug/+/status", "smart_plug/+/metrics", "tele/+/STATE", "tele/+/SENSOR", "tele/+/LWT"],
+        ["smart_plug/+/status", "smart_plug/+/metrics", "smart_plug/+/wifi", "tele/+/STATE", "tele/+/SENSOR", "tele/+/LWT"],
         (err) => { if (err) console.error("[MQTT] Subscribe error:", err); }
       );
     });
