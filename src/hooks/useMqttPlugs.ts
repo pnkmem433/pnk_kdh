@@ -178,6 +178,26 @@ export function useMqttPlugs() {
         return;
       }
 
+      // smart_plug/{uuid}/wifi — 자체제작 펌웨어 WiFi 정보
+      if (parts[0] === "smart_plug" && parts[2] === "wifi") {
+        const uuid = parts[1];
+        const wifi = obj.Wifi as Record<string, unknown> | undefined;
+        const ssid = typeof wifi?.SSId === "string" ? wifi.SSId : null;
+        setPlugs((prev) => {
+          const existing = prev[uuid] || makeDefaultPlug(uuid, getSavedName(uuid));
+          return {
+            ...prev,
+            [uuid]: {
+              ...existing,
+              ssid: ssid ?? existing.ssid,
+              lastSeen: Date.now(),
+              offline: false,
+            },
+          };
+        });
+        return;
+      }
+
       // tele/tasmota_XXXXXX/SENSOR
       if (parts[0] === "tele" && parts[2] === "SENSOR") {
         const shortId = parts[1].replace("tasmota_", "");
