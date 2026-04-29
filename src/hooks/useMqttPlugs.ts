@@ -130,6 +130,7 @@ export function useMqttPlugs() {
       if (parts[0] === "smart_plug" && parts[2] === "status") {
         const uuid = parts[1];
         const extra = extractExtra(obj, KNOWN_STATUS_FIELDS);
+        const hasWebserver = Object.prototype.hasOwnProperty.call(obj, "webserver");
         setPlugs((prev) => {
           const existing = prev[uuid] || makeDefaultPlug(uuid, getSavedName(uuid));
           return {
@@ -137,7 +138,9 @@ export function useMqttPlugs() {
             [uuid]: {
               ...existing,
               state: parseState(obj.state) ?? existing.state,
-              webserver: numOrNull(obj.webserver) ?? existing.webserver,
+              // If webserver key is absent → firmware is 자체제작, reset to null.
+              // If present → use its numeric value (or null if not numeric).
+              webserver: hasWebserver ? numOrNull(obj.webserver) : null,
               lastSeen: Date.now(),
               offline: false,
               extraFields: { ...existing.extraFields, ...extra },
@@ -151,6 +154,7 @@ export function useMqttPlugs() {
       if (parts[0] === "smart_plug" && parts[2] === "metrics") {
         const uuid = parts[1];
         const extra = extractExtra(obj, KNOWN_METRICS_FIELDS);
+        const hasWebserver = Object.prototype.hasOwnProperty.call(obj, "webserver");
         setPlugs((prev) => {
           const existing = prev[uuid] || makeDefaultPlug(uuid, getSavedName(uuid));
           return {
@@ -158,7 +162,7 @@ export function useMqttPlugs() {
             [uuid]: {
               ...existing,
               state: parseState(obj.state) ?? existing.state,
-              webserver: numOrNull(obj.webserver) ?? existing.webserver,
+              webserver: hasWebserver ? numOrNull(obj.webserver) : null,
               energyAvailable: typeof obj.energy_available === "boolean" ? obj.energy_available : existing.energyAvailable,
               power: numOrNull(obj.power) ?? existing.power,
               voltage: numOrNull(obj.voltage) ?? existing.voltage,
