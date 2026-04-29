@@ -27,7 +27,7 @@ interface Props {
 }
 
 const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChange, onAddLocation, onCommand }: Props) => {
-  const { uuid, name, state, webserver, lastSeen, offline, ssid, ipAddress, lwt, extraFields } = plug;
+  const { uuid, name, state, webserver, lastSeen, offline, ssid, ipAddress, extraFields } = plug;
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(name);
   const [editLocation, setEditLocation] = useState(location);
@@ -35,7 +35,10 @@ const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChan
   const [newLocInput, setNewLocInput] = useState("");
   const [showExtra, setShowExtra] = useState(false);
   const isOn = state === "on";
-  const isLwtOffline = lwt === "Offline";
+  // Firmware 자동 판별: webserver 필드가 MQTT로 오면 Tasmota, 없으면 자체제작
+  const isTasmota = webserver !== null;
+  // 자체제작 펌웨어는 WiFi가 하드코딩되어 있음 (MQTT로 SSID 안 옴)
+  const displaySsid = ssid ?? (isTasmota ? null : "CC-Retail");
   const extraKeys = Object.keys(extraFields);
 
   const handleSave = () => {
@@ -64,11 +67,7 @@ const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChan
         offline ? "bg-yellow-400" : isOn ? "bg-plug-on" : "bg-plug-off/30"
       }`} />
 
-      {isLwtOffline ? (
-        <div className="absolute top-3 right-3 text-[10px] font-semibold text-destructive bg-destructive/15 px-2 py-0.5 rounded-full">
-          MQTT 연결 안됨
-        </div>
-      ) : offline && (
+      {offline && (
         <div className="absolute top-3 right-3 text-[10px] font-semibold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">
           오프라인
         </div>
@@ -185,9 +184,13 @@ const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChan
                 {state === null ? "UNKNOWN" : isOn ? "ON" : "OFF"}
               </span>
             </div>
-            {webserver !== null && (
+            {isTasmota ? (
               <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
                 WEB {webserver}
+              </span>
+            ) : (
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                자체제작
               </span>
             )}
           </div>
@@ -219,11 +222,11 @@ const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChan
           </div>
 
           {/* Network info */}
-          {(ssid || ipAddress) && (
+          {(displaySsid || ipAddress) && (
             <div className="flex items-center gap-3 text-[10px] text-muted-foreground/70 mb-2 flex-wrap">
-              {ssid && (
+              {displaySsid && (
                 <div className="flex items-center gap-1">
-                  <Wifi className="w-3 h-3 shrink-0" /><span>{ssid}</span>
+                  <Wifi className="w-3 h-3 shrink-0" /><span>{displaySsid}</span>
                 </div>
               )}
               {ipAddress && (
