@@ -97,7 +97,7 @@ export function useMqttPlugs() {
     client.on("connect", () => {
       setConnectionStatus("connected");
       client.subscribe(
-        ["smart_plug/+/status", "smart_plug/+/metrics", "tele/+/STATE", "tele/+/SENSOR", "tele/+/LWT"],
+        ["smart_plug/+/status", "smart_plug/+/metrics", "smart_plug/+/wifi", "tele/+/STATE", "tele/+/SENSOR", "tele/+/LWT"],
         (err) => { if (err) console.error("[MQTT] Subscribe error:", err); }
       );
     });
@@ -172,6 +172,26 @@ export function useMqttPlugs() {
               lastSeen: Date.now(),
               offline: false,
               extraFields: { ...existing.extraFields, ...extra },
+            },
+          };
+        });
+        return;
+      }
+
+      // smart_plug/{uuid}/wifi — 자체제작 펌웨어 WiFi 정보
+      if (parts[0] === "smart_plug" && parts[2] === "wifi") {
+        const uuid = parts[1];
+        const wifi = obj.Wifi as Record<string, unknown> | undefined;
+        const ssid = typeof wifi?.SSId === "string" ? wifi.SSId : null;
+        setPlugs((prev) => {
+          const existing = prev[uuid] || makeDefaultPlug(uuid, getSavedName(uuid));
+          return {
+            ...prev,
+            [uuid]: {
+              ...existing,
+              ssid: ssid ?? existing.ssid,
+              lastSeen: Date.now(),
+              offline: false,
             },
           };
         });

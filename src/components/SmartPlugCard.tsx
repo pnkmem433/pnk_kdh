@@ -37,8 +37,8 @@ const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChan
   const isOn = state === "on";
   // Firmware 자동 판별: webserver 필드가 MQTT로 오면 Tasmota, 없으면 자체제작
   const isTasmota = webserver !== null;
-  // 자체제작 펌웨어는 WiFi가 하드코딩되어 있음 (MQTT로 SSID 안 옴)
-  const displaySsid = ssid ?? (isTasmota ? null : "CC-Retail");
+  // SSID는 펌웨어 종류와 무관하게 MQTT에서 수신한 값을 그대로 사용
+  const displaySsid = ssid;
   const extraKeys = Object.keys(extraFields);
 
   const handleSave = () => {
