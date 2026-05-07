@@ -36,6 +36,12 @@
 #endif
 #define APP_TIMEZONE      9
 
+// Use the same readable unique name for AP mode and DHCP hostname.
+#ifdef WIFI_DEFAULT_HOSTNAME
+#undef WIFI_DEFAULT_HOSTNAME
+#endif
+#define WIFI_DEFAULT_HOSTNAME "Pnks-%06X"
+
 #ifdef TELE_PERIOD
 #undef TELE_PERIOD
 #endif
