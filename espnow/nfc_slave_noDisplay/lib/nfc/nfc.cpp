@@ -62,7 +62,7 @@ NfcReader::NfcReader(const NfcConfig &config)
       _ss(config.pin.SS),
       _rst(config.pin.RST),
       _irq(config.pin.IRQ),
-      _rfid(config.pin.SS, config.pin.RST >= 0 ? config.pin.RST : 255), // MFRC522 라이브러리에서 255는 '미사용'을 의미함
+      _rfid(config.pin.SS, config.pin.RST),
       _task(config.task)
 {
   if (_settings.pollIntervalMs == 0)
@@ -76,23 +76,16 @@ NfcReader::NfcReader(const NfcConfig &config)
     _irqMode = false;
   }
 
-  if (_settings.miss > 0) {
+  if (_settings.miss >= 0)
     _removeTimeMs = static_cast<uint16_t>(_settings.miss > 65535 ? 65535 : _settings.miss);
-  } else if (_settings.miss == 0) {
-    // REMOVE 디바운싱: 순간적인 미인식으로 인한 거짓 REMOVE 패킷 전송을 막기 위해
-    // 설정이 0(즉시)이더라도 기본 500ms 대기 시간을 갖도록 강제 적용합니다.
-    _removeTimeMs = 500;
-  }
 }
 
 void NfcReader::begin()
 {
   pinMode(_ss, OUTPUT);
   digitalWrite(_ss, HIGH);
-  if (_rst >= 0) { // RST 핀이 -1이 아닐 때만 핀 모드 설정
-    pinMode(_rst, OUTPUT);
-    digitalWrite(_rst, HIGH);
-  }
+  pinMode(_rst, OUTPUT);
+  digitalWrite(_rst, HIGH);
   if (_irq >= 0) {
     pinMode(_irq, INPUT_PULLUP);
   }
@@ -184,8 +177,6 @@ uint8_t NfcReader::version() const { return _version; }
 bool NfcReader::hasError() const { return !_lastError.isEmpty(); }
 const String &NfcReader::lastError() const { return _lastError; }
 const String &NfcReader::lastUid() const { return _lastUid; }
-uint16_t NfcReader::pollIntervalMs() const { return _settings.pollIntervalMs; }
-uint16_t NfcReader::removeTimeMs() const { return _removeTimeMs; }
 
 void NfcReader::setEnabled(bool enabled)
 {
@@ -212,27 +203,27 @@ void NfcReader::taskThunk(void *context)
 
 void NfcReader::taskTick()
 {
-  const uint32_t now = millis();
-
   if (!_enabled)
   {
+    delay(5);
     return;
   }
   // 안테나 전환 직후 짧은 안정화 시간
-  if (now - _lastEnableMs < 40)
+  if (millis() - _lastEnableMs < 40)
   {
+    delay(5);
     return;
   }
-  if (now - _lastLogMs > LOG_INTERVAL_MS)
+  if (millis() - _lastLogMs > LOG_INTERVAL_MS)
   {
-    _lastLogMs = now;
+    _lastLogMs = millis();
   }
 
   if (!_ok)
   {
-    if (now - _lastCheckMs > 1000)
+    if (millis() - _lastCheckMs > 1000)
     {
-      _lastCheckMs = now;
+      _lastCheckMs = millis();
       reset();
       _ok = checkHardware();
       if (!_ok)
@@ -246,20 +237,28 @@ void NfcReader::taskTick()
         // 하드웨어 복구 시점에는 실제 카드 제거를 보장할 수 없으므로 onRemove 호출 안 함
       }
     }
+    delay(20);
     return;
   }
 
   bool irqAsserted = (_irq >= 0 && digitalRead(_irq) == LOW);
-  if (!irqAsserted && (now - _lastPollMs < _settings.pollIntervalMs))
+  bool readAllowed = (!_irqMode) || (_irqMode && irqAsserted);
+  if (!readAllowed)
   {
+    delay(5);
     return;
   }
-  _lastPollMs = now;
+  if (!irqAsserted && (millis() - _lastPollMs < _settings.pollIntervalMs))
+  {
+    delay(5);
+    return;
+  }
+  _lastPollMs = millis();
 
-  bool cardSeenThisTick = false;
   SpiLock lock;
   if (!lock.ok())
   {
+    delay(5);
     return;
   }
 
@@ -269,48 +268,49 @@ void NfcReader::taskTick()
   if (req != MFRC522::STATUS_OK)
   {
     if (_lastReqStatus != static_cast<uint8_t>(req))
+    {
+      _lastReqStatus = static_cast<uint8_t>(req);
+    }
+    if (_cardPresent)
+    {
+      if (_settings.miss >= 0)
       {
-        _lastReqStatus = static_cast<uint8_t>(req);
+        if (_removeTimeMs == 0 || (_lastSeenMs > 0 && (millis() - _lastSeenMs) >= _removeTimeMs))
+        {
+          _cardPresent = false;
+          _lastUid = "";
+          if (_onRemove)
+            _onRemove();
+        }
       }
+    }
     reinitIfNeeded();
-  }
-  else
-  {
-    cardSeenThisTick = true;
-    _cardPresent = true;
-    _missCount = 0;
-    _failCount = 0;
-    _lastReqStatus = static_cast<uint8_t>(req);
-    _lastSeenMs = now;
-
-    if (_rfid.PICC_ReadCardSerial())
-    {
-      const String uid = uidToHex(_rfid.uid.uidByte, _rfid.uid.size);
-      if (uid != _lastUid)
-      {
-        _lastUid = uid;
-        if (_onRead)
-          _onRead(uid);
-      }
-    }
-    else
-    {
-      reinitIfNeeded();
-    }
+    delay(5);
+    return;
   }
 
-  if (!cardSeenThisTick && _cardPresent && _settings.miss >= 0)
+  _cardPresent = true;
+  _missCount = 0;
+  _failCount = 0;
+  // 카드가 감지되면 존재 시간 갱신 (UID 읽기 실패 시에도 유지)
+  _lastSeenMs = millis();
+
+  if (!_rfid.PICC_ReadCardSerial())
   {
-    const bool removeExpired =
-        (_removeTimeMs == 0) || (_lastSeenMs > 0 && (now - _lastSeenMs) >= _removeTimeMs);
-    if (removeExpired)
-    {
-      _cardPresent = false;
-      _lastUid = "";
-      if (_onRemove)
-        _onRemove();
-    }
+    reinitIfNeeded();
+    delay(5);
+    return;
   }
+
+  String uid = uidToHex(_rfid.uid.uidByte, _rfid.uid.size);
+  if (uid != _lastUid)
+  {
+    _lastUid = uid;
+    if (_onRead)
+      _onRead(uid);
+  }
+
+  delay(5);
 }
 
 String NfcReader::uidToHex(const uint8_t *uid, uint8_t uidLength)

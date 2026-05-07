@@ -12,7 +12,7 @@ struct NfcPins
   uint8_t MISO;
   uint8_t MOSI;
   uint8_t SS;
-  int8_t RST; // 음수(-1)를 허용하기 위해 int8_t로 변경
+  uint8_t RST;
   int8_t IRQ; // optional, active LOW
 };
 
@@ -55,18 +55,11 @@ public:
   uint8_t version() const;
   bool hasError() const;
   const String &lastError() const;
-  void setEnabled(bool enabled);
-  const String &lastUid() const;
-  uint16_t pollIntervalMs() const;
-  uint16_t removeTimeMs() const;
 
 private:
   NfcConfig::NfcSettings _settings;
   uint16_t _removeTimeMs = 0;
   bool _irqMode = false;
-  bool _enabled = true;
-  uint32_t _lastEnableMs = 0;
-  uint32_t _suppressRemoveUntil = 0;
   static void taskThunk(void *context);
   void taskTick();
   bool checkHardware();
@@ -77,7 +70,7 @@ private:
   uint8_t _miso;
   uint8_t _mosi;
   uint8_t _ss;
-  int8_t _rst; // 음수(-1)를 허용하기 위해 int8_t로 변경
+  uint8_t _rst;
   int8_t _irq = -1;
 
   MFRC522 _rfid;

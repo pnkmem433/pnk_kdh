@@ -2,10 +2,12 @@
 #include <TaskRunner.h>
 #include <nfc.h>
 
+#include "../../common/ExperimentConfig.h"
+
 TaskRunner nfcTask({
   .name = "nfc_loop",
   .stackSize = 8192,
-  .priority = 1,  
+  .priority = 1,
   .core = -1,
 });
 
@@ -34,10 +36,10 @@ NfcReader nfcReader({
   },
   .task = &nfcTask,
   .settings = {
-    .miss = 500,
+    .miss = ExperimentConfig::kRemoveTimeMs,
     .irqMode = false,
-    .pollIntervalMs = 25,
-    .reinitMisses = 8,
+    .pollIntervalMs = ExperimentConfig::kNfcPollIntervalMs,
+    .reinitMisses = ExperimentConfig::kNfcReinitMisses,
   },
 });
 
@@ -47,15 +49,15 @@ NfcReader nfcReader2({
     .MISO = D9,
     .MOSI = D10,
     .SS = D4,
-    .RST = D2,
+    .RST = -1,
     .IRQ = -1,
   },
   .task = &nfcTask2,
   .settings = {
-    .miss = 500,
+    .miss = ExperimentConfig::kRemoveTimeMs,
     .irqMode = false,
-    .pollIntervalMs = 25,
-    .reinitMisses = 8,
+    .pollIntervalMs = ExperimentConfig::kNfcPollIntervalMs,
+    .reinitMisses = ExperimentConfig::kNfcReinitMisses,
   },
 });
 
