@@ -289,7 +289,7 @@ export function useMqttPlugs() {
     if (!client || !client.connected) return false;
     const shortId = uuid.slice(-6).toUpperCase();
     const url = kind === "tasmota"
-      ? "http://gym907-0001.iptime.org/ota/tasmota/tasmota_light/esp02s_tasmota_light.bin"
+      ? "http://gym907-0001.iptime.org/ota/tasmota/tasmota_light/esp02s_tasmota_light.bin.gz"
       : "http://gym907-0001.iptime.org/ota/tasmota/custom/esp02s_custom.bin";
     const payload = `OtaUrl ${url}; Upgrade 1`;
     client.publish(`cmnd/tasmota_${shortId}/Backlog`, payload);
