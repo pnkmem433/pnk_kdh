@@ -24,9 +24,10 @@ interface Props {
   onLocationChange: (uuid: string, location: string) => void;
   onAddLocation: (name: string) => void;
   onCommand: (uuid: string, cmd: "on" | "off") => void;
+  onOta: (uuid: string, kind: "tasmota" | "custom") => boolean;
 }
 
-const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChange, onAddLocation, onCommand }: Props) => {
+const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChange, onAddLocation, onCommand, onOta }: Props) => {
   const { uuid, name, state, webserver, lastSeen, offline, ssid, ipAddress, extraFields } = plug;
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(name);
