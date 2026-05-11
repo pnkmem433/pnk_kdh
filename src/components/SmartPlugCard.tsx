@@ -222,7 +222,7 @@ const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChan
             </button>
           </div>
 
-          {/* OTA buttons */}
+          {/* OTA buttons — Tasmota 펌웨어에서만 사용 가능 */}
           <div className="flex gap-2 mb-3">
             <button
               onClick={() => {
@@ -232,9 +232,9 @@ const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChan
                      : toast.error("MQTT 연결되지 않음");
                 });
               }}
-              disabled={offline}
+              disabled={offline || !isTasmota}
+              title={!isTasmota ? "자체제작 펌웨어에서는 사용 불가 (Tasmota 전용)" : "cmnd/tasmota_XXXXXX/Backlog → tasmota_light bin"}
               className="flex-1 py-1.5 rounded-lg text-[10px] font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              title="cmnd/tasmota_XXXXXX/Backlog → tasmota_light bin"
             >
               ⬆ Tasmota OTA
             </button>
@@ -246,13 +246,18 @@ const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChan
                      : toast.error("MQTT 연결되지 않음");
                 });
               }}
-              disabled={offline}
+              disabled={offline || !isTasmota}
+              title={!isTasmota ? "자체제작 펌웨어에서는 사용 불가 (Tasmota 전용)" : "cmnd/tasmota_XXXXXX/Backlog → custom bin"}
               className="flex-1 py-1.5 rounded-lg text-[10px] font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              title="cmnd/tasmota_XXXXXX/Backlog → custom bin"
             >
               ⬆ Custom OTA
             </button>
           </div>
+          {!isTasmota && (
+            <p className="text-[10px] text-muted-foreground/70 -mt-1 mb-2 italic">
+              OTA는 Tasmota 펌웨어에서만 가능합니다
+            </p>
+          )}
 
           {/* Network info */}
           {(displaySsid || ipAddress) && (
