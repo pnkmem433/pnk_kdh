@@ -24,9 +24,10 @@ interface Props {
   onLocationChange: (uuid: string, location: string) => void;
   onAddLocation: (name: string) => void;
   onCommand: (uuid: string, cmd: "on" | "off") => void;
+  onOta: (uuid: string, kind: "tasmota" | "custom") => boolean;
 }
 
-const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChange, onAddLocation, onCommand }: Props) => {
+const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChange, onAddLocation, onCommand, onOta }: Props) => {
   const { uuid, name, state, webserver, lastSeen, offline, ssid, ipAddress, extraFields } = plug;
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(name);
@@ -218,6 +219,38 @@ const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChan
               } disabled:opacity-40 disabled:cursor-not-allowed`}
             >
               OFF
+            </button>
+          </div>
+
+          {/* OTA buttons */}
+          <div className="flex gap-2 mb-3">
+            <button
+              onClick={() => {
+                const ok = onOta(uuid, "tasmota");
+                import("sonner").then(({ toast }) => {
+                  ok ? toast.success(`타스모타 OTA 전송: ${uuid.slice(-6).toUpperCase()}`)
+                     : toast.error("MQTT 연결되지 않음");
+                });
+              }}
+              disabled={offline}
+              className="flex-1 py-1.5 rounded-lg text-[10px] font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              title="cmnd/tasmota_XXXXXX/Backlog → tasmota_light bin"
+            >
+              ⬆ Tasmota OTA
+            </button>
+            <button
+              onClick={() => {
+                const ok = onOta(uuid, "custom");
+                import("sonner").then(({ toast }) => {
+                  ok ? toast.success(`자체제작 OTA 전송: ${uuid.slice(-6).toUpperCase()}`)
+                     : toast.error("MQTT 연결되지 않음");
+                });
+              }}
+              disabled={offline}
+              className="flex-1 py-1.5 rounded-lg text-[10px] font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              title="cmnd/tasmota_XXXXXX/Backlog → custom bin"
+            >
+              ⬆ Custom OTA
             </button>
           </div>
 

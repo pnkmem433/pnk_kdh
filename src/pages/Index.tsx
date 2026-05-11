@@ -11,7 +11,7 @@ const statusConfig = {
 } as const;
 
 const Index = () => {
-  const { plugs, updateName, sendCommand, connectionStatus } = useMqttPlugs();
+  const { plugs, updateName, sendCommand, sendOta, connectionStatus } = useMqttPlugs();
   const { locations, plugLocations, addLocation, removeLocation, setPlugLocation } = useLocations();
   const status = statusConfig[connectionStatus];
   const [showAddLoc, setShowAddLoc] = useState(false);
@@ -139,6 +139,7 @@ const Index = () => {
                         onLocationChange={setPlugLocation}
                         onAddLocation={addLocation}
                         onCommand={sendCommand}
+                        onOta={sendOta}
                       />
                     ))}
                   </div>
