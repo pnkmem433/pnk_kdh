@@ -139,6 +139,7 @@ const Index = () => {
                         onLocationChange={setPlugLocation}
                         onAddLocation={addLocation}
                         onCommand={sendCommand}
+                        onOta={sendOta}
                       />
                     ))}
                   </div>
