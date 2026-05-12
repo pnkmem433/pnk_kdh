@@ -280,9 +280,11 @@ export function useMqttPlugs() {
         const wifi = obj.Wifi as Record<string, unknown> | undefined;
         const ssid = typeof wifi?.SSId === "string" ? wifi.SSId : null;
         const ip = typeof obj.IPAddress === "string" ? (obj.IPAddress as string) : null;
+        let needStatusReq = false;
         setPlugs((prev) => {
           const fullUuid = findUuidByShortId(shortId, prev);
           if (!fullUuid) return prev;
+          if (!prev[fullUuid].module) needStatusReq = true;
           return {
             ...prev,
             [fullUuid]: {
@@ -294,6 +296,10 @@ export function useMqttPlugs() {
             },
           };
         });
+        // Module이 아직 없으면 Status 2 요청 → stat/.../STATUS2 응답으로 Hardware 수신
+        if (needStatusReq && client.connected) {
+          client.publish(`cmnd/tasmota_${shortId}/Status`, "2");
+        }
       }
     });
 
