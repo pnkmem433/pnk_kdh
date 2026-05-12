@@ -317,13 +317,22 @@ export function useMqttPlugs() {
     }
   }, []);
 
+  const plugsRef = useRef<Record<string, PlugData>>({});
+  useEffect(() => { plugsRef.current = plugs; }, [plugs]);
+
   const sendOta = useCallback((uuid: string, kind: "tasmota" | "custom"): boolean => {
     const client = clientRef.current;
     if (!client || !client.connected) return false;
     const shortId = uuid.slice(-6).toUpperCase();
+    // Module 판별: tele INFO1에서 가져온 module 값 (esp02s, ESP32C3, esp8685 ...)
+    const mod = (plugsRef.current[uuid]?.module || "").toLowerCase();
+    // ESP32-C3 / ESP8685 계열 → esp8685 폴더, 그 외(기본 esp02s/ESP8285) → esp02s 폴더
+    const family = mod.includes("8685") || mod.includes("32c3") || mod.includes("esp32c3")
+      ? "esp8685"
+      : "esp02s";
     const url = kind === "tasmota"
-      ? "http://gym907-0001.iptime.org/ota/tasmota/tasmota_light/esp02s_tasmota_light.bin.gz"
-      : "http://gym907-0001.iptime.org/ota/tasmota/custom/esp02s_custom.bin";
+      ? `http://gym907-0001.iptime.org/ota/tasmota/${family}/lite/${family}_lite.bin`
+      : `http://gym907-0001.iptime.org/ota/tasmota/${family}/custom/${family}_custom.bin`;
     const payload = `OtaUrl ${url}; Upgrade 1`;
     client.publish(`cmnd/tasmota_${shortId}/Backlog`, payload);
     return true;
