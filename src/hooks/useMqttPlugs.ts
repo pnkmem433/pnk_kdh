@@ -145,6 +145,24 @@ export function useMqttPlugs() {
         return;
       }
 
+      // stat/tasmota_XXXXXX/STATUS2 — response to "Status 2", contains Hardware
+      // {"StatusFWR":{"Version":"15.3.0.3(lite)","Hardware":"ESP32-C3", ...}}
+      if (parts[0] === "stat" && parts[2] === "STATUS2") {
+        const shortId = parts[1].replace("tasmota_", "");
+        const fwr = obj.StatusFWR as Record<string, unknown> | undefined;
+        const hw = typeof fwr?.Hardware === "string" ? (fwr.Hardware as string) : null;
+        if (!hw) return;
+        setPlugs((prev) => {
+          const fullUuid = findUuidByShortId(shortId, prev);
+          if (!fullUuid) return prev;
+          return {
+            ...prev,
+            [fullUuid]: { ...prev[fullUuid], module: hw },
+          };
+        });
+        return;
+      }
+
       // smart_plug/{uuid}/status
       if (parts[0] === "smart_plug" && parts[2] === "status") {
         const uuid = parts[1];
