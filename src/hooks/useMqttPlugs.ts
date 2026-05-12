@@ -179,17 +179,31 @@ export function useMqttPlugs() {
       }
 
       // smart_plug/{uuid}/wifi — 자체제작 펌웨어 WiFi 정보
+      // 두 가지 형식 지원:
+      // 1) {"Wifi":{"SSID":"...","SSId":"...","BSSId":"...",...}}
+      // 2) {"configuredSsid":"...","currentSsid":"...","connected":true,"localIp":"192.168.1.168"}
       if (parts[0] === "smart_plug" && parts[2] === "wifi") {
         const uuid = parts[1];
         const wifi = obj.Wifi as Record<string, unknown> | undefined;
-        const ssid = typeof wifi?.SSId === "string" ? wifi.SSId : null;
+        const ssid =
+          (typeof wifi?.SSID === "string" && wifi.SSID) ||
+          (typeof wifi?.SSId === "string" && wifi.SSId) ||
+          (typeof obj.currentSsid === "string" && obj.currentSsid) ||
+          (typeof obj.configuredSsid === "string" && obj.configuredSsid) ||
+          null;
+        const ip =
+          (typeof obj.localIp === "string" && obj.localIp) ||
+          (typeof obj.ip === "string" && obj.ip) ||
+          (typeof wifi?.IPAddress === "string" && (wifi.IPAddress as string)) ||
+          null;
         setPlugs((prev) => {
           const existing = prev[uuid] || makeDefaultPlug(uuid, getSavedName(uuid));
           return {
             ...prev,
             [uuid]: {
               ...existing,
-              ssid: ssid ?? existing.ssid,
+              ssid: ssid || existing.ssid,
+              ipAddress: ip || existing.ipAddress,
               lastSeen: Date.now(),
               offline: false,
             },
