@@ -349,9 +349,9 @@ export function useMqttPlugs() {
     if (!client || !client.connected) return false;
     const shortId = uuid.slice(-6).toUpperCase();
     // Module 판별: tele INFO1에서 가져온 module 값 (esp02s, ESP32C3, esp8685 ...)
-    const mod = (plugsRef.current[uuid]?.module || "").toLowerCase();
+    const mod = (plugsRef.current[uuid]?.module || "").toLowerCase().replace(/[-_\s]/g, "");
     // ESP32-C3 / ESP8685 계열 → esp8685 폴더, 그 외(기본 esp02s/ESP8285) → esp02s 폴더
-    const family = mod.includes("8685") || mod.includes("32c3") || mod.includes("esp32c3")
+    const family = mod.includes("8685") || mod.includes("32c3")
       ? "esp8685"
       : "esp02s";
     const url = kind === "tasmota"
