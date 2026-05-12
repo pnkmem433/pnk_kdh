@@ -20,6 +20,8 @@ export interface PlugData {
   ipAddress: string | null;
   // LWT (Last Will & Testament) — Tasmota Online/Offline
   lwt: "Online" | "Offline" | null;
+  // Module type from tele INFO1 (e.g. "esp02s", "esp8685", "ESP32C3")
+  module: string | null;
   // Extra fields not explicitly handled
   extraFields: Record<string, unknown>;
 }
@@ -58,7 +60,7 @@ function makeDefaultPlug(uuid: string, name: string): PlugData {
   return {
     uuid, name, state: null, webserver: null, lastSeen: null, offline: false,
     energyAvailable: null, power: null, voltage: null, current: null, daily: null, total: null,
-    ssid: null, ipAddress: null, lwt: null, extraFields: {},
+    ssid: null, ipAddress: null, lwt: null, module: null, extraFields: {},
   };
 }
 
@@ -97,7 +99,7 @@ export function useMqttPlugs() {
     client.on("connect", () => {
       setConnectionStatus("connected");
       client.subscribe(
-        ["smart_plug/+/status", "smart_plug/+/metrics", "smart_plug/+/wifi", "tele/+/STATE", "tele/+/SENSOR", "tele/+/LWT"],
+        ["smart_plug/+/status", "smart_plug/+/metrics", "smart_plug/+/wifi", "tele/+/STATE", "tele/+/SENSOR", "tele/+/LWT", "tele/+/INFO1"],
         (err) => { if (err) console.error("[MQTT] Subscribe error:", err); }
       );
     });
@@ -125,6 +127,23 @@ export function useMqttPlugs() {
 
       let obj: Record<string, unknown>;
       try { obj = JSON.parse(payloadStr); } catch { return; }
+
+      // tele/tasmota_XXXXXX/INFO1 — extract Module (esp02s, ESP32C3, esp8685, ...)
+      if (parts[0] === "tele" && parts[2] === "INFO1") {
+        const shortId = parts[1].replace("tasmota_", "");
+        const info1 = obj.Info1 as Record<string, unknown> | undefined;
+        const moduleVal = typeof info1?.Module === "string" ? (info1.Module as string) : null;
+        if (!moduleVal) return;
+        setPlugs((prev) => {
+          const fullUuid = findUuidByShortId(shortId, prev);
+          if (!fullUuid) return prev;
+          return {
+            ...prev,
+            [fullUuid]: { ...prev[fullUuid], module: moduleVal },
+          };
+        });
+        return;
+      }
 
       // smart_plug/{uuid}/status
       if (parts[0] === "smart_plug" && parts[2] === "status") {
@@ -298,13 +317,22 @@ export function useMqttPlugs() {
     }
   }, []);
 
+  const plugsRef = useRef<Record<string, PlugData>>({});
+  useEffect(() => { plugsRef.current = plugs; }, [plugs]);
+
   const sendOta = useCallback((uuid: string, kind: "tasmota" | "custom"): boolean => {
     const client = clientRef.current;
     if (!client || !client.connected) return false;
     const shortId = uuid.slice(-6).toUpperCase();
+    // Module 판별: tele INFO1에서 가져온 module 값 (esp02s, ESP32C3, esp8685 ...)
+    const mod = (plugsRef.current[uuid]?.module || "").toLowerCase();
+    // ESP32-C3 / ESP8685 계열 → esp8685 폴더, 그 외(기본 esp02s/ESP8285) → esp02s 폴더
+    const family = mod.includes("8685") || mod.includes("32c3") || mod.includes("esp32c3")
+      ? "esp8685"
+      : "esp02s";
     const url = kind === "tasmota"
-      ? "http://gym907-0001.iptime.org/ota/tasmota/tasmota_light/esp02s_tasmota_light.bin.gz"
-      : "http://gym907-0001.iptime.org/ota/tasmota/custom/esp02s_custom.bin";
+      ? `http://gym907-0001.iptime.org/ota/tasmota/${family}/lite/${family}_lite.bin`
+      : `http://gym907-0001.iptime.org/ota/tasmota/${family}/custom/${family}_custom.bin`;
     const payload = `OtaUrl ${url}; Upgrade 1`;
     client.publish(`cmnd/tasmota_${shortId}/Backlog`, payload);
     return true;
