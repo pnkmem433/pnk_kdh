@@ -128,6 +128,23 @@ export function useMqttPlugs() {
       let obj: Record<string, unknown>;
       try { obj = JSON.parse(payloadStr); } catch { return; }
 
+      // tele/tasmota_XXXXXX/INFO1 — extract Module (esp02s, ESP32C3, esp8685, ...)
+      if (parts[0] === "tele" && parts[2] === "INFO1") {
+        const shortId = parts[1].replace("tasmota_", "");
+        const info1 = obj.Info1 as Record<string, unknown> | undefined;
+        const moduleVal = typeof info1?.Module === "string" ? (info1.Module as string) : null;
+        if (!moduleVal) return;
+        setPlugs((prev) => {
+          const fullUuid = findUuidByShortId(shortId, prev);
+          if (!fullUuid) return prev;
+          return {
+            ...prev,
+            [fullUuid]: { ...prev[fullUuid], module: moduleVal },
+          };
+        });
+        return;
+      }
+
       // smart_plug/{uuid}/status
       if (parts[0] === "smart_plug" && parts[2] === "status") {
         const uuid = parts[1];
