@@ -20,6 +20,8 @@ export interface PlugData {
   ipAddress: string | null;
   // LWT (Last Will & Testament) — Tasmota Online/Offline
   lwt: "Online" | "Offline" | null;
+  // Module type from tele INFO1 (e.g. "esp02s", "esp8685", "ESP32C3")
+  module: string | null;
   // Extra fields not explicitly handled
   extraFields: Record<string, unknown>;
 }
