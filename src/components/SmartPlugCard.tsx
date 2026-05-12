@@ -248,7 +248,7 @@ const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChan
               }}
               disabled={offline || !isTasmota}
               title={!isTasmota ? "자체제작 펌웨어에서는 사용 불가 (Tasmota 전용)" : "cmnd/tasmota_XXXXXX/Backlog → custom bin"}
-              className="flex-1 py-1.5 rounded-lg text-[10px] font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-1 py-1.5 rounded-lg text-[10px] font-semibold bg-muted text-muted-foreground hover:bg-muted/70 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               ⬆ Custom OTA
             </button>
