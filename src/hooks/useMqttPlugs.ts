@@ -99,7 +99,7 @@ export function useMqttPlugs() {
     client.on("connect", () => {
       setConnectionStatus("connected");
       client.subscribe(
-        ["smart_plug/+/status", "smart_plug/+/metrics", "smart_plug/+/wifi", "tele/+/STATE", "tele/+/SENSOR", "tele/+/LWT", "tele/+/INFO1"],
+        ["smart_plug/+/status", "smart_plug/+/metrics", "smart_plug/+/wifi", "tele/+/STATE", "tele/+/SENSOR", "tele/+/LWT", "tele/+/INFO1", "stat/+/STATUS2"],
         (err) => { if (err) console.error("[MQTT] Subscribe error:", err); }
       );
     });
@@ -140,6 +140,24 @@ export function useMqttPlugs() {
           return {
             ...prev,
             [fullUuid]: { ...prev[fullUuid], module: moduleVal },
+          };
+        });
+        return;
+      }
+
+      // stat/tasmota_XXXXXX/STATUS2 — response to "Status 2", contains Hardware
+      // {"StatusFWR":{"Version":"15.3.0.3(lite)","Hardware":"ESP32-C3", ...}}
+      if (parts[0] === "stat" && parts[2] === "STATUS2") {
+        const shortId = parts[1].replace("tasmota_", "");
+        const fwr = obj.StatusFWR as Record<string, unknown> | undefined;
+        const hw = typeof fwr?.Hardware === "string" ? (fwr.Hardware as string) : null;
+        if (!hw) return;
+        setPlugs((prev) => {
+          const fullUuid = findUuidByShortId(shortId, prev);
+          if (!fullUuid) return prev;
+          return {
+            ...prev,
+            [fullUuid]: { ...prev[fullUuid], module: hw },
           };
         });
         return;
@@ -262,9 +280,11 @@ export function useMqttPlugs() {
         const wifi = obj.Wifi as Record<string, unknown> | undefined;
         const ssid = typeof wifi?.SSId === "string" ? wifi.SSId : null;
         const ip = typeof obj.IPAddress === "string" ? (obj.IPAddress as string) : null;
+        let needStatusReq = false;
         setPlugs((prev) => {
           const fullUuid = findUuidByShortId(shortId, prev);
           if (!fullUuid) return prev;
+          if (!prev[fullUuid].module) needStatusReq = true;
           return {
             ...prev,
             [fullUuid]: {
@@ -276,6 +296,10 @@ export function useMqttPlugs() {
             },
           };
         });
+        // Module이 아직 없으면 Status 2 요청 → stat/.../STATUS2 응답으로 Hardware 수신
+        if (needStatusReq && client.connected) {
+          client.publish(`cmnd/tasmota_${shortId}/Status`, "2");
+        }
       }
     });
 
@@ -325,9 +349,9 @@ export function useMqttPlugs() {
     if (!client || !client.connected) return false;
     const shortId = uuid.slice(-6).toUpperCase();
     // Module 판별: tele INFO1에서 가져온 module 값 (esp02s, ESP32C3, esp8685 ...)
-    const mod = (plugsRef.current[uuid]?.module || "").toLowerCase();
+    const mod = (plugsRef.current[uuid]?.module || "").toLowerCase().replace(/[-_\s]/g, "");
     // ESP32-C3 / ESP8685 계열 → esp8685 폴더, 그 외(기본 esp02s/ESP8285) → esp02s 폴더
-    const family = mod.includes("8685") || mod.includes("32c3") || mod.includes("esp32c3")
+    const family = mod.includes("8685") || mod.includes("32c3")
       ? "esp8685"
       : "esp02s";
     const url = kind === "tasmota"
