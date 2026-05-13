@@ -357,10 +357,10 @@ export function useMqttPlugs() {
     const url = kind === "tasmota"
       ? (family === "esp02s"
           ? `http://gym907-0001.iptime.org/ota/tasmota/esp02s/lite/esp02s_tasmota_lite.bin.gz`
-          : `http://gym907-0001.iptime.org/ota/tasmota/${family}/lite/${family}_lite.bin`)
+          : `http://gym907-0001.iptime.org/ota/tasmota/esp8685/lite/esp8685_tasmota_lite.bin`)
       : (family === "esp02s"
           ? `http://gym907-0001.iptime.org/ota/tasmota/esp02s/custom/esp02s_custom.bin.gz`
-          : `http://gym907-0001.iptime.org/ota/tasmota/${family}/custom/${family}_custom.bin`);
+          : `http://gym907-0001.iptime.org/ota/tasmota/esp8685/custom/esp8685_custom.bin`);
     const payload = `OtaUrl ${url}; Upgrade 1`;
     client.publish(`cmnd/tasmota_${shortId}/Backlog`, payload);
     return true;
