@@ -186,8 +186,8 @@ const SmartPlugCard = ({ plug, location, locations, onNameChange, onLocationChan
               </span>
             </div>
             {isTasmota ? (
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
-                WEB {webserver}
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-plug-on-bg text-plug-on">
+                타스모타
               </span>
             ) : (
               <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
