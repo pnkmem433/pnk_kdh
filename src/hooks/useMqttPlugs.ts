@@ -162,6 +162,28 @@ export function useMqttPlugs() {
         });
         return;
       }
+      // tasmota/discovery/{MAC}/config — contains "md":"ESP32C3" / "dn":"esp8685" etc.
+      if (parts[0] === "tasmota" && parts[1] === "discovery" && parts[3] === "config") {
+        const mac = parts[2].toUpperCase();
+        const moduleVal =
+          (typeof obj.md === "string" && obj.md) ||
+          (typeof obj.dn === "string" && obj.dn) ||
+          null;
+        if (!moduleVal) return;
+        setPlugs((prev) => {
+          // MAC in discovery topic equals the full plug uuid
+          const existing = prev[mac];
+          if (!existing) {
+            // Also try matching by short suffix in case uuid casing differs
+            const fullUuid = findUuidByShortId(mac.slice(-6), prev);
+            if (!fullUuid) return prev;
+            return { ...prev, [fullUuid]: { ...prev[fullUuid], module: moduleVal } };
+          }
+          return { ...prev, [mac]: { ...existing, module: moduleVal } };
+        });
+        return;
+      }
+
 
       // smart_plug/{uuid}/status
       if (parts[0] === "smart_plug" && parts[2] === "status") {
