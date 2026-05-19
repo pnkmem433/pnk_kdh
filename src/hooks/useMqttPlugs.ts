@@ -99,7 +99,7 @@ export function useMqttPlugs() {
     client.on("connect", () => {
       setConnectionStatus("connected");
       client.subscribe(
-        ["smart_plug/+/status", "smart_plug/+/metrics", "smart_plug/+/wifi", "tele/+/STATE", "tele/+/SENSOR", "tele/+/LWT", "tele/+/INFO1", "stat/+/STATUS2"],
+        ["smart_plug/+/status", "smart_plug/+/metrics", "smart_plug/+/wifi", "tele/+/STATE", "tele/+/SENSOR", "tele/+/LWT", "tele/+/INFO1", "stat/+/STATUS2", "tasmota/discovery/+/config"],
         (err) => { if (err) console.error("[MQTT] Subscribe error:", err); }
       );
     });
