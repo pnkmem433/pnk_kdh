@@ -1,0 +1,521 @@
+﻿<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OTA 관리 미니 대시보드</title>
+    <style>
+      :root {
+        --bg: #0b1120;
+        --panel: #161f3d;
+        --panel-2: #111935;
+        --line: #2d3b73;
+        --line-soft: #243261;
+        --text: #f7f9ff;
+        --muted: #a5b2d8;
+        --muted-2: #7f8bb4;
+        --primary: #4d86f7;
+        --primary-2: #3b73df;
+        --green: #63e6a6;
+        --red: #ff4a4a;
+        --chip: #22305e;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: linear-gradient(180deg, #09101f 0%, #0d1224 100%);
+        color: var(--text);
+        font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+      }
+
+      .page {
+        max-width: 1360px;
+        margin: 0 auto;
+        padding: 24px 26px 40px;
+      }
+
+      .eyebrow {
+        color: #8cb0ff;
+        font-size: 0.92rem;
+        letter-spacing: 0.04em;
+        margin-bottom: 4px;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 3rem;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+      }
+
+      .base-url {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 1rem;
+      }
+
+      .top-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .pill, .small-btn {
+        border: 1px solid var(--line-soft);
+        background: #18234a;
+        color: var(--text);
+        border-radius: 16px;
+        padding: 12px 16px;
+        font-weight: 700;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .check {
+        width: 18px;
+        height: 18px;
+        border-radius: 5px;
+        background: #29b66f;
+        display: inline-grid;
+        place-items: center;
+        font-size: 0.85rem;
+      }
+
+      .section-head {
+        margin-top: 34px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .section-title {
+        margin: 0;
+        font-size: 2.05rem;
+      }
+
+      .section-sub {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .back-btn {
+        border: 0;
+        background: #25356d;
+        color: white;
+        border-radius: 14px;
+        padding: 13px 18px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .card {
+        margin-top: 18px;
+        background: rgba(24, 33, 67, 0.92);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 16px;
+      }
+
+      .card-title {
+        margin: 0 0 12px;
+        font-size: 2rem;
+      }
+
+      .table-wrap {
+        border: 1px solid #34509a;
+        border-radius: 16px;
+        overflow: hidden;
+        background: rgba(14, 23, 51, 0.55);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      thead th {
+        text-align: left;
+        padding: 18px 14px;
+        font-size: 0.95rem;
+        color: white;
+        background: rgba(13, 22, 47, 0.45);
+        border-bottom: 1px solid var(--line-soft);
+      }
+
+      tbody td {
+        padding: 18px 14px;
+        font-size: 0.95rem;
+        color: #f6f8ff;
+        border-bottom: 1px solid rgba(71, 93, 157, 0.65);
+      }
+
+      tbody tr:last-child td { border-bottom: 0; }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 88px;
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: var(--chip);
+        color: #dce6ff;
+        font-size: 0.83rem;
+        font-weight: 700;
+      }
+
+      .status-dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, #9ff4c9 0%, #5ddc97 55%, #2aac6d 100%);
+        box-shadow: 0 0 12px rgba(99, 230, 166, 0.45);
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 18px;
+        padding: 34px 0 18px;
+        color: var(--muted-2);
+        font-weight: 700;
+      }
+
+      .pagination .active { color: #53df7d; }
+
+      .footer-note {
+        margin-top: 16px;
+        color: var(--muted-2);
+        font-size: 0.93rem;
+      }
+
+      .floating-actions {
+        position: fixed;
+        right: 18px;
+        bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 180px;
+      }
+
+      .float-btn {
+        height: 48px;
+        border: 0;
+        border-radius: 14px;
+        color: white;
+        font-size: 0.98rem;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .float-btn.delete { background: var(--red); }
+      .float-btn.create { background: linear-gradient(180deg, var(--primary), var(--primary-2)); }
+
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.58);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .modal-backdrop.open { display: flex; }
+
+      .modal {
+        width: min(920px, 100%);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(30, 42, 80, 0.98), rgba(19, 28, 55, 0.99));
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+        padding: 22px 20px 20px;
+      }
+
+      .modal h2 {
+        margin: 0 0 14px;
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 14px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .field.span-3 { grid-column: span 3; }
+
+      .field label {
+        font-size: 0.95rem;
+        font-weight: 700;
+      }
+
+      .field input,
+      .field select {
+        width: 100%;
+        height: 52px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: #0f1730;
+        color: var(--text);
+        padding: 0 16px;
+        font-size: 1rem;
+        outline: none;
+      }
+
+      .field input::placeholder { color: #8a96ba; }
+
+      .file-box {
+        height: 52px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: #0f1730;
+        padding: 8px 12px;
+      }
+
+      .file-box input[type="file"] { display: none; }
+
+      .file-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 36px;
+        padding: 0 14px;
+        border-radius: 9px;
+        border: 1px solid #95a4cf;
+        background: #f5f7ff;
+        color: #111a35;
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .file-name {
+        color: var(--muted);
+        font-size: 0.95rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .modal-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .modal-btn {
+        height: 54px;
+        border: 0;
+        border-radius: 12px;
+        font-size: 1.08rem;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .modal-btn.cancel { background: #2a3868; color: var(--text); }
+      .modal-btn.submit { background: linear-gradient(180deg, var(--primary), var(--primary-2)); color: white; }
+
+      @media (max-width: 1200px) {
+        .page { padding-right: 220px; }
+      }
+
+      @media (max-width: 980px) {
+        h1 { font-size: 2.4rem; }
+        .topbar, .section-head { flex-direction: column; align-items: flex-start; }
+        .form-grid { grid-template-columns: 1fr; }
+        .field.span-3 { grid-column: span 1; }
+        .floating-actions {
+          position: static;
+          width: 100%;
+          margin-top: 18px;
+        }
+        .page { padding-right: 26px; }
+        .table-wrap { overflow-x: auto; }
+        table { min-width: 1040px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="topbar">
+        <div>
+          <div class="eyebrow">FIRMWARE OTA ADMIN</div>
+          <h1>OTA 관리 미니 대시보드</h1>
+          <div class="base-url">Base URL: http://gym907-0001.iptime.org:3004</div>
+        </div>
+        <div class="top-actions">
+          <div class="pill"><span class="check">✓</span> Logged in</div>
+          <button class="small-btn" type="button">계정</button>
+          <button class="small-btn" type="button">로그아웃</button>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">버전 · 스마트플러그</h2>
+          <div class="section-sub">#10 · 41742426-d035-4756-ba17-f542ea75ab02</div>
+        </div>
+        <button class="back-btn" type="button">← 프로젝트로</button>
+      </div>
+
+      <section class="card">
+        <h3 class="card-title">버전 목록</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>이름</th>
+                <th>칩 종류</th>
+                <th>업데이트할 펌웨어 계열</th>
+                <th>생성일</th>
+                <th>활성</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>54</td><td>v0.5.4</td><td><span class="badge">esp8685</span></td><td><span class="badge">자체제작</span></td><td>2026. 04. 09. 14:05:43</td><td><div class="status-dot"></div></td></tr>
+              <tr><td>53</td><td>v0.5.3</td><td><span class="badge">esp8685</span></td><td><span class="badge">자체제작</span></td><td>2026. 04. 09. 08:49:13</td><td><div class="status-dot"></div></td></tr>
+              <tr><td>52</td><td>tasmota52</td><td><span class="badge">esp02s</span></td><td><span class="badge">타스모타</span></td><td>2026. 03. 31. 16:45:50</td><td><div class="status-dot"></div></td></tr>
+              <tr><td>51</td><td>tasmota51</td><td><span class="badge">esp8685</span></td><td><span class="badge">타스모타</span></td><td>2026. 03. 31. 16:33:23</td><td><div class="status-dot"></div></td></tr>
+              <tr><td>50</td><td>tasmota_origin</td><td><span class="badge">esp02s</span></td><td><span class="badge">타스모타</span></td><td>2026. 03. 31. 16:30:51</td><td><div class="status-dot"></div></td></tr>
+              <tr><td>49</td><td>v0.4.9</td><td><span class="badge">esp8685</span></td><td><span class="badge">자체제작</span></td><td>2026. 03. 11. 16:19:54</td><td><div class="status-dot"></div></td></tr>
+              <tr><td>48</td><td>v0.4.8</td><td><span class="badge">esp02s</span></td><td><span class="badge">자체제작</span></td><td>2026. 03. 11. 10:09:31</td><td><div class="status-dot"></div></td></tr>
+              <tr><td>47</td><td>v0.4.7</td><td><span class="badge">esp8685</span></td><td><span class="badge">자체제작</span></td><td>2026. 03. 10. 13:06:18</td><td><div class="status-dot"></div></td></tr>
+              <tr><td>46</td><td>v0.4.6</td><td><span class="badge">esp02s</span></td><td><span class="badge">타스모타</span></td><td>2026. 03. 10. 10:48:28</td><td><div class="status-dot"></div></td></tr>
+              <tr><td>45</td><td>v0.4.5</td><td><span class="badge">esp8685</span></td><td><span class="badge">자체제작</span></td><td>2026. 03. 09. 18:12:16</td><td><div class="status-dot"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <span>‹</span>
+          <span class="active">1</span>
+          <span>2</span>
+          <span>3</span>
+          <span>4</span>
+          <span>5</span>
+          <span>›</span>
+        </div>
+      </section>
+
+      <div class="footer-note">• 페이지: /versions</div>
+
+      <div class="floating-actions">
+        <button class="float-btn delete" type="button">최신 버전 삭제</button>
+        <button id="open-modal" class="float-btn create" type="button">새 버전 만들기</button>
+      </div>
+    </main>
+
+    <div id="modal" class="modal-backdrop" aria-hidden="true">
+      <section class="modal" aria-label="새 버전 생성">
+        <h2>새 버전 생성</h2>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="version-number">버전 번호*</label>
+            <input id="version-number" type="text" placeholder="예: 21">
+          </div>
+
+          <div class="field">
+            <label for="version-name">버전 이름*</label>
+            <input id="version-name" type="text" placeholder="예: v3.3.1">
+          </div>
+
+          <div class="field span-3">
+            <label for="bin-file">Bin 파일*</label>
+            <div class="file-box">
+              <label class="file-button" for="bin-file">파일 선택</label>
+              <input id="bin-file" type="file" accept=".bin,.gz,.bin.gz">
+              <span id="file-name" class="file-name">선택된 파일 없음</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="chip-type">칩 종류*</label>
+            <select id="chip-type">
+              <option value="" selected disabled>선택하세요</option>
+              <option value="esp02s">esp02s</option>
+              <option value="esp8685">esp8685</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="firmware-family">업데이트 할 펌웨어 계열*</label>
+            <select id="firmware-family">
+              <option value="" selected disabled>선택하세요</option>
+              <option value="custom">자체제작</option>
+              <option value="tasmota">타스모타</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button id="close-modal" class="modal-btn cancel" type="button">닫기</button>
+          <button class="modal-btn submit" type="button">생성</button>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const modal = document.getElementById("modal");
+      const openModalButton = document.getElementById("open-modal");
+      const closeModalButton = document.getElementById("close-modal");
+      const fileInput = document.getElementById("bin-file");
+      const fileName = document.getElementById("file-name");
+
+      openModalButton.addEventListener("click", () => {
+        modal.classList.add("open");
+        modal.setAttribute("aria-hidden", "false");
+      });
+
+      closeModalButton.addEventListener("click", () => {
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden", "true");
+      });
+
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+          modal.classList.remove("open");
+          modal.setAttribute("aria-hidden", "true");
+        }
+      });
+
+      fileInput.addEventListener("change", () => {
+        const selected = fileInput.files && fileInput.files[0];
+        fileName.textContent = selected ? selected.name : "선택된 파일 없음";
+      });
+    </script>
+  </body>
+</html>

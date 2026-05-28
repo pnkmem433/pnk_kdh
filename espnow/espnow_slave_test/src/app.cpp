@@ -57,7 +57,7 @@ void setup() {
           [](const String& uidStr) {
             g_lastUid1 = uidStr;
             Serial.println("\n==================================================");
-            Serial.printf(" 🟢 [NFC-1] 태그 인식됨 (READ) - UID: %s\n", uidStr.c_str());
+            Serial.printf(" 🟢 [NFC-1] READ uid=%s\n", uidStr.c_str());
             Serial.println("==================================================");
             EspNowLink::getInstance().queueNfcPacket(1, PACKET_NFC_READ, uidStr);
           },
@@ -67,7 +67,7 @@ void setup() {
               return;
             }
             Serial.println("\n--------------------------------------------------");
-            Serial.printf(" 🔴 [NFC-1] 태그 제거됨 (REMOVE)\n");
+            Serial.printf(" 🔴 [NFC-1] REMOVE uid=%s\n", g_lastUid1.c_str());
             Serial.println("--------------------------------------------------");
             EspNowLink::getInstance().queueNfcPacket(1, PACKET_NFC_REMOVE, g_lastUid1);
             g_lastUid1 = "";
@@ -86,7 +86,7 @@ void setup() {
           [](const String& uidStr) {
             g_lastUid2 = uidStr;
             Serial.println("\n==================================================");
-            Serial.printf(" 🟢 [NFC-2] 태그 인식됨 (READ) - UID: %s\n", uidStr.c_str());
+            Serial.printf(" 🟢 [NFC-2] READ uid=%s\n", uidStr.c_str());
             Serial.println("==================================================");
             EspNowLink::getInstance().queueNfcPacket(2, PACKET_NFC_READ, uidStr);
           },
@@ -96,7 +96,7 @@ void setup() {
               return;
             }
             Serial.println("\n--------------------------------------------------");
-            Serial.printf(" 🔴 [NFC-2] 태그 제거됨 (REMOVE)\n");
+            Serial.printf(" 🔴 [NFC-2] REMOVE uid=%s\n", g_lastUid2.c_str());
             Serial.println("--------------------------------------------------");
             EspNowLink::getInstance().queueNfcPacket(2, PACKET_NFC_REMOVE, g_lastUid2);
             g_lastUid2 = "";

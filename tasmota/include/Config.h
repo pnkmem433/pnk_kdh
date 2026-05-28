@@ -12,4 +12,7 @@ constexpr unsigned long kStatusPublishIntervalMs = 5000;
 constexpr unsigned long kWifiRetryDelayMs = 500;
 constexpr unsigned long kMqttRetryDelayMs = 3000;
 constexpr unsigned long kDebounceMs = 40;
+constexpr unsigned long kWifiLedBlinkMs = 500;
+constexpr unsigned long kMqttLedBlinkMs = 100;
+constexpr unsigned long kOtaLedBlinkMs = 250;
 }  // namespace Config

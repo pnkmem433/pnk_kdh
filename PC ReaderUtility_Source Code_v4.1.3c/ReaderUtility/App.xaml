@@ -1,0 +1,262 @@
+﻿<Application x:Class="RFID.Utility.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml"
+             xmlns:local="clr-namespace:RFID.Utility.IClass"
+		     xmlns:properties="clr-namespace:RFID.Utility.Properties">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ObjectDataProvider x:Key="Resources" ObjectType="{x:Type local:CulturesHelper}"
+					MethodName="GetResourceInstance"></ObjectDataProvider>
+            <ObjectDataProvider x:Key="CultureResourcesDS" ObjectType="{x:Type local:CulturesHelper}" />
+
+
+            <SolidColorBrush x:Key="TextBackColor" Color="White"/>
+            <SolidColorBrush x:Key="BorderColor" Color="#FF838383"/>
+            <SolidColorBrush x:Key="TextColor" Color="#FF444444"/>
+            <SolidColorBrush x:Key="NormalBrush" Color="#FFCCCCCC"/>
+            <SolidColorBrush x:Key="PressedBrush" Color="#FFEEEEEE"/>
+            <SolidColorBrush x:Key="DisabledForegroundBrush" Color="#888" />
+            <SolidColorBrush x:Key="GlyphBrush" Color="#444" />
+            <SolidColorBrush x:Key="Disabled" Color="Gray"/>
+
+            <!--
+            <SolidColorBrush x:Key="NormalBrush" Color="NavajoWhite"/>
+            <SolidColorBrush x:Key="PressedBrush" Color="#FFCA79"/>
+            <SolidColorBrush x:Key="DisabledForegroundBrush" Color="Tan" />
+            -->
+            <Image x:Key="IMG_Close" Source="IMG/close.png"/>
+            <Image x:Key="IMG_Previous" Source="IMG/ic_keyboard_arrow_left_white_48dp.png"/>
+            <Image x:Key="IMG_Help" Source="IMG/help.png"/>
+            <Image x:Key="IMG_Setting" Source="IMG/ic_settings_white_48dp.png"/>
+            <Image x:Key="IMG_Right" Source="IMG/ic_arrow_right_32.png"/>
+            <Image x:Key="IMG_Forward" Source="IMG/ic_keyboard_arrow_left_white_48dp.png"/>
+            <Image x:Key="IMG_Next" Source="IMG/ic_keyboard_arrow_right_white_48dp.png"/>
+            <Image x:Key="IMG_Load" Source="IMG/load.png"/>
+
+            <!-- ComboBoxStyle -->
+            <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
+                <Setter Property="Height" Value="26"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="BorderBrush" Value="#838383"/>
+                <Setter Property="FontFamily" Value="微軟正黑體"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+            </Style>
+            
+            
+            <!-- LabelStyle -->
+            <Style TargetType="Label">
+                <Setter Property="FontFamily" Value="微軟正黑體"></Setter>
+                <Setter Property="FontSize" Value="12"></Setter>
+                <Setter Property="FontStyle" Value="Oblique"></Setter>
+            </Style>
+            
+
+            <!-- TextBlockStyle -->
+            <Style x:Key="TextBlockStyle11" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="11"></Setter>
+                <Setter Property="FontFamily" Value="微軟正黑體"></Setter>
+                <Setter Property="VerticalAlignment" Value="Center"></Setter>
+            </Style>
+            <Style x:Key="TextBlockStyle12" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12"></Setter>
+                <Setter Property="FontFamily" Value="微軟正黑體"></Setter>
+                <Setter Property="VerticalAlignment" Value="Center"></Setter>
+            </Style>
+            <Style x:Key="TextBlockStyle12B" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12"></Setter>
+                <Setter Property="FontWeight" Value="Bold"></Setter>
+                <Setter Property="FontFamily" Value="微軟正黑體"></Setter>
+                <Setter Property="VerticalAlignment" Value="Center"></Setter>
+            </Style>
+            <Style x:Key="TextBlockStyle14B" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="微軟正黑體"></Setter>
+                <Setter Property="FontSize" Value="14"></Setter>
+                <Setter Property="FontWeight" Value="Bold"></Setter>
+                <Setter Property="VerticalAlignment" Value="Center"></Setter>
+            </Style>
+            <Style x:Key="TextBlockStyle16B" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="微軟正黑體"></Setter>
+                <Setter Property="FontSize" Value="16"></Setter>
+                <Setter Property="FontWeight" Value="Bold"></Setter>
+                <Setter Property="VerticalAlignment" Value="Center"></Setter>
+            </Style>
+
+            <!--TextBoxStyle-->
+            <Style x:Key="TextBoxStyle" TargetType="TextBox">
+                <Setter Property="Height" Value="26"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="BorderBrush" Value="#737373"/>
+                <Setter Property="FontFamily" Value="微軟正黑體"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="VerticalContentAlignment"  Value="Center"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="Padding" Value="3,0,3,0"/>
+                <Setter Property="Margin" Value="2,0,2,0"/>
+            </Style>
+
+            <!--ButtonStyle-->
+            <Style x:Key="{x:Static ToolBar.ButtonStyleKey}" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="BorderBrush" Value="#FF494B4C"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Setter Property="Background"  Value="#FFB0D0D3"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="BorderBrush" Value="#FF96CFEA"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Setter Property="Background"  Value="#FF497F99"/>
+                                </Trigger>
+                                <Trigger Property="IsDefaulted" Value="True">
+                                    <Setter Property="BorderBrush" Value="DarkGray" />
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="ButtonStyle14B" TargetType="Button">
+                <Setter Property="FontFamily" Value="微軟正黑體"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontStyle" Value="Normal"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Height" Value="26"/>
+                <Setter Property="Width" Value="100"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="BorderBrush" Value="#FF494B4C"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Setter Property="Background"  Value="#FFB0D0D3"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="BorderBrush" Value="#FF96CFEA"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Setter Property="Background"  Value="#FF497F99"/>
+                                </Trigger>
+                                <Trigger Property="IsDefaulted" Value="True">
+                                    <Setter Property="BorderBrush" Value="DarkGray" />
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+
+            <!--Default styled textbox(hex)-->
+            <Style x:Key="TextBoxDefaultStyle" TargetType="{x:Type TextBox}">
+                <Setter Property="Height" Value="26"/>
+                <Setter Property="ForceCursor" Value="False"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontFamily" Value="微軟正黑體"/>
+                <Setter Property="CharacterCasing" Value="Upper"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Padding" Value="3,0,3,0"/>
+                <Setter Property="Margin" Value="2,0,2,0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TextBox}">
+                            <Grid>
+                                <Border Background="{StaticResource TextBackColor}" BorderBrush="{StaticResource BorderColor}" x:Name="Bd" BorderThickness="1">
+                                    <ScrollViewer Margin="0" x:Name="PART_ContentHost"/>
+                                </Border>
+                                <Label HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,0,-4" FontSize="9" Opacity=".6">(hex)</Label>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <!--Normal styled textbox-->
+            <Style x:Key="TextBoxNormalStyle" TargetType="{x:Type TextBox}">
+                <Setter Property="Height" Value="26"/>
+                <Setter Property="ForceCursor" Value="False"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontFamily" Value="微軟正黑體"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Padding" Value="3,0,3,0"/>
+                <Setter Property="Margin" Value="2,0,2,0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TextBox}">
+                            <Grid >
+                                <Border Background="{StaticResource TextBackColor}" BorderBrush="{StaticResource BorderColor}" x:Name="Bd" BorderThickness="1">
+                                    <ScrollViewer Margin="0" x:Name="PART_ContentHost"/>
+                                </Border>
+                                <Image Name="OKImage" Width="24" Height="24" Margin="0,0,4,0" Source="IMG/ok.png" HorizontalAlignment="Right"></Image>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <!--Error-style textbox-->
+            <Style x:Key="TextBoxErrorStyle" TargetType="{x:Type TextBox}">
+                <Setter Property="Height" Value="26"/>
+                <Setter Property="ForceCursor" Value="False"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="Foreground" Value="{StaticResource TextColor}"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Padding" Value="3,0,3,0"/>
+                <Setter Property="Margin" Value="2,0,2,0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TextBox}">
+                            <Grid Name="test">
+                                <Border Background="{StaticResource TextBackColor}" BorderBrush="OrangeRed" x:Name="Bd" BorderThickness="1">
+                                    <ScrollViewer Margin="0" x:Name="PART_ContentHost"/>
+                                </Border>
+                                <Image Name="ErrorImage" Width="24" Height="24" Margin="0,0,4,0" Source="IMG/error.png" HorizontalAlignment="Right"></Image>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <!--Info-style textbox-->
+            <Style x:Key="TextBoxFocusStyle" TargetType="{x:Type TextBox}">
+                <Setter Property="Height" Value="26"/>
+                <Setter Property="ForceCursor" Value="False"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Padding" Value="3,0,3,0"/>
+                <Setter Property="Margin" Value="2,0,2,0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TextBox}">
+                            <Grid >
+                                <Border Background="{StaticResource TextBackColor}" BorderBrush="OrangeRed" x:Name="Bd" BorderThickness="1">
+                                    <ScrollViewer Margin="0" x:Name="PART_ContentHost"/>
+                                </Border>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+
+            
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

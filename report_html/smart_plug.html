@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>스마트 플러그 보고서</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(16, 185, 129, 0.10), transparent 24%),
+        radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 24%),
+        #f8fafc;
+    }
+
+    .shadow-soft {
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-900">
+  <aside class="fixed right-4 top-1/2 z-40 hidden -translate-y-1/2 xl:block">
+    <div class="w-48 rounded-3xl border border-slate-200 bg-white/95 p-3 shadow-soft backdrop-blur">
+      <div class="mb-2 px-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Sections</div>
+      <div id="sectionNav" class="grid gap-2"></div>
+    </div>
+  </aside>
+
+  <a href="#top" class="fixed bottom-6 right-6 z-40 rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 shadow-soft transition hover:border-emerald-300 hover:text-emerald-800">
+    맨 위로
+  </a>
+
+  <main id="top" class="mx-auto max-w-5xl space-y-8 px-6 py-14">
+    <div class="flex flex-wrap items-center gap-4 text-sm font-semibold">
+      <a href="./smart_plug/" class="text-emerald-700 underline">기록 목록으로</a>
+      <a href="./index.html" class="text-sky-700 underline">메인 홈으로</a>
+    </div>
+
+    <section id="overview" class="rounded-[2rem] border border-slate-200 bg-white p-10 shadow-soft">
+      <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Report 02</div>
+      <h1 class="mt-4 text-4xl font-black text-slate-950">스마트 플러그</h1>
+      <p class="mt-4 text-base leading-8 text-slate-600">
+        스마트 플러그 관련 최신 보고서와 이후 기록을 한 페이지에서 계속 이어서 관리합니다.
+      </p>
+    </section>
+
+    <section id="latest" class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+      <div class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Latest</div>
+      <h2 class="mt-2 text-2xl font-black text-slate-950">최신 보고서</h2>
+      <div class="mt-5 rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+        <div class="text-lg font-bold text-emerald-950">현재 보고서 자리</div>
+        <p class="mt-2 text-sm leading-7 text-emerald-900">
+          이 페이지에 스마트 플러그 최신 보고서 본문이 들어가면 됩니다.
+        </p>
+      </div>
+    </section>
+
+    <section id="archive" class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+      <div class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Archive</div>
+      <h2 class="mt-2 text-2xl font-black text-slate-950">아카이브</h2>
+      <div class="mt-5 grid gap-3">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-700">이후에는 `report_YYMMDD.html` 형식으로 일지를 계속 추가</div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-700">smart_plug/index.html 에서는 최신 보고서와 과거 기록 목록을 같이 제공</div>
+      </div>
+    </section>
+
+    <section id="next" class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+      <div class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Next</div>
+      <h2 class="mt-2 text-2xl font-black text-slate-950">다음 작업</h2>
+      <div class="mt-5 grid gap-3">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-700">최신 스마트 플러그 결과를 본문으로 옮기기</div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-700">주차별 / 날짜별 기록 파일 분리</div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-700">필요 시 그래프, 로그, 플로우 맵 추가</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const navContainer = document.getElementById("sectionNav");
+    const sections = Array.from(document.querySelectorAll("main section[id]"));
+    const navItems = [
+      { href: "#top", label: "맨 위" },
+      ...sections.map((section) => {
+        const heading = section.querySelector("h1, h2, h3");
+        return {
+          href: `#${section.id}`,
+          label: heading ? heading.textContent.trim() : section.id,
+        };
+      }),
+    ];
+
+    navContainer.innerHTML = navItems
+      .map(
+        (item) => `
+          <a href="${item.href}" class="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800">
+            ${item.label}
+          </a>
+        `,
+      )
+      .join("");
+  </script>
+</body>
+</html>

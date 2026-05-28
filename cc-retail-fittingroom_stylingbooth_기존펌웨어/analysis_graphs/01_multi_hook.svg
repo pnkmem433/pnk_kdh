@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="560" viewBox="0 0 980 560">
+<rect width="100%" height="100%" fill="white"/>
+<text x="490.0" y="28" text-anchor="middle" font-size="24" font-family="Arial">RFID Read Count vs. Dense Hook Distribution</text>
+<line x1="90" y1="465.0" x2="950" y2="465.0" stroke="#d9d9d9" stroke-dasharray="4 4"/>
+<text x="78" y="469.0" text-anchor="end" font-size="12" font-family="Arial">0</text>
+<line x1="90" y1="396.7" x2="950" y2="396.7" stroke="#d9d9d9" stroke-dasharray="4 4"/>
+<text x="78" y="400.7" text-anchor="end" font-size="12" font-family="Arial">10</text>
+<line x1="90" y1="328.3" x2="950" y2="328.3" stroke="#d9d9d9" stroke-dasharray="4 4"/>
+<text x="78" y="332.3" text-anchor="end" font-size="12" font-family="Arial">20</text>
+<line x1="90" y1="260.0" x2="950" y2="260.0" stroke="#d9d9d9" stroke-dasharray="4 4"/>
+<text x="78" y="264.0" text-anchor="end" font-size="12" font-family="Arial">30</text>
+<line x1="90" y1="191.7" x2="950" y2="191.7" stroke="#d9d9d9" stroke-dasharray="4 4"/>
+<text x="78" y="195.7" text-anchor="end" font-size="12" font-family="Arial">40</text>
+<line x1="90" y1="123.3" x2="950" y2="123.3" stroke="#d9d9d9" stroke-dasharray="4 4"/>
+<text x="78" y="127.3" text-anchor="end" font-size="12" font-family="Arial">50</text>
+<line x1="90" y1="55.0" x2="950" y2="55.0" stroke="#d9d9d9" stroke-dasharray="4 4"/>
+<text x="78" y="59.0" text-anchor="end" font-size="12" font-family="Arial">60</text>
+<line x1="90" y1="55" x2="90" y2="465" stroke="#444"/>
+<line x1="90" y1="465" x2="950" y2="465" stroke="#444"/>
+<text x="490.0" y="535" text-anchor="middle" font-size="16" font-family="Arial">Condition / State Change</text>
+<text x="22" y="280.0" transform="rotate(-90 22 280.0)" text-anchor="middle" font-size="16" font-family="Arial">Average Read Count (10s)</text>
+<line x1="90.0" y1="465" x2="90.0" y2="471" stroke="#444"/>
+<text x="90.0" y="489" text-anchor="middle" font-size="12" font-family="Arial">??</text>
+<text x="90.0" y="505" text-anchor="middle" font-size="12" font-family="Arial">1-1</text>
+<line x1="376.7" y1="465" x2="376.7" y2="471" stroke="#444"/>
+<text x="376.7" y="489" text-anchor="middle" font-size="12" font-family="Arial">????</text>
+<text x="376.7" y="505" text-anchor="middle" font-size="12" font-family="Arial">1-1b</text>
+<line x1="663.3" y1="465" x2="663.3" y2="471" stroke="#444"/>
+<text x="663.3" y="489" text-anchor="middle" font-size="12" font-family="Arial">?? 3-2-2</text>
+<text x="663.3" y="505" text-anchor="middle" font-size="12" font-family="Arial">1-2</text>
+<line x1="950.0" y1="465" x2="950.0" y2="471" stroke="#444"/>
+<text x="950.0" y="489" text-anchor="middle" font-size="12" font-family="Arial">?? 3-1-2-1</text>
+<text x="950.0" y="505" text-anchor="middle" font-size="12" font-family="Arial">1-3</text>
+<polyline fill="none" stroke="#d62728" stroke-width="3" stroke-dasharray="none" points="90.0,465.0 376.7,412.6 663.3,328.3 950.0,116.5"/>
+<circle cx="90.0" cy="465.0" r="5" fill="#d62728"/>
+<text x="90.0" y="455.0" text-anchor="middle" font-size="11" fill="#d62728" font-family="Arial">0.00</text>
+<circle cx="376.7" cy="412.6" r="5" fill="#d62728"/>
+<text x="376.7" y="402.6" text-anchor="middle" font-size="11" fill="#d62728" font-family="Arial">7.67</text>
+<circle cx="663.3" cy="328.3" r="5" fill="#d62728"/>
+<text x="663.3" y="318.3" text-anchor="middle" font-size="11" fill="#d62728" font-family="Arial">20.00</text>
+<circle cx="950.0" cy="116.5" r="5" fill="#d62728"/>
+<text x="950.0" y="106.5" text-anchor="middle" font-size="11" fill="#d62728" font-family="Arial">51.00</text>
+<line x1="650" y1="60" x2="672" y2="60" stroke="#d62728" stroke-width="3" stroke-dasharray="none"/>
+<circle cx="661" cy="60" r="5" fill="#d62728"/>
+<text x="682" y="64" font-size="13" font-family="Arial">Blue Shirt Tag (AA000010)</text>
+</svg>

@@ -1,14 +1,15 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { ProjectVersion } from '../../entites/version.entity';
-import { Project } from '../../entites/project.entity';
-import { VersionSearchDto } from 'src/dto/version/search.dto';
-import { User } from 'src/entites/user.entity';
-import { VersionCreateDto } from 'src/dto/version/create.dto';
+import * as fs from 'fs';
 import { extname } from 'path';
 import * as path from 'path';
-import * as fs from 'fs';
+import { User } from 'src/entites/user.entity';
+import { VersionCreateDto } from 'src/dto/version/create.dto';
+import { VersionDeleteDto } from 'src/dto/version/delete.dto';
+import { VersionSearchDto } from 'src/dto/version/search.dto';
+import { Repository } from 'typeorm';
+import { Project } from '../../entites/project.entity';
+import { ProjectVersion } from '../../entites/version.entity';
 
 @Injectable()
 export class ProjectVersionService {
@@ -54,7 +55,7 @@ export class ProjectVersionService {
     });
 
     if (!project) {
-      throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
+      throw new NotFoundException('project not found.');
     }
 
     const latestSameTrack = await this.projectVersionRepository.findOne({
@@ -71,7 +72,7 @@ export class ProjectVersionService {
       Number(latestSameTrack.versionNumber) >= Number(createVersionDto.versionNumber)
     ) {
       throw new BadRequestException(
-        `입력한 버전 번호는 같은 칩/계열의 최신 버전(${latestSameTrack.versionNumber})보다 커야 합니다.`,
+        `versionNumber must be greater than the latest ${createVersionDto.chipType}/${createVersionDto.firmwareFamily} version (${latestSameTrack.versionNumber}).`,
       );
     }
 
@@ -86,7 +87,7 @@ export class ProjectVersionService {
     await this.projectVersionRepository.save(newVersion);
 
     const newFileName = `${newVersion.id}${extname(binFile.originalname)}`;
-    const uploadsDir = path.join(__dirname, '../../uploads');
+    const uploadsDir = path.join(process.cwd(), 'uploads');
     const newFilePath = path.join(uploadsDir, newFileName);
     const tempPath = binFile.path;
 
@@ -101,7 +102,6 @@ export class ProjectVersionService {
     try {
       fs.copyFileSync(tempPath, newFilePath);
       fs.unlinkSync(tempPath);
-      console.log(`File moved successfully to ${newFilePath}`);
     } catch (error) {
       throw new Error(`Error moving file: ${error.message}`);
     }
@@ -129,7 +129,7 @@ export class ProjectVersionService {
     });
 
     if (!project) {
-      throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
+      throw new NotFoundException('project not found.');
     }
 
     const versions = await this.projectVersionRepository.find({
@@ -141,14 +141,59 @@ export class ProjectVersionService {
     });
 
     if (versions.length <= 1) {
-      throw new NotFoundException('해당 프로젝트에서 비활성화할 최신 버전이 없습니다.');
+      throw new NotFoundException('no latest active version to deactivate.');
     }
 
     versions[0].isActive = false;
     await this.projectVersionRepository.save(versions[0]);
 
     return {
-      message: '최신 버전이 성공적으로 비활성화되었습니다.',
+      message: 'latest version deactivated.',
+    };
+  }
+
+  async hardDeleteVersionRow(
+    user: User,
+    versionDeleteDto: VersionDeleteDto,
+  ): Promise<{ message: string; deletedRows: number }> {
+    const project = await this.projectRepository.findOneBy({
+      id: versionDeleteDto.projectId,
+      userSeq: { seq: user.seq },
+    });
+
+    if (!project) {
+      throw new NotFoundException('project not found.');
+    }
+
+    const rows = await this.projectVersionRepository.find({
+      where: {
+        project: { id: versionDeleteDto.projectId, userSeq: { seq: user.seq } },
+        versionNumber: versionDeleteDto.versionNumber,
+        chipType: versionDeleteDto.chipType,
+        firmwareFamily: versionDeleteDto.firmwareFamily,
+      },
+      relations: ['project'],
+      order: { createdAt: 'DESC', id: 'DESC' },
+    });
+
+    if (!rows.length) {
+      throw new NotFoundException('matching version row not found.');
+    }
+
+    for (const row of rows) {
+      if (row.binFile && fs.existsSync(row.binFile)) {
+        try {
+          fs.unlinkSync(row.binFile);
+        } catch (error) {
+          console.warn(`[versions] failed to remove file ${row.binFile}`, error);
+        }
+      }
+      await this.projectVersionRepository.remove(row);
+    }
+
+    return {
+      message: `deleted ${rows.length} row(s).`,
+      deletedRows: rows.length,
     };
   }
 }

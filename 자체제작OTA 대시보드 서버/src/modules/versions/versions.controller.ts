@@ -7,6 +7,7 @@ import { Express } from 'express';
 import { ProjectVersionService } from './versions.service';
 import { VersionSearchDto } from 'src/dto/version/search.dto';
 import { VersionCreateDto } from 'src/dto/version/create.dto';
+import { VersionDeleteDto } from 'src/dto/version/delete.dto';
 
 @ApiTags('versions')
 @Controller('versions')
@@ -46,5 +47,23 @@ export class ProjectVersionController {
   @ApiResponse({ status: 404, description: '프로젝트 또는 버전을 찾을 수 없음' })
   async deleteLatestVersion(@Body() versionSearchDto: VersionSearchDto, @Req() req: any): Promise<{message: string}>  {
     return this.projectVersionService.deleteLatestVersionByProjectId(req.user, versionSearchDto);
+  }
+
+  @Delete('delete-row')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Hard delete an uploaded version row and its firmware file' })
+  @ApiBody({ description: 'Exact project/version/chip/family track to delete', type: VersionDeleteDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Matching rows and uploaded firmware files were deleted',
+    example: { message: 'deleted 1 row(s).', deletedRows: 1 },
+  })
+  @ApiResponse({ status: 404, description: 'Matching version row not found' })
+  async deleteVersionRow(
+    @Body() versionDeleteDto: VersionDeleteDto,
+    @Req() req: any,
+  ): Promise<{ message: string; deletedRows: number }> {
+    return this.projectVersionService.hardDeleteVersionRow(req.user, versionDeleteDto);
   }
 }

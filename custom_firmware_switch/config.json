@@ -1,0 +1,62 @@
+{
+  "platformio_exe": "%USERPROFILE%\\.platformio\\penv\\Scripts\\platformio.exe",
+  "firmware_family": "standard",
+  "ota_server": {
+    "base_url": "http://gym907-0001.iptime.org:3004",
+    "login_endpoint": "/auth/login",
+    "upload_endpoint": "/versions/create",
+    "project_id_fixed": 10,
+    "credentials": {
+      "id": "pnkmem433",
+      "password": "12345678"
+    }
+  },
+  "lattepanda_server": {
+    "host": "dockeruser@gym907-0001.iptime.org",
+    "port": 23,
+    "remote_root": "/home/pnkslabserver/tasmota-firmware",
+    "update_script": "/home/pnkslabserver/tasmota-firmware/common/update_latest_links.py" 
+  },
+  "targets": {
+    "esp8685_custom": {
+      "root": "C:\\WS\\vs_kdh\\pnk_kdh\\smart_plug\\SmartPlug_internship\\SmartPlug",
+      "env": "esp32-c3-devkitm-1",
+      "chip_type": "esp8685",
+      "build_type": "custom",
+      "remote_dir": "/home/pnkslabserver/tasmota-firmware/esp8685/custom",
+      "gdrive_dir": "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\Smartplug 관련 파일\\smartplug 펌웨어 버전 폴더\\esp8685\\custom",
+      "artifact_name_suffix": "esp8685_custom.bin",
+      "project_check": "platformio.ini"
+    },
+    "esp8685_tasmota": {
+      "root": "C:\\WS\\vs_kdh\\pnk_kdh\\minimal_tasmota_esp8685",
+      "env": "tasmota32c3-lite-direct-ota",
+      "chip_type": "esp8685",
+      "build_type": "tasmota",
+      "remote_dir": "/home/pnkslabserver/tasmota-firmware/esp8685/lite",
+      "gdrive_dir": "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\Smartplug 관련 파일\\smartplug 펌웨어 버전 폴더\\esp8685\\lite",
+      "artifact_name_suffix": "esp8685_tasmota_lite.bin",
+      "project_check": "platformio.ini"
+    },
+    "esp02s_custom": {
+      "root": "C:\\WS\\vs_kdh\\pnk_kdh\\smart_plug\\SmartPlug_internship\\esp02s",
+      "env": "esp02s",
+      "chip_type": "esp02s",
+      "build_type": "custom",
+      "remote_dir": "/home/pnkslabserver/tasmota-firmware/esp02s/custom",
+      "gdrive_dir": "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\Smartplug 관련 파일\\smartplug 펌웨어 버전 폴더\\esp02s\\custom",
+      "artifact_name_suffix": "esp02s_custom.bin",
+      "project_check": "platformio.ini"
+    },
+    "esp02s_tasmota": {
+      "root": "C:\\WS\\vs_kdh\\pnk_kdh\\smart_plug\\SmartPlug_internship\\esp02s",
+      "env": "esp02s_tasmota",
+      "chip_type": "esp02s",
+      "build_type": "tasmota",
+      "remote_dir": "/home/pnkslabserver/tasmota-firmware/esp02s/lite",
+      "gdrive_dir": "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\Smartplug 관련 파일\\smartplug 펌웨어 버전 폴더\\esp02s\\lite",
+      "artifact_name_suffix": "esp02s_tasmota_lite.bin",
+      "project_check": "platformio.ini"
+    }
+  }
+}

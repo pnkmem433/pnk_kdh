@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RFID 테스트케이스 구조화</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(14, 165, 233, 0.08), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.08), transparent 28%),
+        #f8fafc;
+    }
+
+    .soft-shadow {
+      box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+    }
+
+    .detail-card.is-dimmed {
+      opacity: 0.3;
+    }
+
+    .detail-card.is-active {
+      border-color: #0284c7;
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.14);
+    }
+  </style>
+</head>
+<body data-section-theme="sky" class="min-h-screen text-slate-900">
+  <main class="mx-auto max-w-7xl px-6 py-12">
+    <section class="rounded-[2rem] border border-slate-200 bg-white p-8 soft-shadow">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div class="max-w-5xl">
+          <div class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">Styling Booth RFID Test Map</div>
+          <h1 class="mt-3 text-3xl font-black text-slate-950">RFID 테스트케이스 구조화</h1>
+          <p class="mt-4 text-sm leading-7 text-slate-600">
+            상단은 경우의 수 구조를 정리하고, 하단은 실제 수행한 테스트를 조건별 상세 카드로 바로 읽을 수 있게 정리했습니다.
+            파일명에 들어 있는 실제 실험 조건도 함께 풀어 적어, 어떤 위치와 어떤 배치가 대응되는지 한눈에 따라갈 수 있게 구성했습니다.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-3 text-sm font-semibold">
+          <a href="./index.html" class="rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sky-800">기록 목록으로</a>
+          <a href="../index.html" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-700">메인 홈으로</a>
+        </div>
+      </div>
+
+      <div class="mt-8 grid gap-4 lg:grid-cols-4">
+        <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+          <h2 class="text-sm font-bold text-slate-950">핵심 축만 유지</h2>
+          <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+            <li>옷 수량</li>
+            <li>배치 방식</li>
+            <li>세부 위치</li>
+            <li>벽과의 거리 / 태그 방향</li>
+            <li>안테나 위치</li>
+            <li>천장 차폐 / RF 전력 세기</li>
+          </ul>
+        </article>
+        <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+          <h2 class="text-sm font-bold text-slate-950">구조도에서 뺀 조건</h2>
+          <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+            <li>옷 안/밖: 독립 축으로 보기엔 영향 작음</li>
+            <li>일반 재질 자체: 주축에서 제외</li>
+            <li>사람 영향: 별도 보조 테스트로 분리</li>
+          </ul>
+        </article>
+        <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+          <h2 class="text-sm font-bold text-slate-950">용어 통일</h2>
+          <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+            <li>벽과의 거리: 벽과 멂 / 벽과 가까움 / 혼합</li>
+            <li>태그 방향: 안테나와 마주봄 / 반대 방향 / 혼합</li>
+            <li>안테나 위치: 앞, 중, 뒤와 좌, 중, 우의 결합</li>
+          </ul>
+        </article>
+        <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+          <h2 class="text-sm font-bold text-slate-950">읽는 순서</h2>
+          <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+            <li>1. 구조도에서 전체 축 확인</li>
+            <li>2. 상세 카드에서 실제 수행 테스트 확인</li>
+            <li>3. 파일명 기준 매핑으로 세부 조건 확인</li>
+          </ul>
+        </article>
+      </div>
+
+      <section class="mt-8 rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 lg:p-6">
+        <div class="mb-4 flex flex-wrap items-center gap-3 text-xs font-semibold">
+          <span class="rounded-full border border-sky-300 bg-sky-100 px-3 py-1 text-sky-800">기존 수행 축</span>
+          <span class="rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-amber-800">추가 / 미실시 축</span>
+          <span class="rounded-full border border-slate-300 bg-white px-3 py-1 text-slate-700">점선 / ... = 생략된 조합</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <svg viewBox="0 0 1960 980" class="min-w-[1450px] w-full">
+            <defs>
+              <style>
+                .title { font: 800 30px sans-serif; fill: #0f172a; }
+                .label { font: 700 20px sans-serif; fill: #0f172a; }
+                .small { font: 600 15px sans-serif; fill: #334155; }
+                .tiny { font: 600 13px sans-serif; fill: #475569; }
+                .node { rx: 18; ry: 18; stroke-width: 2; }
+                .axis { rx: 28; ry: 28; fill: #fff; stroke: #cbd5e1; stroke-width: 2; }
+                .solid { stroke: #94a3b8; stroke-width: 2.1; fill: none; }
+                .dash { stroke: #94a3b8; stroke-width: 2.1; fill: none; stroke-dasharray: 8 8; }
+              </style>
+            </defs>
+
+            <text x="60" y="46" class="title">1. 경우의 수 구조도</text>
+
+            <rect x="56" y="82" width="1848" height="146" class="axis" />
+            <text x="980" y="118" text-anchor="middle" class="label">옷 수량</text>
+            <text x="980" y="144" text-anchor="middle" class="tiny">각 수량에서 아래 조건 축들이 다시 선택된다</text>
+
+            <rect x="180" y="164" width="112" height="46" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="500" y="164" width="112" height="46" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="820" y="164" width="112" height="46" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1140" y="164" width="112" height="46" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1460" y="164" width="112" height="46" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1690" y="160" width="156" height="54" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <text x="236" y="193" text-anchor="middle" class="small">1벌</text>
+            <text x="556" y="193" text-anchor="middle" class="small">2벌</text>
+            <text x="876" y="193" text-anchor="middle" class="small">3벌</text>
+            <text x="1196" y="193" text-anchor="middle" class="small">4벌</text>
+            <text x="1516" y="193" text-anchor="middle" class="small">5벌</text>
+            <text x="1768" y="193" text-anchor="middle" class="small">가혹 7벌</text>
+
+            <rect x="70" y="278" width="246" height="214" class="axis" />
+            <text x="193" y="314" text-anchor="middle" class="label">배치 방식</text>
+            <rect x="94" y="356" width="198" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="94" y="408" width="198" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="94" y="460" width="198" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <text x="193" y="381" text-anchor="middle" class="small">벽걸이</text>
+            <text x="193" y="433" text-anchor="middle" class="small">바닥 적층</text>
+            <text x="193" y="485" text-anchor="middle" class="small">바닥 분산</text>
+
+            <rect x="350" y="278" width="320" height="214" class="axis" />
+            <text x="510" y="314" text-anchor="middle" class="label">벽걸이 위치</text>
+            <rect x="380" y="360" width="56" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="448" y="360" width="56" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="516" y="360" width="56" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="584" y="360" width="56" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="414" y="412" width="56" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="482" y="412" width="56" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="550" y="412" width="56" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <text x="408" y="385" text-anchor="middle" class="small">1</text>
+            <text x="476" y="385" text-anchor="middle" class="small">2</text>
+            <text x="544" y="385" text-anchor="middle" class="small">3</text>
+            <text x="612" y="385" text-anchor="middle" class="small">4</text>
+            <text x="442" y="437" text-anchor="middle" class="small">5</text>
+            <text x="510" y="437" text-anchor="middle" class="small">6</text>
+            <text x="578" y="437" text-anchor="middle" class="small">7</text>
+            <text x="510" y="474" text-anchor="middle" class="tiny">왼쪽훅=1, 중앙훅=4, 오른쪽훅=7</text>
+
+            <rect x="704" y="278" width="252" height="214" class="axis" />
+            <text x="830" y="314" text-anchor="middle" class="label">바닥 위치</text>
+            <rect x="734" y="386" width="58" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="799" y="386" width="58" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="864" y="386" width="58" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <text x="763" y="411" text-anchor="middle" class="small">좌</text>
+            <text x="828" y="411" text-anchor="middle" class="small">중</text>
+            <text x="893" y="411" text-anchor="middle" class="small">우</text>
+
+            <rect x="990" y="278" width="220" height="214" class="axis" />
+            <text x="1100" y="314" text-anchor="middle" class="label">벽과의 거리</text>
+            <text x="1100" y="338" text-anchor="middle" class="tiny">벽 기준으로 가까운지 먼지</text>
+            <rect x="1024" y="374" width="152" height="42" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1024" y="430" width="152" height="42" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <text x="1100" y="400" text-anchor="middle" class="small">벽과 멂</text>
+            <text x="1100" y="456" text-anchor="middle" class="small">벽과 가까움</text>
+
+            <rect x="1244" y="278" width="236" height="214" class="axis" />
+            <text x="1362" y="314" text-anchor="middle" class="label">태그 방향</text>
+            <rect x="1278" y="352" width="168" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1278" y="402" width="168" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1278" y="452" width="168" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <text x="1362" y="376" text-anchor="middle" class="small">안테나와 마주봄</text>
+            <text x="1362" y="426" text-anchor="middle" class="small">안테나 반대 방향</text>
+            <text x="1362" y="476" text-anchor="middle" class="small">혼합</text>
+
+            <rect x="1514" y="278" width="372" height="310" class="axis" />
+            <text x="1700" y="314" text-anchor="middle" class="label">안테나 위치</text>
+            <text x="1700" y="338" text-anchor="middle" class="tiny">앞/중/뒤와 좌/중/우가 결합된 하나의 위치 축</text>
+            <text x="1606" y="382" text-anchor="middle" class="tiny">좌</text>
+            <text x="1700" y="382" text-anchor="middle" class="tiny">중</text>
+            <text x="1794" y="382" text-anchor="middle" class="tiny">우</text>
+            <text x="1564" y="432" text-anchor="middle" class="tiny">앞</text>
+            <text x="1564" y="492" text-anchor="middle" class="tiny">중</text>
+            <text x="1564" y="552" text-anchor="middle" class="tiny">뒤</text>
+
+            <rect x="1580" y="404" width="74" height="40" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <rect x="1674" y="404" width="74" height="40" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <rect x="1768" y="404" width="74" height="40" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <rect x="1580" y="464" width="74" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1674" y="464" width="74" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1768" y="464" width="74" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1580" y="524" width="74" height="40" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <rect x="1674" y="524" width="74" height="40" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <rect x="1768" y="524" width="74" height="40" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <text x="1617" y="429" text-anchor="middle" class="tiny">앞-좌</text>
+            <text x="1711" y="429" text-anchor="middle" class="tiny">앞-중</text>
+            <text x="1805" y="429" text-anchor="middle" class="tiny">앞-우</text>
+            <text x="1617" y="489" text-anchor="middle" class="tiny">중-좌</text>
+            <text x="1711" y="489" text-anchor="middle" class="tiny">중-중</text>
+            <text x="1805" y="489" text-anchor="middle" class="tiny">중-우</text>
+            <text x="1617" y="549" text-anchor="middle" class="tiny">뒤-좌</text>
+            <text x="1711" y="549" text-anchor="middle" class="tiny">뒤-중</text>
+            <text x="1805" y="549" text-anchor="middle" class="tiny">뒤-우</text>
+
+            <rect x="626" y="640" width="310" height="168" class="axis" />
+            <text x="781" y="676" text-anchor="middle" class="label">천장 차폐</text>
+            <rect x="670" y="744" width="116" height="42" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="798" y="744" width="116" height="42" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <text x="728" y="770" text-anchor="middle" class="small">차폐 없음</text>
+            <text x="856" y="770" text-anchor="middle" class="small">차폐 있음</text>
+
+            <rect x="1000" y="640" width="370" height="168" class="axis" />
+            <text x="1185" y="676" text-anchor="middle" class="label">안테나 RF 전력 세기</text>
+            <rect x="1046" y="744" width="278" height="42" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <text x="1185" y="770" text-anchor="middle" class="small">-2 ~ 25 dBm</text>
+
+            <path d="M236 210 C236 252, 193 260, 193 278" class="solid" />
+            <path d="M236 210 C236 258, 510 260, 510 278" class="solid" />
+            <path d="M236 210 C236 264, 830 260, 830 278" class="solid" />
+            <path d="M236 210 C236 270, 1100 260, 1100 278" class="solid" />
+            <path d="M236 210 C236 276, 1362 260, 1362 278" class="solid" />
+            <path d="M236 210 C236 282, 1700 260, 1700 278" class="solid" />
+
+            <path d="M1516 210 C1516 262, 1700 260, 1700 278" class="solid" />
+            <path d="M1768 214 C1768 268, 1700 260, 1700 278" class="solid" />
+
+            <path d="M1700 588 C1700 630, 781 620, 781 640" class="dash" />
+            <path d="M1700 588 C1700 636, 1185 620, 1185 640" class="dash" />
+
+            <text x="920" y="252" text-anchor="middle" class="small">...</text>
+            <text x="1450" y="618" text-anchor="middle" class="small">...</text>
+          </svg>
+        </div>
+      </section>
+
+      <section id="detailSection" class="mt-8 rounded-[1.75rem] border border-slate-200 bg-white p-6 soft-shadow">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Detailed Cards</div>
+            <h2 class="mt-2 text-2xl font-black text-slate-950">2. 테스트 설명 카드</h2>
+            <p class="mt-2 text-sm leading-7 text-slate-600">
+              벽과의 거리와 태그 방향을 분리해서 읽도록 문장을 다시 정리했습니다. 실제 수행한 테스트만 빠르게 훑을 수 있도록 카드만 남겼습니다.
+            </p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+            사람 영향 테스트는 이 페이지 구조도에서 제외
+          </div>
+        </div>
+
+        <div class="mt-6 grid gap-4 lg:grid-cols-2">
+          <article id="detail-1" class="detail-card rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 lg:col-span-2 transition">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="text-lg font-bold text-slate-950">1. 벽걸이 밀집/분산 비교</h3>
+              <span class="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">1-1 ~ 1-3</span>
+            </div>
+            <div class="mt-4 space-y-3 text-sm leading-7 text-slate-700">
+              <p><span class="font-semibold text-slate-950">1-1:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">옷 7벌</span>을 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">한 훅</span>에 모두 걸고, <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">벽과의 거리 혼합</span>, <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">태그 방향 혼합</span> 상태에서 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">안테나 중-중</span>으로 측정한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">1-2:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">옷 7벌</span>을 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">3-2-2 분산</span>으로 걸고, <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">벽과의 거리 혼합</span>, <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">태그 방향 혼합</span> 상태에서 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">안테나 중-중</span>으로 측정한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">1-3:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">옷 7벌</span>을 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">3-1-2-1 분산</span>으로 순차 배치하고, <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">벽과의 거리 혼합</span>, <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">태그 방향 혼합</span> 상태에서 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">안테나 중-중</span>으로 측정한 테스트.</p>
+            </div>
+          </article>
+
+          <article id="detail-2" class="detail-card rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 transition">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="text-lg font-bold text-slate-950">2. 재질 차폐 비교</h3>
+              <span class="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">1-8 ~ 1-11</span>
+            </div>
+            <div class="mt-4 space-y-3 text-sm leading-7 text-slate-700">
+              <p><span class="font-semibold text-slate-950">1-9:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">옷 5벌</span>을 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">중앙훅</span>에 걸고, 추가 재질 없이 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">안테나 중-중</span>으로 측정한 기준 테스트.</p>
+              <p><span class="font-semibold text-slate-950">1-8:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">1-9 기준 배치</span>에 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">바람막이만 추가</span>한 뒤 측정한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">1-10:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">1-9 기준 배치</span>에 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">청바지만 추가</span>한 뒤 측정한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">1-11:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">1-9 기준 배치</span>에 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">청바지 + 바람막이</span>를 모두 추가해 재질 차폐를 비교한 테스트.</p>
+            </div>
+          </article>
+
+          <article id="detail-3" class="detail-card rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 transition">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="text-lg font-bold text-slate-950">3. 청바지/바람막이 추가 비교</h3>
+              <span class="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">1-4 ~ 1-7, 1-12</span>
+            </div>
+            <div class="mt-4 space-y-3 text-sm leading-7 text-slate-700">
+              <p><span class="font-semibold text-slate-950">1-6:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">청바지, 바람막이 모두 제외</span>한 기본 5벌 비교 테스트.</p>
+              <p><span class="font-semibold text-slate-950">1-5:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">1-6 기준 배치</span>에 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">청바지만 추가</span>하고 바람막이는 제외한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">1-7:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">1-6 기준 배치</span>에 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">바람막이만 추가</span>하고 청바지는 제외한 비교 테스트.</p>
+              <p><span class="font-semibold text-slate-950">1-4:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">1-6 기준 배치</span>에 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">청바지와 바람막이</span>를 모두 추가한 상태를 측정한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">1-12:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">왼쪽 2개 + 바로 옆 1개 + 중앙 2개 + 오른쪽 청바지</span>처럼 특수 배치한 테스트.</p>
+            </div>
+          </article>
+
+          <article id="detail-4" class="detail-card rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 transition">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="text-lg font-bold text-slate-950">4. 바닥 적층 방향 비교</h3>
+              <span class="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">2-1 ~ 2-3, 2-5 ~ 2-7</span>
+            </div>
+            <div class="mt-4 space-y-3 text-sm leading-7 text-slate-700">
+              <p><span class="font-semibold text-slate-950">2-1:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">옷 7벌</span>을 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">바닥 적층</span>하고 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">최하단 19번만 안테나를 바라보게</span> 둔 상태에서 측정한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">2-2:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">최하단 19번만 안테나 반대 방향</span>으로 두고 측정한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">2-3:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">최하단 19번 외 나머지만 안테나를 바라보게</span> 만든 적층 비교 테스트.</p>
+              <p><span class="font-semibold text-slate-950">2-5:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">전체 태그를 안테나 반대 방향</span>으로 정렬한 적층 테스트.</p>
+              <p><span class="font-semibold text-slate-950">2-6:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">가장 위 10번만 안테나를 바라보게</span> 만든 적층 테스트.</p>
+              <p><span class="font-semibold text-slate-950">2-7:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">19번만 안테나를 바라보게</span> 만든 적층 테스트.</p>
+            </div>
+          </article>
+
+          <article id="detail-5" class="detail-card rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 transition">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="text-lg font-bold text-slate-950">5. 바닥 랜덤 배치 비교</h3>
+              <span class="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">2-4</span>
+            </div>
+            <div class="mt-4 space-y-3 text-sm leading-7 text-slate-700">
+              <p><span class="font-semibold text-slate-950">2-4:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">옷 7벌</span>을 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">바닥에 랜덤 분산</span>하고 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">벽과의 거리 혼합</span>, <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">태그 방향 혼합</span> 상태에서 측정한 테스트.</p>
+            </div>
+          </article>
+
+          <article id="detail-6" class="detail-card rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 lg:col-span-2 transition">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="text-lg font-bold text-slate-950">6. 안테나 위치 비교</h3>
+              <span class="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">1-5 new, 2-1 ~ 2-6 new, 3-2 new, 3-6 new</span>
+            </div>
+            <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-7 text-slate-700">
+              <p><span class="font-semibold text-slate-950">파일명 기준 매핑:</span> <span class="font-semibold text-slate-950">정면</span>=벽과 멂, <span class="font-semibold text-slate-950">후면</span>=벽과 가까움, <span class="font-semibold text-slate-950">왼쪽훅/중앙훅/오른쪽훅</span>=벽걸이 위치, <span class="font-semibold text-slate-950">안테나 왼쪽/중앙/오른쪽</span>=같은 조건에서 안테나 위치만 바꿔 본 비교입니다.</p>
+              <p class="mt-2"><span class="font-semibold text-slate-950">옷밖/옷안, QR 보임/안보임</span>은 파일명에 적힌 실제 배치 조건 그대로 남겼습니다. 이 부분은 안테나 위치 테스트의 세부 배치 조건으로 보고, 구조도 핵심 축과는 별도로 읽는 것이 안전합니다.</p>
+            </div>
+            <div class="mt-4 space-y-3 text-sm leading-7 text-slate-700">
+              <p><span class="font-semibold text-slate-950">1-5 new:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">파란셔츠 1벌</span>을 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">후면 왼쪽훅</span>, 즉 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">벽과 가까운 왼쪽훅</span>에 두고 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">옷밖 QR 안보이게</span> 배치한 상태에서 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">안테나 왼쪽 / 중앙 / 오른쪽</span>을 비교한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">2-1 new:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">파란셔츠 1벌</span>을 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">정면 중앙훅</span>, 즉 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">벽과 먼 중앙훅</span>에 두고 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">옷밖 QR 보이게</span> 배치한 상태에서 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">안테나 왼쪽 / 중앙 / 오른쪽</span>을 비교한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">2-2 new:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">파란셔츠 1벌</span>을 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">정면 중앙훅</span>, 즉 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">벽과 먼 중앙훅</span>에 두고 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">옷밖 QR 안보이게</span> 배치한 상태에서 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">안테나 왼쪽 / 중앙 / 오른쪽</span>을 비교한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">2-3 new:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">파란셔츠 1벌</span>을 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">정면 중앙훅</span>, 즉 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">벽과 먼 중앙훅</span>에 두고 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">옷안 QR 보이게</span> 배치한 상태에서 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">안테나 왼쪽 / 중앙 / 오른쪽</span>을 비교한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">2-4 new:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">파란셔츠 1벌</span>을 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">정면 중앙훅</span>, 즉 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">벽과 먼 중앙훅</span>에 두고 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">옷안 QR 안보이게</span> 배치한 상태에서 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">안테나 왼쪽 / 중앙 / 오른쪽</span>을 비교한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">2-5 new:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">파란셔츠 1벌</span>을 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">후면 중앙훅</span>, 즉 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">벽과 가까운 중앙훅</span>에 두고 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">옷밖 QR 안보이게</span> 배치한 상태에서 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">안테나 왼쪽 / 중앙 / 오른쪽</span>을 비교한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">2-6 new:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">파란셔츠 1벌</span>을 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">후면 중앙훅</span>, 즉 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">벽과 가까운 중앙훅</span>에 두고 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">옷밖 QR 보이게</span> 배치한 상태에서 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">안테나 왼쪽 / 중앙 / 오른쪽</span>을 비교한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">3-2 new:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">파란셔츠 1벌</span>을 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">정면 오른쪽훅</span>, 즉 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">벽과 먼 오른쪽훅</span>에 두고 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">옷밖 QR 안보이게</span> 배치한 상태에서 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">안테나 왼쪽 / 중앙 / 오른쪽</span>을 비교한 테스트.</p>
+              <p><span class="font-semibold text-slate-950">3-6 new:</span> <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">파란셔츠 1벌</span>을 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">후면 오른쪽훅</span>, 즉 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">벽과 가까운 오른쪽훅</span>에 두고 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">옷밖 QR 안보이게</span> 배치한 상태에서 <span class="rounded-md bg-sky-100 px-2 py-1 text-sky-800">안테나 왼쪽 / 중앙 / 오른쪽</span>을 비교한 테스트.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="../common_section_nav.js"></script>
+  <script src="../common_auto_reload.js"></script>
+</body>
+</html>

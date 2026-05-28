@@ -1,0 +1,184 @@
+﻿<Window x:Class="RFID.Utility.ConnectDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        Background="{x:Null}" WindowStartupLocation="CenterScreen" AllowsTransparency="True"
+        Title="Connect"  ResizeMode="NoResize" WindowStyle="None" mc:Ignorable="d" 
+        d:DesignHeight="234" d:DesignWidth="440" SizeToContent="WidthAndHeight" Topmost="False">
+    <Window.Resources>
+        <Style TargetType="{x:Type TabItem}">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="FontFamily" Value="微軟正黑體"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontStyle" Value="Oblique"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabItem}">
+                        <Border x:Name="Border" BorderThickness="2,2,1,0" BorderBrush="Gray" CornerRadius="2,5,0,0">
+                            <ContentPresenter x:Name="BorderMouseOver" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                              ContentSource="Header" Margin="20,2,20,0"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="Wheat" />
+                                <Setter TargetName="Border" Property="BorderThickness" Value="1" />
+                                <Setter TargetName="Border" Property="Margin" Value="0" />
+                            </Trigger>
+                            <Trigger SourceName="Border" Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="Gray"/>
+                                <Setter TargetName="Border" Property="BorderThickness" Value="1"/>
+                                <Setter TargetName="Border" Property="Background"  Value="#FFB0D0D3"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+        </Style>
+
+        <Style TargetType="{x:Type TabControl}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabControl}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Border  x:Name="Border" >
+                                <TabPanel IsItemsHost="True" />
+                            </Border>
+                            <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1">
+                                <ContentPresenter ContentSource="SelectedContent" Name="PART_SelectedContentHost"/>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+    
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="34" />
+            <RowDefinition Height="200" />
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" BorderBrush="#B0B0B0" BorderThickness="1,1,1,0" Background="#303030" MouseLeftButtonDown="OnConnectBorderMouseLeftDown">
+            <Grid Margin="2">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource TextBlockStyle16B}" Foreground="WhiteSmoke">Reader Search</TextBlock>
+                    <TextBlock Style="{StaticResource TextBlockStyle12B}" Margin="5,15,0,0" Foreground="WhiteSmoke">v4.1.3c</TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="ConnectDialogClose" Content="{StaticResource IMG_Close}" Width="28" Height="28" Click="OnConnectDialogCloseClick" VerticalContentAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <Border Grid.Row="1" BorderBrush="#B0B0B0" BorderThickness="1,0,1,1" Background="#FAFAFA">
+            <TabControl x:Name="TabControl" Margin="0,2,0,0" SelectionChanged="TabControlSelectionChanged">
+                <TabItem x:Name="ConnectCOM" Header="{Binding ConnectCOM, Source={StaticResource Resources}}">
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Left">
+                        <TextBlock Style="{StaticResource TextBlockStyle12}" Margin="10,5,10,0" Text="{Binding TBMSG1}" FontSize="{Binding TBMSG1FontSize}"></TextBlock>
+                        <TextBlock Style="{StaticResource TextBlockStyle12}" Margin="10,2,10,0" Text="{Binding TBMSG2}"></TextBlock>
+                        <GroupBox Height="60" Width="410" Margin="10,0,10,0" BorderBrush="LightSlateGray" HorizontalAlignment="Left">
+                            <GroupBox.Header>
+                                <Label>Reader Select</Label>
+                            </GroupBox.Header>
+                            <ComboBox Height="24" Width="396" FontStyle="Normal" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left" 
+                                      DropDownOpened ="OnComboboxCOMReaderDropDownOpened" DisplayMemberPath="Content"
+                                      ItemsSource="{Binding COMPortBoxItemsSource}" SelectedItem="{Binding COMPortBoxSelectedItem}"></ComboBox>
+                        </GroupBox>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <GroupBox Height="60" Width="170" Margin="10,10,10,0" BorderBrush="LightSlateGray" >
+                                <GroupBox.Header>
+                                    <Label>Baud Rate Select</Label>
+                                </GroupBox.Header>
+                                <ComboBox Height="24" Width="156" FontStyle="Normal" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left"
+                                          ItemsSource="{Binding BaudRate}" SelectedItem="{Binding BaudRateSelectedItem}" DisplayMemberPath="Content">
+                                </ComboBox>
+                            </GroupBox>
+                            <Button Style="{StaticResource ButtonStyle14B}" Margin="26,35,5,0" Click="OnButtonCOMConnectClick" IsEnabled="{Binding ButtonCOMConnectIsEnabled}">Connect</Button>
+                            <Button Style="{StaticResource ButtonStyle14B}" Margin="0,35,10,0" Click="OnButtonCOMEnterClick" IsEnabled="{Binding ButtonCOMEnterIsEnabled}">Enter Utility</Button>
+                        </StackPanel>
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="{Binding ConnectUSB, Source={StaticResource Resources}}">
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Left">
+                        <TextBlock Style="{StaticResource TextBlockStyle12}" Margin="10,5,10,0" Text="{Binding USBTBMSG1}" FontSize="{Binding USBTBMSG1FontSize}"></TextBlock>
+                        <TextBlock Style="{StaticResource TextBlockStyle12}" Margin="10,2,10,0" Text="{Binding USBTBMSG2}"></TextBlock>
+                        <GroupBox Height="60" Width="410" Margin="10,0,10,0" BorderBrush="LightSlateGray" HorizontalAlignment="Left">
+                            <GroupBox.Header>
+                                <Label>USB Device List:</Label>
+                            </GroupBox.Header>
+                            <ComboBox x:Name="ComboBoxUSBReader" Height="24" Width="396" FontStyle="Normal" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left"></ComboBox>
+                        </GroupBox>
+                        <Button Style="{StaticResource ButtonStyle14B}" Margin="316,5,5,0" Click="OnButtonUSBEnumerateClick" IsEnabled="{Binding ButtonUSBEnumerateIsEnabled}">Get Device</Button>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <Button Style="{StaticResource ButtonStyle14B}" Margin="216,10,5,0" Click="OnButtonUSBConnectClick" IsEnabled="{Binding ButtonUSBConnectIsEnabled}">Connect</Button>
+                            <Button Style="{StaticResource ButtonStyle14B}" Margin="0,10,10,0" Click="OnButtonUSBEnterClick" IsEnabled="{Binding ButtonUSBEnterIsEnabled}">Enter Utility</Button>
+                        </StackPanel>
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="{Binding ConnectNet, Source={StaticResource Resources}}">
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Left">
+                        <StackPanel Orientation="Vertical" IsEnabled="False">
+                            <CheckBox x:Name="CheckBoxNetSearch" Margin="5,35,0,0" Checked="CheckBoxNetManageGroup">Net Device List:</CheckBox>
+                            <StackPanel Margin="5,5,0,0" Orientation="Horizontal" IsEnabled="{Binding ElementName=CheckBoxNetSearch, Path=IsChecked}">
+                                <ComboBox x:Name="ComboBoxNetReader" Height="28" Width="309" ></ComboBox>
+                                <Button x:Name="ButtonNetSearch" Click="OnButtonNetSearchClick" Style="{StaticResource ButtonStyle14B}" Margin="10,0,5,0">Search</Button>
+                            </StackPanel>
+                        </StackPanel>
+                        <CheckBox x:Name="CheckBoxNetAssign" Margin="5,20,0,5" Checked="CheckBoxNetManageGroup">Net Assign:</CheckBox>
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" IsEnabled="{Binding ElementName=CheckBoxNetAssign, Path=IsChecked}">
+                                <Label VerticalAlignment="Center">IP:</Label>
+                                <TextBox x:Name="TextBoxNetIP" FontSize="14" VerticalContentAlignment="Center" Height="26" Width="166"></TextBox>
+                                <Label VerticalAlignment="Center" Margin="10,0,0,0">Port:</Label>
+                                <TextBox x:Name="TextBoxNetPort" FontSize="14" VerticalContentAlignment="Center" Height="26" Width="80"></TextBox>
+                            </StackPanel>
+                            <Button x:Name="ButtonNetConnect" Click="OnButtonNetConnectClick" Style="{StaticResource ButtonStyle14B}" Margin="10,0,5,0">Connect</Button>
+                        </StackPanel>
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="{Binding ConnectBLE, Source={StaticResource Resources}}">
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Left">
+                        <TextBlock Style="{StaticResource TextBlockStyle12}" Margin="10,5,10,0" Text="{Binding BLETBMSG1}" FontSize="{Binding BLETBMSG1FontSize}"></TextBlock>
+                        <TextBlock Style="{StaticResource TextBlockStyle12}" Margin="10,2,10,0" Text="{Binding BLETBMSG2}"></TextBlock>
+                        <GroupBox Height="105" Width="420" Margin="5,-5,6,0" BorderBrush="LightSlateGray" HorizontalAlignment="Left">
+                            <GroupBox.Header>
+                                <Label>BLE Device List:</Label>
+                            </GroupBox.Header>
+                            <ListView x:Name="ListViewBLEResults" Width="398" ItemsSource="{Binding BLEDeviceUnpairedItemsSource}" SelectedItem="{Binding BLEDeviceUnpairedItemsSelected, Mode=TwoWay}">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel HorizontalAlignment="Stretch" Orientation="Vertical" Background="AliceBlue" Height="34" >
+                                            <TextBlock Text="{Binding Path=DeviceName}" FontSize="16" FontFamily="Consolas" FontWeight="Bold" TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding Path=ShowDeviceUUID}" FontSize="14" FontFamily="Consolas" FontWeight="Bold" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                            </ListView>
+                            <!--<ComboBox x:Name="ComboBoxBLEReader" Height="24" Width="396" FontStyle="Normal" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left"></ComboBox>-->
+                        </GroupBox>
+                        
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <Button Style="{StaticResource ButtonStyle14B}" Margin="5,5,0,0" Click="OnButtonBLEEnumerateClick" IsEnabled="{Binding ButtonBLEEnumerateIsEnabled}">Enumerate</Button>
+                            <Button Style="{StaticResource ButtonStyle14B}" Margin="115,5,5,0" Click="OnButtonBLEConnectClick" IsEnabled="{Binding ButtonBLEConnectIsEnabled}">Connect</Button>
+                            <Button Style="{StaticResource ButtonStyle14B}" Margin="0,5,0,0" Click="OnButtonBLEEnterClick" IsEnabled="{Binding ButtonBLEEnterIsEnabled}">Enter Utility</Button>
+                        </StackPanel>
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
+        </Border>
+    </Grid>
+</Window>

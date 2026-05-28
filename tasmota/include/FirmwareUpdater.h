@@ -17,8 +17,11 @@ class FirmwareUpdater {
 public:
   FirmwareUpdater(const char* serverUrl, const char* projectId, int versionCode);
 
+  using ServiceCallback = std::function<void()>;
+
   void performFirmwareUpdate(std::function<void(float)> progressCallback,
-                             std::function<void(FirmwareUpdateResult)> resultCallback);
+                             std::function<void(FirmwareUpdateResult)> resultCallback,
+                             ServiceCallback serviceCallback = nullptr);
   void setAutoReset(bool enable);
   void reset();
 

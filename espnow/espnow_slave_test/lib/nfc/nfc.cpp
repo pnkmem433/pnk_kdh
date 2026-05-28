@@ -1,8 +1,18 @@
-﻿#include "nfc.h"
+#include "nfc.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 
 static const uint32_t LOG_INTERVAL_MS = 1000;
+static const uint32_t BOOT_WARMUP_MS = 2500;
+static const uint16_t READ_CONFIRM_MS = 90;
+static const uint8_t READ_CONFIRM_COUNT = 2;
+static const uint16_t REMOVE_PENDING_GRACE_MS = 180;
+static const uint16_t EVENT_REFRACTORY_MS = 250;
+static const uint16_t ENABLE_REMOVE_SUPPRESS_MS = 180;
+static const uint16_t ENABLE_READ_CONFIRM_RESET_MS = 60;
+static const uint8_t EVENT_NONE = 0;
+static const uint8_t EVENT_READ = 1;
+static const uint8_t EVENT_REMOVE = 2;
 
 static SemaphoreHandle_t s_spiMutex = nullptr;
 static bool s_spiInited = false;
@@ -135,11 +145,22 @@ void NfcReader::begin()
   }
 
   _lastUid = "";
+  _pendingReadUid = "";
   _cardPresent = false;
+  _publishedPresent = false;
+  _removePending = false;
   _failCount = 0;
   _missCount = 0;
+  _pendingReadCount = 0;
   _lastPollMs = 0;
   _lastSeenMs = 0;
+  _pendingReadStartMs = 0;
+  _removePendingStartMs = 0;
+  _lastEventMs = 0;
+  _lastEventType = EVENT_NONE;
+  _bootWarmupUntilMs = millis() + BOOT_WARMUP_MS;
+  _suppressRemoveUntil = _bootWarmupUntilMs;
+  _disabledStartMs = 0;
 
   if (_task) {
     _task->begin({
@@ -169,6 +190,12 @@ void NfcReader::reset()
   _rfid.PCD_AntennaOn();
   _rfid.PCD_SetAntennaGain(MFRC522::RxGain_23dB_2);
   _failCount = 0;
+  _missCount = 0;
+  _pendingReadUid = "";
+  _pendingReadCount = 0;
+  _pendingReadStartMs = 0;
+  _removePending = false;
+  _removePendingStartMs = 0;
 }
 
 void NfcReader::onRead(ReadCallback cb) { _onRead = cb; }
@@ -191,8 +218,21 @@ void NfcReader::setEnabled(bool enabled)
 {
   if (_enabled == enabled)
     return;
+  const uint32_t now = millis();
   _enabled = enabled;
-  _lastEnableMs = millis();
+  _lastEnableMs = now;
+  if (_enabled) {
+    if (_disabledStartMs != 0) {
+      shiftTimingWindows(now - _disabledStartMs);
+      _disabledStartMs = 0;
+    }
+    _pendingReadUid = "";
+    _pendingReadCount = 0;
+    _pendingReadStartMs = 0;
+    _suppressRemoveUntil = _lastEnableMs + ENABLE_REMOVE_SUPPRESS_MS;
+  } else {
+    _disabledStartMs = now;
+  }
 
   SpiLock lock;
   if (!lock.ok())
@@ -202,6 +242,26 @@ void NfcReader::setEnabled(bool enabled)
     _rfid.PCD_AntennaOn();
   } else {
     _rfid.PCD_AntennaOff();
+  }
+}
+
+void NfcReader::shiftTimingWindows(uint32_t deltaMs)
+{
+  if (deltaMs == 0) {
+    return;
+  }
+
+  if (_lastSeenMs != 0) {
+    _lastSeenMs += deltaMs;
+  }
+  if (_pendingReadStartMs != 0) {
+    _pendingReadStartMs += deltaMs;
+  }
+  if (_removePendingStartMs != 0) {
+    _removePendingStartMs += deltaMs;
+  }
+  if (_lastEventMs != 0) {
+    _lastEventMs += deltaMs;
   }
 }
 
@@ -257,6 +317,7 @@ void NfcReader::taskTick()
   _lastPollMs = now;
 
   bool cardSeenThisTick = false;
+  String seenUid;
   SpiLock lock;
   if (!lock.ok())
   {
@@ -285,13 +346,7 @@ void NfcReader::taskTick()
 
     if (_rfid.PICC_ReadCardSerial())
     {
-      const String uid = uidToHex(_rfid.uid.uidByte, _rfid.uid.size);
-      if (uid != _lastUid)
-      {
-        _lastUid = uid;
-        if (_onRead)
-          _onRead(uid);
-      }
+      seenUid = uidToHex(_rfid.uid.uidByte, _rfid.uid.size);
     }
     else
     {
@@ -299,16 +354,114 @@ void NfcReader::taskTick()
     }
   }
 
+  if (cardSeenThisTick && !seenUid.isEmpty())
+  {
+    _cardPresent = true;
+    _lastUid = seenUid;
+    _removePending = false;
+    _removePendingStartMs = 0;
+
+    if (_lastEnableMs != 0 && (now - _lastEnableMs) < ENABLE_READ_CONFIRM_RESET_MS)
+    {
+      _pendingReadUid = seenUid;
+      _pendingReadCount = 1;
+      _pendingReadStartMs = now;
+      return;
+    }
+
+    if (now < _bootWarmupUntilMs)
+    {
+      _pendingReadUid = seenUid;
+      _pendingReadCount = READ_CONFIRM_COUNT;
+      _pendingReadStartMs = now;
+      return;
+    }
+
+    if (_publishedPresent)
+    {
+      _pendingReadUid = "";
+      _pendingReadCount = 0;
+      _pendingReadStartMs = 0;
+      return;
+    }
+
+    if (seenUid != _pendingReadUid)
+    {
+      _pendingReadUid = seenUid;
+      _pendingReadCount = 1;
+      _pendingReadStartMs = now;
+      return;
+    }
+
+    if (_pendingReadCount < 0xFF)
+    {
+      _pendingReadCount++;
+    }
+
+    const bool readConfirmed =
+        _pendingReadCount >= READ_CONFIRM_COUNT &&
+        (now - _pendingReadStartMs) >= READ_CONFIRM_MS;
+    const bool readAllowed =
+        !(_lastEventType == EVENT_REMOVE && (now - _lastEventMs) < EVENT_REFRACTORY_MS);
+
+    if (readConfirmed && readAllowed)
+    {
+      _publishedPresent = true;
+      _pendingReadUid = "";
+      _pendingReadCount = 0;
+      _pendingReadStartMs = 0;
+      _lastEventType = EVENT_READ;
+      _lastEventMs = now;
+      if (_onRead)
+      {
+        _onRead(seenUid);
+      }
+    }
+    return;
+  }
+
+  _pendingReadUid = "";
+  _pendingReadCount = 0;
+  _pendingReadStartMs = 0;
+
   if (!cardSeenThisTick && _cardPresent && _settings.miss >= 0)
   {
+    if (now < _bootWarmupUntilMs || now < _suppressRemoveUntil || !_publishedPresent)
+    {
+      return;
+    }
+
     const bool removeExpired =
         (_removeTimeMs == 0) || (_lastSeenMs > 0 && (now - _lastSeenMs) >= _removeTimeMs);
-    if (removeExpired)
+    if (!removeExpired)
+    {
+      return;
+    }
+
+    if (!_removePending)
+    {
+      _removePending = true;
+      _removePendingStartMs = now;
+      return;
+    }
+
+    const bool removeConfirmed = (now - _removePendingStartMs) >= REMOVE_PENDING_GRACE_MS;
+    const bool removeAllowed =
+        !(_lastEventType == EVENT_READ && (now - _lastEventMs) < EVENT_REFRACTORY_MS);
+
+    if (removeConfirmed && removeAllowed)
     {
       _cardPresent = false;
+      _publishedPresent = false;
+      _removePending = false;
+      _removePendingStartMs = 0;
+      _lastEventType = EVENT_REMOVE;
+      _lastEventMs = now;
       _lastUid = "";
       if (_onRemove)
+      {
         _onRemove();
+      }
     }
   }
 }

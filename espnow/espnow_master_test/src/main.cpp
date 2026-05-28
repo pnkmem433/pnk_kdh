@@ -104,6 +104,23 @@ struct TestCounters {
   uint32_t goalEventCount = 0;
 };
 
+struct SlaveEventStats {
+  bool used = false;
+  uint8_t slaveId = 0;
+  uint32_t pickDownEvents = 0;
+  uint32_t pickUpEvents = 0;
+  uint32_t lastEventMs = 0;
+  char lastEventName[16] = {};
+};
+
+struct LogicalTagState {
+  bool used = false;
+  uint8_t slaveId = 0;
+  uint8_t nfcIndex = 0;
+  bool present = false;
+  char uid[UID_MAX_LEN] = {};
+};
+
 SeenPacket g_seenPackets[DEDUP_CACHE_SIZE] = {};
 size_t g_nextSeenIndex = 0;
 KnownSlave g_knownSlaves[MAX_KNOWN_SLAVES] = {};
@@ -122,6 +139,8 @@ uint32_t g_lastSendFailLogMs = 0;
 bool g_pollInFlight = false;
 uint8_t g_pollInFlightMac[ESP_NOW_ETH_ALEN] = {};
 TestCounters g_testCounters = {};
+SlaveEventStats g_slaveEventStats[MAX_KNOWN_SLAVES] = {};
+LogicalTagState g_logicalTagStates[MAX_KNOWN_SLAVES * 2] = {};
 
 const uint8_t BROADCAST_MAC[ESP_NOW_ETH_ALEN] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
@@ -145,11 +164,20 @@ const char* mqttEventName(uint8_t packetType) {
   return packetType == PACKET_NFC_READ ? "READ" : "REMOVE";
 }
 
+const char* eventEmojiByName(const char* eventName) {
+  return strncmp(eventName, "PICK-DOWN", 16) == 0 ? "🟢" : "🔴";
+}
+
 bool isGoalEvent(const char* eventName) {
   return strncmp(eventName, ExperimentConfig::kGoalEvent, 15) == 0;
 }
 
 void printMac(const uint8_t* mac);
+SlaveEventStats* findOrCreateSlaveStats(uint8_t slaveId);
+void noteSlaveEvent(uint8_t slaveId, const char* eventName, uint32_t eventMs);
+void printPerSlaveEventSummary();
+LogicalTagState* findOrCreateLogicalTagState(uint8_t slaveId, uint8_t nfcIndex);
+bool shouldAcceptLogicalEvent(uint8_t slaveId, uint8_t nfcIndex, uint8_t packetType, const char* uid);
 
 bool isTimeBasedGoal() {
   return ExperimentConfig::kGoalDurationMs > 0;
@@ -204,6 +232,100 @@ void printCounterSummary(const char* reason) {
       static_cast<unsigned long>(g_testCounters.pickUpEvents),
       static_cast<unsigned long>(g_testCounters.publishSuccess),
       static_cast<unsigned long>(g_testCounters.publishFail));
+}
+
+SlaveEventStats* findOrCreateSlaveStats(uint8_t slaveId) {
+  for (SlaveEventStats& stats : g_slaveEventStats) {
+    if (stats.used && stats.slaveId == slaveId) {
+      return &stats;
+    }
+  }
+
+  for (SlaveEventStats& stats : g_slaveEventStats) {
+    if (!stats.used) {
+      stats.used = true;
+      stats.slaveId = slaveId;
+      stats.pickDownEvents = 0;
+      stats.pickUpEvents = 0;
+      stats.lastEventMs = 0;
+      stats.lastEventName[0] = '\0';
+      return &stats;
+    }
+  }
+  return nullptr;
+}
+
+void noteSlaveEvent(uint8_t slaveId, const char* eventName, uint32_t eventMs) {
+  SlaveEventStats* stats = findOrCreateSlaveStats(slaveId);
+  if (!stats) {
+    return;
+  }
+
+  if (strncmp(eventName, "PICK-DOWN", sizeof(stats->lastEventName)) == 0) {
+    stats->pickDownEvents++;
+  } else if (strncmp(eventName, "PICK-UP", sizeof(stats->lastEventName)) == 0) {
+    stats->pickUpEvents++;
+  }
+
+  stats->lastEventMs = eventMs;
+  strncpy(stats->lastEventName, eventName, sizeof(stats->lastEventName) - 1);
+  stats->lastEventName[sizeof(stats->lastEventName) - 1] = '\0';
+}
+
+void printPerSlaveEventSummary() {
+  for (const SlaveEventStats& stats : g_slaveEventStats) {
+    if (!stats.used) {
+      continue;
+    }
+    Serial.printf("[Master][SlaveSummary] slave=%u pickdown=%lu pickup=%lu last=%s last_ms=%lu\n",
+                  stats.slaveId,
+                  static_cast<unsigned long>(stats.pickDownEvents),
+                  static_cast<unsigned long>(stats.pickUpEvents),
+                  stats.lastEventName[0] ? stats.lastEventName : "-",
+                  static_cast<unsigned long>(stats.lastEventMs));
+  }
+}
+
+LogicalTagState* findOrCreateLogicalTagState(uint8_t slaveId, uint8_t nfcIndex) {
+  for (LogicalTagState& state : g_logicalTagStates) {
+    if (state.used && state.slaveId == slaveId && state.nfcIndex == nfcIndex) {
+      return &state;
+    }
+  }
+
+  for (LogicalTagState& state : g_logicalTagStates) {
+    if (!state.used) {
+      state.used = true;
+      state.slaveId = slaveId;
+      state.nfcIndex = nfcIndex;
+      state.present = false;
+      state.uid[0] = '\0';
+      return &state;
+    }
+  }
+  return nullptr;
+}
+
+bool shouldAcceptLogicalEvent(uint8_t slaveId, uint8_t nfcIndex, uint8_t packetType, const char* uid) {
+  LogicalTagState* state = findOrCreateLogicalTagState(slaveId, nfcIndex);
+  if (!state) {
+    return true;
+  }
+
+  const bool isRead = (packetType == PACKET_NFC_READ);
+  const bool sameUid = strncmp(state->uid, uid, sizeof(state->uid)) == 0;
+
+  if (isRead && state->present && sameUid) {
+    return false;
+  }
+  if (!isRead && !state->present && sameUid) {
+    return false;
+  }
+
+  state->present = isRead;
+  strncpy(state->uid, uid, sizeof(state->uid) - 1);
+  state->uid[sizeof(state->uid) - 1] = '\0';
+  return true;
 }
 
 void printMasterStateSummary() {
@@ -443,12 +565,27 @@ void setupEspNow() {
     rememberSeen(packet);
 
     const uint32_t recvMs = millis();
+    const uint8_t effectiveSlaveId = slave ? slave->advertisedSlaveId : packet.slaveId;
+    if (!shouldAcceptLogicalEvent(effectiveSlaveId, packet.nfcIndex, packet.type, packet.uid)) {
+      EspNowPacket ack = packet;
+      ack.type = PACKET_MASTER_ACK;
+      ack.ackedType = packet.type;
+      ack.masterRxMs = recvMs;
+      esp_now_send(macAddr, reinterpret_cast<const uint8_t*>(&ack), sizeof(ack));
+      Serial.printf("[Master][Dedup] slave=%u nfc=%u event=%s uid=%s\n",
+                    effectiveSlaveId,
+                    packet.nfcIndex,
+                    csvEventName(packet.type),
+                    packet.uid);
+      return;
+    }
+
     CsvLogRow row = {};
     row.testId = g_nextTestId++;
     strncpy(row.phase, ExperimentConfig::kPhase, sizeof(row.phase) - 1);
     strncpy(row.environment, ExperimentConfig::kEnvironment, sizeof(row.environment) - 1);
     strncpy(row.pattern, ExperimentConfig::kPattern, sizeof(row.pattern) - 1);
-    row.slaveId = slave ? slave->advertisedSlaveId : packet.slaveId;
+    row.slaveId = effectiveSlaveId;
     row.nfcIndex = packet.nfcIndex;
     strncpy(row.uid, packet.uid, sizeof(row.uid) - 1);
     strncpy(row.eventName, csvEventName(packet.type), sizeof(row.eventName) - 1);
@@ -485,21 +622,15 @@ void setupEspNow() {
       }
     }
 
-    Serial.printf("[Master][Event] test=%lu slave_slot=%u nfc=%u event=%s uid=%s t1=%lu t2=%lu\n",
+    noteSlaveEvent(row.slaveId, row.eventName, recvMs);
+
+    Serial.printf("[Master][Tag] %s %s test=%lu slave_slot=%u nfc=%u uid=%s\n",
+                  eventEmojiByName(row.eventName),
+                  row.eventName,
                   static_cast<unsigned long>(row.testId),
                   row.slaveId,
                   row.nfcIndex,
-                  row.eventName,
-                  row.uid,
-                  static_cast<unsigned long>(row.t1PollMs),
-                  static_cast<unsigned long>(row.t2RecvMs));
-    Serial.printf("[Master][Tag] slave_slot=%u adv_id=%u nfc=%u event=%s uid=%s retry=%u\n",
-                  row.slaveId,
-                  slave ? slave->advertisedSlaveId : packet.slaveId,
-                  row.nfcIndex,
-                  row.eventName,
-                  row.uid,
-                  row.retryCount);
+                  row.uid);
 
     EspNowPacket ack = packet;
     ack.type = PACKET_MASTER_ACK;
@@ -596,6 +727,7 @@ void checkSlaveStatus() {
   if (now - g_lastTimerSummaryMs >= STATE_LOG_INTERVAL_MS) {
       g_lastTimerSummaryMs = now;
       printMasterStateSummary();
+      printPerSlaveEventSummary();
       if (isTimeBasedGoal()) {
         printCounterSummary("timer");
       }
@@ -707,9 +839,10 @@ void setup() {
   }
   Serial.println(" Notes:");
   Serial.println("  - Change espnow/common/ExperimentConfig.h before each run.");
-  Serial.println("  - Pickup test 1 is analyzed by Slave_ID from CSV, not by Pattern.");
+  Serial.println("  - For hold tests, use SlaveSummary pickup count as false REMOVE count per slave.");
   Serial.println("=================================");
   printCounterSummary("boot");
+  printPerSlaveEventSummary();
 
   setupEspNow();
 }

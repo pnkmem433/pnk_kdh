@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { IsIn, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class firmwareDownloadDto {
   @ApiProperty({
-    description: '프로젝트 ID',
+    description: 'Project ID',
     example: 10,
     type: 'number',
   })
@@ -12,7 +12,7 @@ export class firmwareDownloadDto {
   projectId: number;
 
   @ApiProperty({
-    description: '칩 종류',
+    description: 'Chip type',
     example: 'esp8685',
     type: 'string',
     enum: ['esp02s', 'esp8685'],
@@ -23,7 +23,7 @@ export class firmwareDownloadDto {
   chipType: string;
 
   @ApiProperty({
-    description: '현재 펌웨어 계열',
+    description: 'Current firmware family',
     example: 'custom',
     type: 'string',
     enum: ['custom', 'tasmota'],
@@ -34,11 +34,33 @@ export class firmwareDownloadDto {
   currentFirmwareFamily: string;
 
   @ApiProperty({
-    description: '현재 버전 번호',
+    description: 'Current version number',
     example: 23,
     type: 'number',
   })
   @IsInt()
   @IsNotEmpty()
   currentVersion: number;
+
+  @ApiProperty({
+    description: 'Device MAC address without separators',
+    example: 'A1B2C3D4E5F6',
+    type: 'string',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  macAddress?: string;
+
+  @ApiProperty({
+    description: 'Optional boot source hint from the custom firmware',
+    example: 'external_install',
+    type: 'string',
+    required: false,
+    enum: ['stable', 'custom_ota', 'external_install'],
+  })
+  @IsString()
+  @IsOptional()
+  @IsIn(['stable', 'custom_ota', 'external_install'])
+  bootSourceHint?: string;
 }

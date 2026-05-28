@@ -28,8 +28,9 @@ def _get_gdrive_dir() -> pathlib.Path:
 
 
 def _find_current_gdrive_version(gdrive_dir: pathlib.Path) -> str | None:
-    version_pattern = re.compile(r"^v(\d+)_esp8685_tasmota\.bin$", re.IGNORECASE)
+    version_pattern = re.compile(r"^v(\d+)_(?:com_)?esp8685_tasmota\.bin$", re.IGNORECASE)
     latest_version = None
+    latest_mtime = None
 
     if not gdrive_dir.exists():
         return None
@@ -40,13 +41,12 @@ def _find_current_gdrive_version(gdrive_dir: pathlib.Path) -> str | None:
         match = version_pattern.match(entry.name)
         if not match:
             continue
-        version_number = int(match.group(1))
-        if latest_version is None or version_number > latest_version:
-            latest_version = version_number
+        entry_mtime = entry.stat().st_mtime
+        if latest_mtime is None or entry_mtime > latest_mtime:
+            latest_mtime = entry_mtime
+            latest_version = match.group(1)
 
-    if latest_version is None:
-        return None
-    return str(latest_version)
+    return latest_version
 
 
 def _validate_newer_version(version_text: str, current_version: str | None) -> str:
@@ -98,9 +98,9 @@ def _image_name() -> str:
     version = _prompt_version_once()
 
     if env_name == "tasmota32c3-work-dev":
-        suffix = "esp8685-dev"
+        suffix = "com_esp8685-dev"
     else:
-        suffix = "esp8685"
+        suffix = "com_esp8685"
 
     return f"v{version}_{suffix}"
 

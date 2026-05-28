@@ -1,64 +1,68 @@
 #ifndef _USER_CONFIG_OVERRIDE_H_
 #define _USER_CONFIG_OVERRIDE_H_
 
-#warning **** user_config_override.h: Using Smart Plug Settings ****
+// ?????????????????????? ?????? ??? ??? ???
+#warning "**** Building Custom Tasmota SmartPlug Firmware (Aggressive Size Optimization) ****"
 
+// --- 1. ??? ??? (Wi-Fi, MQTT) ---
 #undef STA_SSID1
-#define STA_SSID1         "CC-Retail"
-
+#define STA_SSID1 "CC-Retail"
 #undef STA_PASS1
-#define STA_PASS1         "pnks1111"
+#define STA_PASS1 "pnks1111"
 
 #undef MQTT_HOST
-#define MQTT_HOST         "192.168.0.15"
-
+#define MQTT_HOST "api.pnkslab.com"
 #undef MQTT_PORT
-#define MQTT_PORT         1883
-
+#define MQTT_PORT 1884
 #undef MQTT_USER
-#define MQTT_USER         "plugtest"
-
+#define MQTT_USER "pnks"
 #undef MQTT_PASS
-#define MQTT_PASS         "fcfc50kc35"
+#define MQTT_PASS "pnks1111"
 
-#ifdef WEB_USERNAME
-#undef WEB_USERNAME
-#endif
-#define WEB_USERNAME      "pnkmem433"
+// --- 2. ???????? ???????? ???????? ?????? ---
+// ???????????? ?????? ???
+#undef USE_DOMOTICZ
+#undef USE_HOME_ASSISTANT
+#undef USE_DISCOVERY
+#undef USE_TASMOTA_DISCOVERY
+#undef USE_KNX
+#undef USE_PROMETHEUS
+#undef USE_WEMO
+#undef USE_HUE
+#undef USE_EMULATION_HUE
+#undef USE_EMULATION_WEMO
+#undef USE_UPNP
+#undef USE_TIMERS
+#undef USE_RULES
+#undef USE_EXPRESSION
+#undef USE_SCRIPT
+#undef USE_PING
+#undef USE_MDNS
+#undef USE_SYSLOG
 
-#ifdef WEB_PASSWORD
-#undef WEB_PASSWORD
-#endif
-#define WEB_PASSWORD      "pnks1111"
+// ?????? ??? ?????????????
+#undef USE_I2C
+#undef USE_SPI
+#undef USE_DISPLAY
+#undef USE_IR_REMOTE
+#undef USE_IR_RECEIVE
+#undef USE_WS2812
+#undef USE_SR04
+#undef USE_RC_SWITCH
+#undef USE_TUYA_MCU
+#undef USE_ENERGY_SENSOR
+#undef USE_SERIAL_BRIDGE
+#undef USE_COUNTER
 
-#ifdef APP_TIMEZONE
-#undef APP_TIMEZONE
-#endif
-#define APP_TIMEZONE      9
-
-// Use the same readable unique name for AP mode and DHCP hostname.
-#ifdef WIFI_DEFAULT_HOSTNAME
-#undef WIFI_DEFAULT_HOSTNAME
-#endif
-#define WIFI_DEFAULT_HOSTNAME "Pnks-%06X"
-
-#ifdef TELE_PERIOD
-#undef TELE_PERIOD
-#endif
-#define TELE_PERIOD       10
-
-#ifdef APP_LEDSTATE
-#undef APP_LEDSTATE
-#endif
-#define APP_LEDSTATE      LED_POWER
-
-#ifdef APP_ENABLE_LEDLINK
-#undef APP_ENABLE_LEDLINK
-#endif
-#define APP_ENABLE_LEDLINK false
-
-#ifndef USE_SMARTPLUG_CUSTOM
-#define USE_SMARTPLUG_CUSTOM
-#endif
+// ??? ?????? ??? ?????? ???
+#undef USE_DHT
+#undef USE_DS18X20
+#undef USE_DS18X20_LEGACY
+#undef USE_BMP
+#undef USE_BME680
+#undef USE_BH1750
+#undef USE_SHT
+#undef USE_HTU
+#undef USE_ADC_VCC
 
 #endif  // _USER_CONFIG_OVERRIDE_H_

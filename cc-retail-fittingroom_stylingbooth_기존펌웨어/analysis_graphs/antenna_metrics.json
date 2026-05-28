@@ -1,0 +1,572 @@
+﻿{
+    "1_5":  {
+                "existing":  {
+                                 "counts":  [
+
+                                            ],
+                                 "firsts":  [
+
+                                            ],
+                                 "trim_count":  null,
+                                 "trim_first":  null
+                             },
+                "left":  {
+                             "counts":  [
+                                            8,
+                                            7,
+                                            9,
+                                            6
+                                        ],
+                             "firsts":  [
+                                            2042,
+                                            4043,
+                                            481,
+                                            3938
+                                        ],
+                             "trim_count":  7.5,
+                             "trim_first":  2990
+                         },
+                "center":  {
+                               "counts":  [
+
+                                          ],
+                               "firsts":  [
+
+                                          ],
+                               "trim_count":  null,
+                               "trim_first":  null
+                           },
+                "right":  {
+                              "counts":  [
+                                             24,
+                                             27,
+                                             28,
+                                             27,
+                                             26
+                                         ],
+                              "firsts":  [
+                                             139,
+                                             239,
+                                             338,
+                                             639,
+                                             150
+                                         ],
+                              "trim_count":  26.67,
+                              "trim_first":  242.33
+                          }
+            },
+    "2_1":  {
+                "existing":  {
+                                 "counts":  [
+                                                5,
+                                                11,
+                                                8,
+                                                10,
+                                                10
+                                            ],
+                                 "firsts":  [
+                                                938,
+                                                747,
+                                                1083,
+                                                538,
+                                                1452
+                                            ],
+                                 "trim_count":  9.33,
+                                 "trim_first":  922.67
+                             },
+                "left":  {
+                             "counts":  [
+                                            52,
+                                            52,
+                                            55,
+                                            55,
+                                            52
+                                        ],
+                             "firsts":  [
+                                            139,
+                                            245,
+                                            245,
+                                            139,
+                                            240
+                                        ],
+                             "trim_count":  53,
+                             "trim_first":  208
+                         },
+                "center":  {
+                               "counts":  [
+                                              65,
+                                              64,
+                                              68,
+                                              65,
+                                              64
+                                          ],
+                               "firsts":  [
+                                              239,
+                                              253,
+                                              139,
+                                              239,
+                                              238
+                                          ],
+                               "trim_count":  64.67,
+                               "trim_first":  238.67
+                           },
+                "right":  {
+                              "counts":  [
+                                             47,
+                                             48,
+                                             46,
+                                             48,
+                                             51
+                                         ],
+                              "firsts":  [
+                                             243,
+                                             138,
+                                             244,
+                                             139,
+                                             138
+                                         ],
+                              "trim_count":  47.67,
+                              "trim_first":  173.33
+                          }
+            },
+    "2_2":  {
+                "existing":  {
+                                 "counts":  [
+                                                12,
+                                                11,
+                                                15,
+                                                12,
+                                                13
+                                            ],
+                                 "firsts":  [
+                                                1239,
+                                                343,
+                                                339,
+                                                738,
+                                                344
+                                            ],
+                                 "trim_count":  12.33,
+                                 "trim_first":  475
+                             },
+                "left":  {
+                             "counts":  [
+                                            61,
+                                            61,
+                                            61,
+                                            62,
+                                            59
+                                        ],
+                             "firsts":  [
+                                            141,
+                                            140,
+                                            239,
+                                            341,
+                                            147
+                                        ],
+                             "trim_count":  61,
+                             "trim_first":  175.67
+                         },
+                "center":  {
+                               "counts":  [
+                                              65,
+                                              64,
+                                              63,
+                                              63,
+                                              62
+                                          ],
+                               "firsts":  [
+                                              139,
+                                              147,
+                                              152,
+                                              140,
+                                              139
+                                          ],
+                               "trim_count":  63.33,
+                               "trim_first":  142
+                           },
+                "right":  {
+                              "counts":  [
+                                             51,
+                                             52,
+                                             52,
+                                             53,
+                                             53
+                                         ],
+                              "firsts":  [
+                                             138,
+                                             138,
+                                             139,
+                                             138,
+                                             139
+                                         ],
+                              "trim_count":  52.33,
+                              "trim_first":  138.33
+                          }
+            },
+    "2_3":  {
+                "existing":  {
+                                 "counts":  [
+                                                5,
+                                                7,
+                                                5,
+                                                5,
+                                                5
+                                            ],
+                                 "firsts":  [
+                                                853,
+                                                1249,
+                                                1644,
+                                                1850,
+                                                254
+                                            ],
+                                 "trim_count":  5,
+                                 "trim_first":  1248.67
+                             },
+                "left":  {
+                             "counts":  [
+                                            5,
+                                            7,
+                                            5
+                                        ],
+                             "firsts":  [
+                                            447,
+                                            454,
+                                            447
+                                        ],
+                             "trim_count":  5,
+                             "trim_first":  447
+                         },
+                "center":  {
+                               "counts":  [
+                                              54,
+                                              55,
+                                              54,
+                                              57,
+                                              55
+                                          ],
+                               "firsts":  [
+                                              156,
+                                              240,
+                                              162,
+                                              142,
+                                              239
+                                          ],
+                               "trim_count":  54.67,
+                               "trim_first":  185.67
+                           },
+                "right":  {
+                              "counts":  [
+                                             6,
+                                             7,
+                                             6,
+                                             5
+                                         ],
+                              "firsts":  [
+                                             1738,
+                                             1738,
+                                             1838,
+                                             2038
+                                         ],
+                              "trim_count":  6,
+                              "trim_first":  1788
+                          }
+            },
+    "2_4":  {
+                "existing":  {
+                                 "counts":  [
+                                                5,
+                                                6,
+                                                5,
+                                                6
+                                            ],
+                                 "firsts":  [
+                                                444,
+                                                257,
+                                                447,
+                                                647
+                                            ],
+                                 "trim_count":  5.5,
+                                 "trim_first":  445.5
+                             },
+                "left":  {
+                             "counts":  [
+
+                                        ],
+                             "firsts":  [
+
+                                        ],
+                             "trim_count":  null,
+                             "trim_first":  null
+                         },
+                "center":  {
+                               "counts":  [
+                                              33,
+                                              33,
+                                              38,
+                                              36,
+                                              33
+                                          ],
+                               "firsts":  [
+                                              148,
+                                              161,
+                                              355,
+                                              658,
+                                              139
+                                          ],
+                               "trim_count":  34,
+                               "trim_first":  221.33
+                           },
+                "right":  {
+                              "counts":  [
+                                             7,
+                                             7,
+                                             6,
+                                             6
+                                         ],
+                              "firsts":  [
+                                             166,
+                                             438,
+                                             2338,
+                                             2338
+                                         ],
+                              "trim_count":  6.5,
+                              "trim_first":  1388
+                          }
+            },
+    "2_5":  {
+                "existing":  {
+                                 "counts":  [
+
+                                            ],
+                                 "firsts":  [
+
+                                            ],
+                                 "trim_count":  null,
+                                 "trim_first":  null
+                             },
+                "left":  {
+                             "counts":  [
+                                            8,
+                                            9,
+                                            11,
+                                            12,
+                                            5
+                                        ],
+                             "firsts":  [
+                                            444,
+                                            848,
+                                            1639,
+                                            543,
+                                            541
+                                        ],
+                             "trim_count":  9.33,
+                             "trim_first":  644
+                         },
+                "center":  {
+                               "counts":  [
+
+                                          ],
+                               "firsts":  [
+
+                                          ],
+                               "trim_count":  null,
+                               "trim_first":  null
+                           },
+                "right":  {
+                              "counts":  [
+                                             7,
+                                             6
+                                         ],
+                              "firsts":  [
+                                             1556,
+                                             1549
+                                         ],
+                              "trim_count":  6.5,
+                              "trim_first":  1552.5
+                          }
+            },
+    "2_6":  {
+                "existing":  {
+                                 "counts":  [
+                                                6,
+                                                7,
+                                                6,
+                                                7,
+                                                6
+                                            ],
+                                 "firsts":  [
+                                                2079,
+                                                2459,
+                                                2772,
+                                                3155,
+                                                3178
+                                            ],
+                                 "trim_count":  6.33,
+                                 "trim_first":  2795.33
+                             },
+                "left":  {
+                             "counts":  [
+                                            5,
+                                            5
+                                        ],
+                             "firsts":  [
+                                            350,
+                                            340
+                                        ],
+                             "trim_count":  5,
+                             "trim_first":  345
+                         },
+                "center":  {
+                               "counts":  [
+                                              28,
+                                              32,
+                                              41,
+                                              40,
+                                              37
+                                          ],
+                               "firsts":  [
+                                              338,
+                                              149,
+                                              272,
+                                              144,
+                                              139
+                                          ],
+                               "trim_count":  36.33,
+                               "trim_first":  188.33
+                           },
+                "right":  {
+                              "counts":  [
+
+                                         ],
+                              "firsts":  [
+
+                                         ],
+                              "trim_count":  null,
+                              "trim_first":  null
+                          }
+            },
+    "3_2":  {
+                "existing":  {
+                                 "counts":  [
+
+                                            ],
+                                 "firsts":  [
+
+                                            ],
+                                 "trim_count":  null,
+                                 "trim_first":  null
+                             },
+                "left":  {
+                             "counts":  [
+                                            66,
+                                            66,
+                                            67,
+                                            67,
+                                            65
+                                        ],
+                             "firsts":  [
+                                            139,
+                                            238,
+                                            139,
+                                            138,
+                                            239
+                                        ],
+                             "trim_count":  66.33,
+                             "trim_first":  172
+                         },
+                "center":  {
+                               "counts":  [
+                                              30,
+                                              25,
+                                              24,
+                                              26,
+                                              20
+                                          ],
+                               "firsts":  [
+                                              141,
+                                              140,
+                                              140,
+                                              639,
+                                              1462
+                                          ],
+                               "trim_count":  25,
+                               "trim_first":  306.67
+                           },
+                "right":  {
+                              "counts":  [
+                                             69,
+                                             69,
+                                             69,
+                                             68,
+                                             69
+                                         ],
+                              "firsts":  [
+                                             141,
+                                             149,
+                                             142,
+                                             143,
+                                             143
+                                         ],
+                              "trim_count":  69,
+                              "trim_first":  142.67
+                          }
+            },
+    "3_6":  {
+                "existing":  {
+                                 "counts":  [
+
+                                            ],
+                                 "firsts":  [
+
+                                            ],
+                                 "trim_count":  null,
+                                 "trim_first":  null
+                             },
+                "left":  {
+                             "counts":  [
+
+                                        ],
+                             "firsts":  [
+
+                                        ],
+                             "trim_count":  null,
+                             "trim_first":  null
+                         },
+                "center":  {
+                               "counts":  [
+                                              15,
+                                              17,
+                                              13,
+                                              14,
+                                              13
+                                          ],
+                               "firsts":  [
+                                              144,
+                                              141,
+                                              139,
+                                              141,
+                                              140
+                                          ],
+                               "trim_count":  14,
+                               "trim_first":  140.67
+                           },
+                "right":  {
+                              "counts":  [
+                                             10,
+                                             10,
+                                             16,
+                                             13,
+                                             14
+                                         ],
+                              "firsts":  [
+                                             1239,
+                                             1139,
+                                             945,
+                                             1038,
+                                             1043
+                                         ],
+                              "trim_count":  12.33,
+                              "trim_first":  1073.33
+                          }
+            }
+}

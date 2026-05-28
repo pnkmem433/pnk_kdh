@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ESP32-P4 Request - 상세</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Noto Sans','맑은 고딕',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+.container{max-width:1000px;margin:0 auto;background:#fff;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column;min-height:70vh}
+.header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:24px 20px}
+.header h1{font-size:1.4em;margin-bottom:6px}
+.bar{display:flex;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid #eee;background:#fff}
+a.btn{border:1px solid #ddd;background:#fff;padding:6px 10px;border-radius:6px;font-size:.9em;text-decoration:none;color:#333}
+.content{padding:20px}
+.meta{display:flex;gap:16px;flex-wrap:wrap;color:#555;margin:6px 0 12px}
+.meta .lbl{color:#666}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.tag{background:#e3f2fd;color:#1976d2;border-radius:14px;padding:4px 10px;font-size:.85em}
+.tabs{display:flex;gap:10px;margin:14px 0;border-bottom:2px solid #f0f0f0}
+.tab{padding:10px 16px;border:none;background:none;border-bottom:3px solid transparent;cursor:pointer;color:#666}
+.tab.active{color:#667eea;border-bottom-color:#667eea}
+.panel{display:none;padding-top:10px}
+.panel.active{display:block}
+.section{margin-bottom:16px}
+.section .ttl{font-weight:700;margin-bottom:6px}
+.box{background:#f9f9f9;border-left:4px solid #667eea;border-radius:4px;padding:14px;white-space:pre-wrap;line-height:1.6}
+.empty{padding:40px;text-align:center;color:#888}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1 id="title">Request 상세</h1>
+    <div id="subtitle"></div>
+  </div>
+  <div class="bar">
+    <a class="btn" id="back">← 목록으로</a>
+    <a class="btn" id="openRaw" target="_blank" rel="noopener">원본 스크립트 열기</a>
+  </div>
+  <div class="content" id="content">
+    <div class="empty">로딩 중...</div>
+  </div>
+</div>
+<script>
+const BASE_PATH = ''; // request(n).js 경로
+window.requestData = Array.isArray(window.requestData) ? window.requestData : [];
+const $ = s => document.querySelector(s);
+
+function esc(x){
+  const d = document.createElement('div');
+  d.textContent = String(x ?? '');
+  return d.innerHTML;
+}
+
+function parseDateMaybe(d){
+  if(!d) return null;
+  const dt = new Date(d);
+  return isNaN(dt) ? null : dt;
+}
+
+const params = new URL(location.href).searchParams;
+const idParam = params.get('id');
+if(!idParam){
+  $('#content').innerHTML='<div class="empty">잘못된 접근입니다. id가 없습니다.</div>';
+}
+
+// 목록으로 돌아갈 때, list.html의 검색/페이지 상태 유지
+$('#back').href = (() => {
+  const src = new URLSearchParams();
+  const q = params.get('q');
+  const page = params.get('page');
+  if(q) src.set('q', q);
+  if(page) src.set('page', page);
+  const query = src.toString();
+  return 'index.html' + (query ? ('?' + query) : '');
+})();
+
+// 외부 스크립트 로드
+let nextIdx = 1, err = 0;
+function loadNext(){
+  const s = document.createElement('script');
+  s.src = `${BASE_PATH}request(${nextIdx}).js`;
+  s.onload = ()=>{ err = 0; nextIdx++; loadNext(); };
+  s.onerror = ()=>{ err++; if(err>=3) finish(); else { nextIdx++; loadNext(); } };
+  document.head.appendChild(s);
+}
+
+function finish(){
+  const all = (window.requestData || []).filter(Boolean);
+  const req = all.find(r => String(r.request_number) === String(idParam));
+  if(!req){
+    $('#content').innerHTML='<div class="empty">해당 요청을 찾을 수 없습니다.</div>';
+    return;
+  }
+
+  const d = parseDateMaybe(req.date);
+  const dateText = d ? d.toISOString().slice(0,10) : (req.date||'-');
+  $('#title').innerHTML = `Request #${esc(req.request_number)}: ${esc(req.title||'')}`;
+  $('#subtitle').innerHTML = `${esc(req.author||'Claude')} · ${esc(dateText)} · ${esc(req.status||'completed')}`;
+  $('#openRaw').href = '#';
+
+  const hasQ = !!(req.raw_content?.question);
+  const hasA = !!(req.raw_content?.answer);
+  const hasS = !!(req.sections && Object.keys(req.sections).length);
+
+  // 메타 + 태그
+  let html = '';
+  html += `<div class="meta">
+      <span><span class="lbl">작성자:</span> ${esc(req.author||'Claude')}</span>
+      <span><span class="lbl">날짜:</span> ${esc(dateText)}</span>
+      <span><span class="lbl">상태:</span> ${esc(req.status||'completed')}</span>
+  </div>`;
+  if(Array.isArray(req.tags) && req.tags.length){
+    html += `<div class="tags">${req.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>`;
+  }
+
+  // 탭
+  let tabs = [];
+  if(hasS) tabs.push({key:'ov', label:'요약'});
+  if(hasQ) tabs.push({key:'q', label:'질문'});
+  if(hasA) tabs.push({key:'a', label:'답변'});
+
+  if(!tabs.length){
+    html += `<div class="empty">내용이 없습니다.</div>`;
+    $('#content').innerHTML = html;
+    return;
+  }
+
+  html += `<div class="tabs">${tabs.map((t,i)=>`<button class="tab ${i===0?'active':''}" data-k="${t.key}">${esc(t.label)}</button>`).join('')}</div>`;
+  html += `<div id="panels">`;
+
+  if(hasS){
+    html += `<div class="panel active" data-k="ov">`;
+    for(const [title, content] of Object.entries(req.sections)){
+      let text = (typeof content === 'string') ? content : JSON.stringify(content, null, 2);
+      html += `<div class="section"><div class="ttl">■ ${esc(title)}</div><div class="box">${esc(text)}</div></div>`;
+    }
+    html += `</div>`;
+  }
+
+  if(hasQ){
+    html += `<div class="panel ${!hasS?'active':''}" data-k="q"><div class="box">${esc(req.raw_content.question)}</div></div>`;
+  }
+
+  if(hasA){
+    html += `<div class="panel ${(!hasS && !hasQ)?'active':''}" data-k="a"><div class="box">${esc(req.raw_content.answer)}</div></div>`;
+  }
+
+  html += `</div>`;
+  $('#content').innerHTML = html;
+
+  // 탭 동작
+  document.querySelectorAll('.tab').forEach(btn=>{
+    btn.onclick = () => {
+      const k = btn.dataset.k;
+      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.dataset.k===k));
+    };
+  });
+}
+
+loadNext();
+</script>
+</body>
+</html>

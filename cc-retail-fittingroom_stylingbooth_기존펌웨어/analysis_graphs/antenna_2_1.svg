@@ -1,0 +1,34 @@
+﻿<svg xmlns='http://www.w3.org/2000/svg' width='760' height='430' viewBox='0 0 760 430'>
+<rect width='100%' height='100%' fill='white'/>
+<text x='380' y='24' text-anchor='middle' font-family='Arial' font-size='22'>RFID Read Count by Antenna Position (2-1)</text>
+<line x1='70' y1='355' x2='730' y2='355' stroke='#dddddd' stroke-dasharray='3,3'/>
+<text x='60' y='360' text-anchor='end' font-family='Arial' font-size='12'>0</text>
+<line x1='70' y1='293' x2='730' y2='293' stroke='#dddddd' stroke-dasharray='3,3'/>
+<text x='60' y='298' text-anchor='end' font-family='Arial' font-size='12'>14</text>
+<line x1='70' y1='231' x2='730' y2='231' stroke='#dddddd' stroke-dasharray='3,3'/>
+<text x='60' y='236' text-anchor='end' font-family='Arial' font-size='12'>28</text>
+<line x1='70' y1='169' x2='730' y2='169' stroke='#dddddd' stroke-dasharray='3,3'/>
+<text x='60' y='174' text-anchor='end' font-family='Arial' font-size='12'>42</text>
+<line x1='70' y1='107' x2='730' y2='107' stroke='#dddddd' stroke-dasharray='3,3'/>
+<text x='60' y='112' text-anchor='end' font-family='Arial' font-size='12'>56</text>
+<line x1='70' y1='45' x2='730' y2='45' stroke='#dddddd' stroke-dasharray='3,3'/>
+<text x='60' y='50' text-anchor='end' font-family='Arial' font-size='12'>70</text>
+<line x1='70' y1='45' x2='70' y2='355' stroke='black'/>
+<line x1='70' y1='355' x2='730' y2='355' stroke='black'/>
+<polyline fill='none' stroke='#d62828' stroke-width='3' points='70,313.68 290,120.29 510,68.6 730,143.89'/>
+<circle cx='70' cy='313.68' r='5' fill='#d62828'/>
+<text x='70' y='303.68' text-anchor='middle' font-family='Arial' font-size='12' fill='#d62828'>9.33</text>
+<text x='70' y='377' text-anchor='middle' font-family='Arial' font-size='12'>Existing</text>
+<circle cx='290' cy='120.29' r='5' fill='#d62828'/>
+<text x='290' y='110.29' text-anchor='middle' font-family='Arial' font-size='12' fill='#d62828'>53</text>
+<text x='290' y='377' text-anchor='middle' font-family='Arial' font-size='12'>Left</text>
+<circle cx='510' cy='68.6' r='5' fill='#d62828'/>
+<text x='510' y='58.6' text-anchor='middle' font-family='Arial' font-size='12' fill='#d62828'>64.67</text>
+<text x='510' y='377' text-anchor='middle' font-family='Arial' font-size='12'>Center</text>
+<circle cx='730' cy='143.89' r='5' fill='#d62828'/>
+<text x='730' y='133.89' text-anchor='middle' font-family='Arial' font-size='12' fill='#d62828'>47.67</text>
+<text x='730' y='377' text-anchor='middle' font-family='Arial' font-size='12'>Right</text>
+<text x='380' y='410' text-anchor='middle' font-family='Arial' font-size='14'>Antenna Position</text>
+<text x='18' y='215' text-anchor='middle' font-family='Arial' font-size='14' transform='rotate(-90 18 215)'>RFID Read Count (10s)</text>
+</svg>
+

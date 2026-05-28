@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmd.exe /c \"C:\\Espressif\\frameworks\\esp-idf-v5.4\\export.bat && idf.py build\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

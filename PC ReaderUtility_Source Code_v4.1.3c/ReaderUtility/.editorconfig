@@ -1,0 +1,16 @@
+# 如需深入了解 .editorconfig，請參閱 https://aka.ms/editorconfigdocs
+root = true
+
+# All files
+[*]
+indent_style = space
+
+# Xml files
+
+# CA1822: 將成員標記為靜態
+dotnet_diagnostic.CA1822.severity = suggestion
+
+[*.xml]
+indent_size = 2
+
+dotnet_code_quality.ca1028.api_surface = internal

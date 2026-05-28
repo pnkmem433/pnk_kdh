@@ -1,0 +1,937 @@
+{
+  "baseline_5_1.csv": {
+    "name": "baseline_5_1.csv",
+    "blue": {
+      "counts": [
+        76,
+        76,
+        78,
+        76,
+        78
+      ],
+      "firsts": [
+        141,
+        139,
+        144,
+        140,
+        242
+      ],
+      "trim_count": 76.67,
+      "trim_first": 141.67
+    },
+    "tag19": {
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "firsts": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "trim_count": 0.0,
+      "trim_first": null
+    },
+    "valid_trim": 5.0,
+    "unique_trim": 6.0
+  },
+  "baseline_5_2.csv": {
+    "name": "baseline_5_2.csv",
+    "blue": {
+      "counts": [
+        72,
+        77,
+        78,
+        76,
+        77
+      ],
+      "firsts": [
+        151,
+        140,
+        240,
+        143,
+        149
+      ],
+      "trim_count": 76.67,
+      "trim_first": 147.67
+    },
+    "tag19": {
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "firsts": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "trim_count": 0.0,
+      "trim_first": null
+    },
+    "valid_trim": 5.67,
+    "unique_trim": 6.0
+  },
+  "baseline_6_1.csv": {
+    "name": "baseline_6_1.csv",
+    "blue": {
+      "counts": [
+        67,
+        65,
+        67,
+        66,
+        66
+      ],
+      "firsts": [
+        141,
+        244,
+        139,
+        140,
+        142
+      ],
+      "trim_count": 66.33,
+      "trim_first": 141.0
+    },
+    "tag19": {
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "firsts": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "trim_count": 0.0,
+      "trim_first": null
+    },
+    "valid_trim": 5.33,
+    "unique_trim": 6.0
+  },
+  "baseline_6_2.csv": {
+    "name": "baseline_6_2.csv",
+    "blue": {
+      "counts": [
+        67,
+        67,
+        69,
+        67,
+        67
+      ],
+      "firsts": [
+        141,
+        153,
+        157,
+        138,
+        152
+      ],
+      "trim_count": 67.0,
+      "trim_first": 148.67
+    },
+    "tag19": {
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "firsts": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "trim_count": 0.0,
+      "trim_first": null
+    },
+    "valid_trim": 5.33,
+    "unique_trim": 6.0
+  },
+  "floor_2_1.csv": {
+    "name": "floor_2_1.csv",
+    "blue": {
+      "counts": [
+        38,
+        41,
+        36,
+        40,
+        38
+      ],
+      "firsts": [
+        265,
+        163,
+        157,
+        257,
+        154
+      ],
+      "trim_count": 38.67,
+      "trim_first": 192.33
+    },
+    "tag19": {
+      "counts": [
+        9,
+        14,
+        13,
+        13,
+        12
+      ],
+      "firsts": [
+        1456,
+        165,
+        261,
+        158,
+        1158
+      ],
+      "trim_count": 12.67,
+      "trim_first": 528.0
+    },
+    "valid_trim": 8.0,
+    "unique_trim": 8.67
+  },
+  "floor_2_2.csv": {
+    "name": "floor_2_2.csv",
+    "blue": {
+      "counts": [
+        64,
+        62,
+        63,
+        64,
+        58
+      ],
+      "firsts": [
+        468,
+        159,
+        161,
+        155,
+        158
+      ],
+      "trim_count": 63.0,
+      "trim_first": 159.33
+    },
+    "tag19": {
+      "counts": [
+        40,
+        37,
+        43,
+        46,
+        42
+      ],
+      "firsts": [
+        497,
+        163,
+        301,
+        188,
+        188
+      ],
+      "trim_count": 41.67,
+      "trim_first": 225.67
+    },
+    "valid_trim": 7.0,
+    "unique_trim": 9.0
+  },
+  "floor_2_3.csv": {
+    "name": "floor_2_3.csv",
+    "blue": {
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "firsts": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "trim_count": 0.0,
+      "trim_first": null
+    },
+    "tag19": {
+      "counts": [
+        68,
+        63,
+        64,
+        67,
+        65
+      ],
+      "firsts": [
+        183,
+        157,
+        150,
+        157,
+        160
+      ],
+      "trim_count": 65.33,
+      "trim_first": 158.0
+    },
+    "valid_trim": 5.0,
+    "unique_trim": 7.67
+  },
+  "floor_2_4.csv": {
+    "name": "floor_2_4.csv",
+    "blue": {
+      "counts": [
+        40,
+        38,
+        38,
+        39,
+        42
+      ],
+      "firsts": [
+        555,
+        240,
+        153,
+        149,
+        148
+      ],
+      "trim_count": 39.0,
+      "trim_first": 180.67
+    },
+    "tag19": {
+      "counts": [
+        53,
+        55,
+        54,
+        56,
+        56
+      ],
+      "firsts": [
+        243,
+        346,
+        151,
+        147,
+        256
+      ],
+      "trim_count": 55.0,
+      "trim_first": 216.67
+    },
+    "valid_trim": 4.33,
+    "unique_trim": 7.0
+  },
+  "floor_2_5.csv": {
+    "name": "floor_2_5.csv",
+    "blue": {
+      "counts": [
+        61,
+        59,
+        60,
+        56,
+        57
+      ],
+      "firsts": [
+        158,
+        160,
+        194,
+        461,
+        150
+      ],
+      "trim_count": 58.67,
+      "trim_first": 170.67
+    },
+    "tag19": {
+      "counts": [
+        67,
+        63,
+        66,
+        67,
+        61
+      ],
+      "firsts": [
+        156,
+        156,
+        356,
+        154,
+        154
+      ],
+      "trim_count": 65.33,
+      "trim_first": 155.33
+    },
+    "valid_trim": 7.0,
+    "unique_trim": 8.0
+  },
+  "floor_2_6.csv": {
+    "name": "floor_2_6.csv",
+    "blue": {
+      "counts": [
+        53,
+        55,
+        56,
+        54,
+        50
+      ],
+      "firsts": [
+        156,
+        162,
+        362,
+        160,
+        259
+      ],
+      "trim_count": 54.0,
+      "trim_first": 193.67
+    },
+    "tag19": {
+      "counts": [
+        60,
+        65,
+        68,
+        63,
+        60
+      ],
+      "firsts": [
+        158,
+        158,
+        149,
+        156,
+        255
+      ],
+      "trim_count": 62.67,
+      "trim_first": 157.33
+    },
+    "valid_trim": 7.0,
+    "unique_trim": 8.0
+  },
+  "floor_2_7.csv": {
+    "name": "floor_2_7.csv",
+    "blue": {
+      "counts": [
+        64,
+        58,
+        63,
+        65,
+        66
+      ],
+      "firsts": [
+        158,
+        155,
+        151,
+        160,
+        156
+      ],
+      "trim_count": 64.0,
+      "trim_first": 156.33
+    },
+    "tag19": {
+      "counts": [
+        63,
+        62,
+        59,
+        66,
+        66
+      ],
+      "firsts": [
+        162,
+        153,
+        153,
+        158,
+        160
+      ],
+      "trim_count": 63.67,
+      "trim_first": 157.0
+    },
+    "valid_trim": 8.0,
+    "unique_trim": 9.0
+  },
+  "multi_1_10_center_jeans.csv": {
+    "name": "multi_1_10_center_jeans.csv",
+    "blue": {
+      "counts": [
+        63,
+        61,
+        58,
+        62,
+        58
+      ],
+      "firsts": [
+        149,
+        160,
+        152,
+        250,
+        162
+      ],
+      "trim_count": 60.33,
+      "trim_first": 158.0
+    },
+    "tag19": {
+      "counts": [
+        33,
+        38,
+        37,
+        41,
+        35
+      ],
+      "firsts": [
+        397,
+        256,
+        284,
+        158,
+        191
+      ],
+      "trim_count": 36.67,
+      "trim_first": 243.67
+    },
+    "valid_trim": 7.33,
+    "unique_trim": 9.67
+  },
+  "multi_1_11_mixed.csv": {
+    "name": "multi_1_11_mixed.csv",
+    "blue": {
+      "counts": [
+        67,
+        61,
+        64,
+        62,
+        58
+      ],
+      "firsts": [
+        199,
+        159,
+        154,
+        162,
+        157
+      ],
+      "trim_count": 62.33,
+      "trim_first": 159.33
+    },
+    "tag19": {
+      "counts": [
+        35,
+        34,
+        34,
+        37,
+        36
+      ],
+      "firsts": [
+        163,
+        200,
+        186,
+        164,
+        659
+      ],
+      "trim_count": 35.0,
+      "trim_first": 183.33
+    },
+    "valid_trim": 7.33,
+    "unique_trim": 9.67
+  },
+  "multi_1_1_dense.csv": {
+    "name": "multi_1_1_dense.csv",
+    "blue": {
+      "counts": [
+        0,
+        0,
+        5,
+        0,
+        0
+      ],
+      "firsts": [
+        null,
+        null,
+        808,
+        null,
+        null
+      ],
+      "trim_count": 0.0,
+      "trim_first": 808.0
+    },
+    "tag19": {
+      "counts": [
+        52,
+        57,
+        46,
+        52,
+        51
+      ],
+      "firsts": [
+        183,
+        147,
+        161,
+        460,
+        254
+      ],
+      "trim_count": 51.67,
+      "trim_first": 199.33
+    },
+    "valid_trim": 8.67,
+    "unique_trim": 10.0
+  },
+  "multi_1_1_front15.csv": {
+    "name": "multi_1_1_front15.csv",
+    "blue": {
+      "counts": [
+        6,
+        8,
+        7,
+        8,
+        11
+      ],
+      "firsts": [
+        2034,
+        192,
+        654,
+        2251,
+        163
+      ],
+      "trim_count": 7.67,
+      "trim_first": 960.0
+    },
+    "tag19": {
+      "counts": [
+        21,
+        22,
+        20,
+        20,
+        16
+      ],
+      "firsts": [
+        688,
+        485,
+        258,
+        179,
+        161
+      ],
+      "trim_count": 20.33,
+      "trim_first": 307.33
+    },
+    "valid_trim": 8.0,
+    "unique_trim": 9.67
+  },
+  "multi_1_2_322.csv": {
+    "name": "multi_1_2_322.csv",
+    "blue": {
+      "counts": [
+        19,
+        23,
+        21,
+        19
+      ],
+      "firsts": [
+        555,
+        279,
+        557,
+        356
+      ],
+      "trim_count": 20.0,
+      "trim_first": 455.5
+    },
+    "tag19": {
+      "counts": [
+        0,
+        0,
+        0,
+        6
+      ],
+      "firsts": [
+        null,
+        null,
+        null,
+        2490
+      ],
+      "trim_count": 0.0,
+      "trim_first": 2490.0
+    },
+    "valid_trim": 7.0,
+    "unique_trim": 8.5
+  },
+  "multi_1_3_3121.csv": {
+    "name": "multi_1_3_3121.csv",
+    "blue": {
+      "counts": [
+        46,
+        55,
+        44,
+        52,
+        56
+      ],
+      "firsts": [
+        453,
+        148,
+        251,
+        161,
+        163
+      ],
+      "trim_count": 51.0,
+      "trim_first": 191.67
+    },
+    "tag19": {
+      "counts": [
+        0,
+        0,
+        5,
+        5,
+        5
+      ],
+      "firsts": [
+        null,
+        null,
+        1400,
+        1895,
+        561
+      ],
+      "trim_count": 3.33,
+      "trim_first": 1400.0
+    },
+    "valid_trim": 6.33,
+    "unique_trim": 8.33
+  },
+  "multi_1_4_jeans_wind.csv": {
+    "name": "multi_1_4_jeans_wind.csv",
+    "blue": {
+      "counts": [
+        5,
+        5,
+        5,
+        0,
+        0
+      ],
+      "firsts": [
+        549,
+        2657,
+        852,
+        null,
+        null
+      ],
+      "trim_count": 3.33,
+      "trim_first": 852.0
+    },
+    "tag19": {
+      "counts": [
+        18,
+        17,
+        20,
+        14,
+        17
+      ],
+      "firsts": [
+        154,
+        160,
+        551,
+        1083,
+        160
+      ],
+      "trim_count": 17.33,
+      "trim_first": 290.33
+    },
+    "valid_trim": 7.33,
+    "unique_trim": 10.0
+  },
+  "multi_1_5_jeans.csv": {
+    "name": "multi_1_5_jeans.csv",
+    "blue": {
+      "counts": [
+        13,
+        11,
+        11,
+        8,
+        10
+      ],
+      "firsts": [
+        293,
+        755,
+        459,
+        2287,
+        818
+      ],
+      "trim_count": 10.67,
+      "trim_first": 677.33
+    },
+    "tag19": {
+      "counts": [
+        18,
+        24,
+        20,
+        21,
+        20
+      ],
+      "firsts": [
+        677,
+        972,
+        359,
+        244,
+        167
+      ],
+      "trim_count": 20.33,
+      "trim_first": 426.67
+    },
+    "valid_trim": 8.0,
+    "unique_trim": 9.0
+  },
+  "multi_1_6_base.csv": {
+    "name": "multi_1_6_base.csv",
+    "blue": {
+      "counts": [
+        6,
+        6,
+        5,
+        7,
+        8
+      ],
+      "firsts": [
+        759,
+        467,
+        183,
+        458,
+        1458
+      ],
+      "trim_count": 6.33,
+      "trim_first": 561.33
+    },
+    "tag19": {
+      "counts": [
+        23,
+        29,
+        23,
+        28,
+        28
+      ],
+      "firsts": [
+        549,
+        747,
+        147,
+        239,
+        342
+      ],
+      "trim_count": 26.33,
+      "trim_first": 376.67
+    },
+    "valid_trim": 7.0,
+    "unique_trim": 9.0
+  },
+  "multi_1_7_wind.csv": {
+    "name": "multi_1_7_wind.csv",
+    "blue": {
+      "counts": [
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "firsts": [
+        2751,
+        null,
+        null,
+        null,
+        null
+      ],
+      "trim_count": 0.0,
+      "trim_first": 2751.0
+    },
+    "tag19": {
+      "counts": [
+        11,
+        10,
+        18,
+        11,
+        12
+      ],
+      "firsts": [
+        180,
+        459,
+        588,
+        938,
+        361
+      ],
+      "trim_count": 11.33,
+      "trim_first": 469.33
+    },
+    "valid_trim": 7.0,
+    "unique_trim": 9.33
+  },
+  "multi_1_8_center.csv": {
+    "name": "multi_1_8_center.csv",
+    "blue": {
+      "counts": [
+        58,
+        62,
+        59,
+        60,
+        59
+      ],
+      "firsts": [
+        159,
+        156,
+        162,
+        149,
+        154
+      ],
+      "trim_count": 59.33,
+      "trim_first": 156.33
+    },
+    "tag19": {
+      "counts": [
+        33,
+        35,
+        31,
+        36,
+        31
+      ],
+      "firsts": [
+        688,
+        160,
+        160,
+        258,
+        456
+      ],
+      "trim_count": 33.0,
+      "trim_first": 291.33
+    },
+    "valid_trim": 6.67,
+    "unique_trim": 8.0
+  },
+  "multi_1_9_center_no_wind.csv": {
+    "name": "multi_1_9_center_no_wind.csv",
+    "blue": {
+      "counts": [
+        65,
+        65,
+        60,
+        60
+      ],
+      "firsts": [
+        162,
+        363,
+        159,
+        271
+      ],
+      "trim_count": 62.5,
+      "trim_first": 216.5
+    },
+    "tag19": {
+      "counts": [
+        30,
+        29,
+        31,
+        28
+      ],
+      "firsts": [
+        494,
+        153,
+        5,
+        157
+      ],
+      "trim_count": 29.5,
+      "trim_first": 155.0
+    },
+    "valid_trim": 7.5,
+    "unique_trim": 9.0
+  }
+}

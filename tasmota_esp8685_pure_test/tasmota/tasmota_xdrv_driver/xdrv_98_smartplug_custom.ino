@@ -79,38 +79,6 @@ void SpCustomMakeStatusPayload(char* buffer, size_t size) {
     SpCustomStateText(), SpCustomWebServerMode());
 }
 
-void SpCustomMakeMetricsPayload(char* buffer, size_t size) {
-  if (Energy && TasmotaGlobal.energy_driver && Energy->phase_count) {
-    const float voltage = Energy->voltage_available ? Energy->voltage[0] : 0.0f;
-    const float current = Energy->current_available ? Energy->current[0] : 0.0f;
-    const float power = Energy->active_power[0];
-    const float total = Energy->total[0];
-    const float daily = Energy->daily_sum;
-    char power_str[16];
-    char voltage_str[16];
-    char current_str[16];
-    char daily_str[16];
-    char total_str[16];
-
-    dtostrfd(power, 1, power_str);
-    dtostrfd(voltage, 1, voltage_str);
-    dtostrfd(current, 3, current_str);
-    dtostrfd(daily, 3, daily_str);
-    dtostrfd(total, 3, total_str);
-
-    snprintf_P(
-      buffer, size,
-      PSTR("{\"state\":\"%s\",\"webserver\":%u,\"power\":%s,\"voltage\":%s,\"current\":%s,\"daily\":%s,\"total\":%s}"),
-      SpCustomStateText(), SpCustomWebServerMode(), power_str, voltage_str, current_str, daily_str, total_str);
-    return;
-  }
-
-  snprintf_P(
-    buffer, size,
-    PSTR("{\"state\":\"%s\",\"webserver\":%u,\"energy_available\":false}"),
-    SpCustomStateText(), SpCustomWebServerMode());
-}
-
 void SpCustomPublishPayloadToUid(const char* suffix, const char* payload) {
   char topic[TOPSZ];
   SpCustomMakeUidTopic(topic, sizeof(topic), suffix);
@@ -123,12 +91,6 @@ void SpCustomPublishStatus() {
   SpCustomPublishPayloadToUid("status", payload);
 }
 
-void SpCustomPublishMetrics() {
-  char payload[160];
-  SpCustomMakeMetricsPayload(payload, sizeof(payload));
-  SpCustomPublishPayloadToUid("metrics", payload);
-}
-
 void SpCustomClearLegacyAliasTopicsOnce() {
   if (smartplug_legacy_topics_cleared) {
     return;
@@ -136,7 +98,6 @@ void SpCustomClearLegacyAliasTopicsOnce() {
 
   if (strcmp(smartplug_uid, smartplug_topic_id)) {
     SpCustomClearLegacyTopicRetain("status");
-    SpCustomClearLegacyTopicRetain("metrics");
   }
 
   smartplug_legacy_topics_cleared = true;
@@ -200,27 +161,23 @@ bool SpCustomHandleCommand(const char* cmd) {
   if (!strcasecmp(cmd, "on")) {
     ExecuteCommandPower(1, POWER_ON, SRC_MQTT);
     SpCustomPublishStatus();
-    SpCustomPublishMetrics();
     return true;
   }
 
   if (!strcasecmp(cmd, "off")) {
     ExecuteCommandPower(1, POWER_OFF, SRC_MQTT);
     SpCustomPublishStatus();
-    SpCustomPublishMetrics();
     return true;
   }
 
   if (!strcasecmp(cmd, "status")) {
     SpCustomPublishStatus();
-    SpCustomPublishMetrics();
     return true;
   }
 
   if (!strcasecmp(cmd, "toggle")) {
     ExecuteCommandPower(1, POWER_TOGGLE, SRC_MQTT);
     SpCustomPublishStatus();
-    SpCustomPublishMetrics();
     MqttPublishSensor();
     return true;
   }
@@ -261,7 +218,6 @@ void SpCustomInit() {
   smartplug_seconds_until_publish = kSmartplugStatusPeriodSeconds;
   smartplug_legacy_topics_cleared = false;
   SpCustomLoadIds();
-  SpCustomClearCommandRetain();
 }
 
 void SpCustomEverySecond() {
@@ -272,7 +228,6 @@ void SpCustomEverySecond() {
   if (0 == smartplug_seconds_until_publish) {
     SpCustomClearLegacyAliasTopicsOnce();
     SpCustomPublishStatus();
-    SpCustomPublishMetrics();
     MqttPublishSensor();
     smartplug_seconds_until_publish = kSmartplugStatusPeriodSeconds;
   }
@@ -285,6 +240,9 @@ bool Xdrv98(uint32_t function) {
     case FUNC_INIT:
       Spc98::SpCustomInit();
       break;
+    case FUNC_MQTT_INIT:
+      Spc98::SpCustomClearCommandRetain();
+      break;
     case FUNC_MQTT_SUBSCRIBE:
       Spc98::SpCustomSubscribe();
       break;
@@ -292,7 +250,6 @@ bool Xdrv98(uint32_t function) {
       return Spc98::SpCustomHandleMqttData();
     case FUNC_SET_DEVICE_POWER:
       Spc98::SpCustomPublishStatus();
-      Spc98::SpCustomPublishMetrics();
       MqttPublishSensor();
       break;
     case FUNC_EVERY_SECOND:

@@ -13,8 +13,8 @@ except ImportError:
     sys.exit(1)
 
 
-CSV_PATH = r"C:\WS\vs_kdh\pnk_kdh\espnow\esp_now_pickup_test_data.csv"
-SESSION_LOG_PATH = r"C:\WS\vs_kdh\pnk_kdh\espnow\esp_now_pickup_capture_sessions.csv"
+CSV_PATH = r"C:\WS\vs_kdh\pnk_kdh\espnow\esp_now_pickdown_1234_test_data.csv"
+SESSION_LOG_PATH = r"C:\WS\vs_kdh\pnk_kdh\espnow\esp_now_pickdown_1234_capture_sessions.csv"
 CSV_HEADER = [
     "Test_ID",
     "Phase",

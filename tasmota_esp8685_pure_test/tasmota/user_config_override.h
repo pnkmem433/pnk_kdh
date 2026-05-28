@@ -15,7 +15,11 @@
 #define WEB_LOG_LEVEL    LOG_LEVEL_INFO
 
 #undef WEB_SERVER
+#ifdef FIRMWARE_OTA_BRIDGE
+#define WEB_SERVER        2
+#else
 #define WEB_SERVER        0
+#endif
 
 #ifdef WEB_USERNAME
 #undef WEB_USERNAME
@@ -27,22 +31,72 @@
 
 // Default network values for the custom smart-plug test image.
 #undef STA_SSID1
+#ifdef FIRMWARE_OTA_BRIDGE
+#define STA_SSID1         ""
+#else
 #define STA_SSID1         "CC-Retail"
+#endif
 
 #undef STA_PASS1
+#ifdef FIRMWARE_OTA_BRIDGE
+#define STA_PASS1         ""
+#else
 #define STA_PASS1         "pnks1111"
+#endif
+
+#ifdef FIRMWARE_OTA_BRIDGE
+#undef WIFI_CONFIG_TOOL
+#define WIFI_CONFIG_TOOL  WIFI_MANAGER
+
+#undef MQTT_USE
+#define MQTT_USE          false
+#endif
+
+#ifdef FIRMWARE_PARTITION_BRIDGE
+#ifndef USE_BERRY
+#define USE_BERRY
+#endif
+
+#ifndef USE_WEBCLIENT_HTTPS
+#define USE_WEBCLIENT_HTTPS
+#endif
+
+#ifndef USE_UFILESYS
+#define USE_UFILESYS
+#endif
+
+#ifndef USE_EXTENSION_MANAGER
+#define USE_EXTENSION_MANAGER
+#endif
+
+#ifdef USE_LIGHT
+#undef USE_LIGHT
+#endif
+
+#ifdef USE_WS2812
+#undef USE_WS2812
+#endif
+
+#ifdef USE_LIGHT_ARTNET
+#undef USE_LIGHT_ARTNET
+#endif
+
+#ifdef USE_BERRY_ANIMATION
+#undef USE_BERRY_ANIMATION
+#endif
+#endif
 
 #undef MQTT_HOST
-#define MQTT_HOST         "192.168.0.15"
+#define MQTT_HOST         "api.pnkslab.com"
 
 #undef MQTT_PORT
-#define MQTT_PORT         1883
+#define MQTT_PORT         1884
 
 #undef MQTT_USER
-#define MQTT_USER         "plugtest"
+#define MQTT_USER         "pnks"
 
 #undef MQTT_PASS
-#define MQTT_PASS         "fcfc50kc35"
+#define MQTT_PASS         "pnks1111"
 
 // Match the stock Tasmota topic style so telemetry appears under
 // tele/tasmota_xxxxxx/SENSOR by default.

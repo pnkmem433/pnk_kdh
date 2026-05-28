@@ -486,6 +486,7 @@ TasmotaWebServer *Webserver;
 
 struct WEB {
   String chunk_buffer = "";                         // Could be max 2 * CHUNKED_BUFFER_SIZE
+  String custom_session_token = "";
   uint32_t upload_size = 0;
   uint32_t light_shutter_button_mask;
   uint32_t buttons_non_light_non_shutter;
@@ -499,6 +500,7 @@ struct WEB {
   bool upload_services_stopped = false;
   bool reset_web_log_flag = false;                  // Reset web console log
   bool initial_config = false;
+  bool custom_login_invalidated = true;
   bool cflg;
 } Web;
 
@@ -583,6 +585,12 @@ void ExecuteWebCommand(char* svalue, uint32_t source) {
   ExecuteCommand(svalue, SRC_IGNORE);
 }
 
+void WSContentStart_P(const char* title, bool auth);
+void WSContentStart_P(const char* title);
+void WSContentSendStyle(void);
+void WSContentSpaceButton(uint32_t title_index, bool show);
+void WSContentStop(void);
+
 /*-------------------------------------------------------------------------------------------*/
 
 // replace the series of `Webserver->on()` with a table in PROGMEM
@@ -605,10 +613,10 @@ const WebServerDispatch_t WebServerDispatch[] PROGMEM = {
   { "cs", HTTP_GET, HandleConsole },
   { "cs", HTTP_OPTIONS, HandlePreflightRequest },
   { "cm", HTTP_ANY, HandleHttpCommand },
+  { "wi", HTTP_ANY, HandleWifiConfiguration },
 #ifndef FIRMWARE_MINIMAL
   { "cn", HTTP_ANY, HandleConfiguration },
   { "md", HTTP_ANY, HandleModuleConfiguration },
-  { "wi", HTTP_ANY, HandleWifiConfiguration },
   { "lg", HTTP_ANY, HandleLoggingConfiguration },
   { "tp", HTTP_ANY, HandleTemplateConfiguration },
   { "co", HTTP_ANY, HandleOtherConfiguration },
@@ -655,7 +663,7 @@ void StartWebserver(int type) {
     if (!Webserver) {
       Webserver = new TasmotaWebServer((HTTP_MANAGER == type || HTTP_MANAGER_RESET_ONLY == type) ? 80 : WEB_PORT);
 
-      const char* headerkeys[] = { "Referer", "Host" };
+      const char* headerkeys[] = { "Referer", "Host", "Cookie" };
       size_t headerkeyssize = sizeof(headerkeys) / sizeof(char*);
       Webserver->collectHeaders(headerkeys, headerkeyssize);
 
@@ -763,11 +771,137 @@ void PollDnsWebserver(void) {
 /*********************************************************************************************/
 
 bool WebAuthenticate(void) {
+  if ((HTTP_ADMIN == Web.state) && strlen(SettingsText(SET_WEBPWD))) {
+    String cookie = Webserver->header(F("Cookie"));
+    if (cookie.length() && Web.custom_session_token.length()) {
+      String expected = F("TASMOTA_SESSION=");
+      expected += Web.custom_session_token;
+      if (cookie.indexOf(expected) >= 0) {
+        return true;
+      }
+    }
+    return false;
+  }
   if (strlen(SettingsText(SET_WEBPWD)) && (HTTP_MANAGER_RESET_ONLY != Web.state)) {
     return Webserver->authenticate(WEB_USERNAME, SettingsText(SET_WEBPWD));
   } else {
     return true;
   }
+}
+
+uint32_t WebCustomRandomToken(void) {
+#ifdef ESP32
+  return esp_random();
+#else
+  return ((uint32_t)ESP.getChipId() << 16) ^ micros() ^ millis();
+#endif
+}
+
+bool WebUseCustomLogin(void) {
+  return (HTTP_ADMIN == Web.state) && strlen(SettingsText(SET_WEBPWD));
+}
+
+void WebEnsureCustomSessionToken(void) {
+  if (Web.custom_session_token.length() && !Web.custom_login_invalidated) {
+    return;
+  }
+
+  char token[40];
+  snprintf_P(token, sizeof(token), PSTR("%s-%08X-%u"), NetworkUniqueId().c_str(), WebCustomRandomToken(), Settings->bootcount);
+  Web.custom_session_token = token;
+  Web.custom_login_invalidated = false;
+}
+
+void WebResetCustomLoginSession(void) {
+  Web.custom_session_token = "";
+  Web.custom_login_invalidated = true;
+}
+
+void WebSendCustomLoginPage(const char* message = nullptr) {
+  WSContentStart_P(PSTR(D_MAIN_MENU), false);
+  WSContentSendStyle();
+  WSContentSend_P(PSTR(
+    "<div style='max-width:380px;margin:30px auto;'>"
+      "<fieldset>"
+        "<legend><b>Admin Login</b></legend>"));
+  if (message && message[0]) {
+    WSContentSend_P(PSTR("<p style='color:var(--c_txtwrn);text-align:center;'><b>%s</b></p>"), message);
+  }
+  WSContentSend_P(PSTR(
+        "<form method='post' action='/'>"
+          "<p><b>User</b><br><input name='USER1' autocomplete='username' autofocus></p>"
+          "<p><b>Password</b><br><input name='PASS1' type='password' autocomplete='current-password'></p>"
+          "<br><button type='submit' class='button bgrn'>Login</button>"
+        "</form>"
+      "</fieldset>"
+    "</div>"));
+  WSContentStop();
+}
+
+void WebRedirectRoot(bool clear_cookie = false) {
+  WSHeaderSend();
+  if (clear_cookie) {
+    Webserver->sendHeader(F("Set-Cookie"), F("TASMOTA_SESSION=; Path=/; Max-Age=0"));
+  }
+  Webserver->sendHeader(F("Location"), F("/"), true);
+  Webserver->send(302, F("text/plain"), "");
+}
+
+bool WebHandleCustomLogin(void) {
+  if (!WebUseCustomLogin()) {
+    return true;
+  }
+
+  if (Webserver->hasArg(F("logout"))) {
+    WebResetCustomLoginSession();
+    WebRedirectRoot(true);
+    return false;
+  }
+
+  if (Webserver->hasArg(F("USER1")) || Webserver->hasArg(F("PASS1"))) {
+    if ((Webserver->arg(F("USER1")) == WEB_USERNAME) &&
+        (Webserver->arg(F("PASS1")) == SettingsText(SET_WEBPWD))) {
+      WebEnsureCustomSessionToken();
+      WSHeaderSend();
+      String cookie = F("TASMOTA_SESSION=");
+      cookie += Web.custom_session_token;
+      cookie += F("; Path=/; HttpOnly; SameSite=Lax");
+      Webserver->sendHeader(F("Set-Cookie"), cookie);
+      Webserver->sendHeader(F("Location"), F("/"), true);
+      Webserver->send(302, F("text/plain"), "");
+      return false;
+    }
+    WebSendCustomLoginPage(PSTR(D_NEED_USER_AND_PASSWORD));
+    return false;
+  }
+
+  if (!WebAuthenticate()) {
+    WebSendCustomLoginPage();
+    return false;
+  }
+
+  return true;
+}
+
+String WebAuthRealm(void) {
+  String realm = F("Tasmota ");
+  realm += NetworkUniqueId();
+  realm += '-';
+  realm += String(Settings->bootcount);
+  return realm;
+}
+
+void WebRequestAuthentication(bool force_unique_realm = false) {
+  if (WebUseCustomLogin()) {
+    WebSendCustomLoginPage();
+    return;
+  }
+  if (force_unique_realm) {
+    String realm = WebAuthRealm();
+    Webserver->requestAuthentication(BASIC_AUTH, realm.c_str());
+    return;
+  }
+  Webserver->requestAuthentication();
 }
 
 /*-------------------------------------------------------------------------------------------*/
@@ -777,8 +911,11 @@ bool HttpCheckPriviledgedAccess(bool autorequestauth = true) {
     HandleRoot();
     return false;
   }
+  if (!WebHandleCustomLogin()) {
+    return false;
+  }
   if (autorequestauth && !WebAuthenticate()) {
-    Webserver->requestAuthentication();
+    WebRequestAuthentication();
     return false;
   }
 
@@ -966,7 +1103,7 @@ void WSContentSend_PD(const char* formatP, ...) {  // Content send snprintf_P ch
 
 void WSContentStart_P(const char* title, bool auth) {
   if (auth && !WebAuthenticate()) {
-    return Webserver->requestAuthentication();
+    return WebRequestAuthentication();
   }
 
   WSContentBegin(200, CT_HTML);
@@ -1428,30 +1565,11 @@ void HandleRoot(void) {
   }
 
   if (WifiIsInManagerMode()) {
-#ifndef FIRMWARE_MINIMAL
-    if (strlen(SettingsText(SET_WEBPWD)) && 
-        !(Webserver->hasArg(F("USER1"))) && 
-        !(Webserver->hasArg(F("PASS1"))) && 
-        HTTP_MANAGER_RESET_ONLY != Web.state) {
-      HandleWifiLogin();
-    } else {
-      if (!strlen(SettingsText(SET_WEBPWD)) || 
-          (((Webserver->arg(F("USER1")) == WEB_USERNAME ) &&
-            (Webserver->arg(F("PASS1")) == SettingsText(SET_WEBPWD) )) ||
-            HTTP_MANAGER_RESET_ONLY == Web.state)) {
-        HandleWifiConfiguration();
-      } else {
-        // wrong user and pass
-        HandleWifiLogin();
-      }
-    }
-#endif  // Not FIRMWARE_MINIMAL
+    HandleWifiConfiguration();
     return;
   }
 
-  // Force authentication on the root page when admin web mode is active.
-  if ((HTTP_ADMIN == Web.state) && strlen(SettingsText(SET_WEBPWD)) && !WebAuthenticate()) {
-    Webserver->requestAuthentication();
+  if (!WebHandleCustomLogin()) {
     return;
   }
 
@@ -1788,7 +1906,7 @@ bool WebUpdateSliderTime(void) {
 
 bool HandleRootStatusRefresh(void) {
   if (!WebAuthenticate()) {
-    Webserver->requestAuthentication();
+    WebRequestAuthentication();
     return true;
   }
 
@@ -2486,6 +2604,8 @@ void ModuleSaveSettings(void) {
   ExecuteWebCommand(command);
 }
 
+#endif  // FIRMWARE_MINIMAL
+
 /*********************************************************************************************\
  * HandleWifiConfiguration
 \*********************************************************************************************/
@@ -2792,6 +2912,8 @@ void WifiSaveSettings(void) {
   cmnd += AddWebCommand(PSTR(D_CMND_PASSWORD "4"), PSTR("p2"), PSTR("\""));
   ExecuteWebCommand((char*)cmnd.c_str());
 }
+
+#ifndef FIRMWARE_MINIMAL
 
 /*********************************************************************************************\
  * HandleLoggingConfiguration

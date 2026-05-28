@@ -1,0 +1,13 @@
+{
+  "name": "smartplug-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Backend + frontend dashboard for Tasmota smart plugs using MQTT and SSE",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "mqtt": "^5.13.3"
+  }
+}

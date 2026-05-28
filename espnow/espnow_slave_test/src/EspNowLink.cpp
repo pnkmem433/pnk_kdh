@@ -87,6 +87,19 @@ PendingEvent* allocatePendingEvent() {
   return nullptr;
 }
 
+PendingEvent* findLatestPendingEvent(uint8_t nfcIndex) {
+  PendingEvent* latest = nullptr;
+  for (PendingEvent& event : g_pendingEvents) {
+    if (!event.active || event.packet.nfcIndex != nfcIndex) {
+      continue;
+    }
+    if (!latest || event.packet.seq > latest->packet.seq) {
+      latest = &event;
+    }
+  }
+  return latest;
+}
+
 PendingEvent* findPendingEvent(uint32_t seq, uint32_t bootId, uint8_t type, uint8_t nfcIndex) {
   for (PendingEvent& event : g_pendingEvents) {
     if (!event.active) {
@@ -216,7 +229,40 @@ void EspNowLink::queueNfcPacket(uint8_t nfcIndex, PacketType type, const String&
     return;
   }
 
-  PendingEvent* event = allocatePendingEvent();
+  PendingEvent* event = findLatestPendingEvent(nfcIndex);
+  if (event) {
+    const bool sameUid = strncmp(event->packet.uid, uid.c_str(), sizeof(event->packet.uid)) == 0;
+    if (event->packet.pollSeq == 0 && sameUid) {
+      if (event->packet.type == type) {
+        event->packet.eventTimeMs = millis();
+        Serial.printf("[Slave-%u][Coalesce] NFC-%u keep %s seq=%lu uid=%s\n",
+                      g_slaveId,
+                      nfcIndex,
+                      packetAction(type),
+                      static_cast<unsigned long>(event->packet.seq),
+                      event->packet.uid);
+        return;
+      }
+
+      event->packet.type = type;
+      event->packet.eventTimeMs = millis();
+      event->packet.attempt = 0;
+      event->packet.pollSeq = 0;
+      event->packet.pollSentMs = 0;
+      event->packet.masterRxMs = 0;
+      event->packet.removeTimeMs = g_removeTimeMs;
+      event->packet.nfcPollIntervalMs = g_nfcPollIntervalMs;
+      Serial.printf("[Slave-%u][Coalesce] NFC-%u flip_to=%s seq=%lu uid=%s\n",
+                    g_slaveId,
+                    nfcIndex,
+                    packetAction(type),
+                    static_cast<unsigned long>(event->packet.seq),
+                    event->packet.uid);
+      return;
+    }
+  }
+
+  event = allocatePendingEvent();
   if (!event) {
     Serial.printf("[Slave-%u][QueueFull] NFC-%u %s uid=%s\n",
                   g_slaveId,

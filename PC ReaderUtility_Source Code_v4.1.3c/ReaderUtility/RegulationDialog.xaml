@@ -1,0 +1,225 @@
+﻿<Window x:Class="RFID.Utility.RegulationDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:cla="clr-namespace:RFID.Utility.IClass"
+        mc:Ignorable="d" Background="{x:Null}" WindowStartupLocation="CenterScreen" AllowsTransparency="True"
+        Title="Regulation" Height="554" Width="760" ResizeMode="NoResize" WindowStyle="None" Topmost="False">
+    <Window.Resources>
+
+       
+        <Style TargetType="ComboBox">
+            <Setter Property="Height" Value="30"></Setter>
+            <Setter Property="VerticalAlignment" Value="Top"></Setter>
+            <Setter Property="VerticalContentAlignment" Value="Center"></Setter>
+            <Setter Property="FontFamily" Value="微軟正黑體"></Setter>
+            <Setter Property="FontSize" Value="14"></Setter>
+        </Style>
+    </Window.Resources>
+    
+    
+    
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="34" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Border x:Name="BorderTitle" BorderBrush="#B0B0B0" BorderThickness="1,1,1,0" Background="#303030" MouseLeftButtonDown="OnBorderTitleMouseLeftDown">
+            <Grid Margin="2">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment ="Center">
+                    <TextBlock Style="{StaticResource TextBlockStyle16B}" Margin="3,0,0,0" Foreground="WhiteSmoke">Setting</TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="LoadConfigButton" Click="OnLoadConfigButtonClick" IsEnabled="{Binding LoadConfigButtonIsEnabled}"
+                            Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Margin="0,0,10,0"
+							Width="32" Height="32" Content="{StaticResource IMG_Load}" />
+                    <Button x:Name="ButtonClose" Content="{StaticResource IMG_Close}"  Width="28" Height="28" Click="OnCloseClick" VerticalContentAlignment="Top"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <Border x:Name="BorderView" BorderBrush="#B0B0B0" Grid.Row="1" BorderThickness="1,0,1,1" Background="#FFF0F0F0">
+            <Grid>
+                <DockPanel LastChildFill="False">
+                    <StackPanel DockPanel.Dock="Bottom" Background="#808080">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="{Binding LabelMessage, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBlockStyle12}" 
+                                       Width="500" Height="22" TextWrapping="Wrap" 
+                                       HorizontalAlignment="Left" VerticalAlignment="Center" TextAlignment="Left" 
+                                       Margin="5,0,0,0" TextTrimming="CharacterEllipsis"></TextBlock>
+                        </Grid>
+                    </StackPanel>
+                    <Border>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="325"/>
+                                <ColumnDefinition Width="425"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Background="#FFEEEEEE">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="305"/>
+                                        <RowDefinition Height="120"/>
+                                        <RowDefinition Height="65"/>
+                                        <RowDefinition Height="130"/>
+                                    </Grid.RowDefinitions>
+                                    <GroupBox IsEnabled="{Binding GroupModuleSetIsEnabled}" Grid.Row="0" Height="302" Width="320" HorizontalAlignment="Left" VerticalAlignment="Top" BorderBrush="LightSlateGray" Margin="5,0,0,0">
+                                        <GroupBox.Header>
+                                            <Label Content="{Binding Group_Setting_Regulation, Source={StaticResource Resources}}"></Label>
+                                        </GroupBox.Header>
+                                        <StackPanel Background="#FFEEEEEE" Orientation="Vertical">
+                                            <TextBlock Margin="5,0,0,0" Style="{StaticResource TextBlockStyle11}" Text="{Binding Group_Setting_Area, Source={StaticResource Resources}}"></TextBlock>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="200"/>
+                                                    <ColumnDefinition Width="120"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ComboBox ItemsSource="{Binding ComboBoxAreaItemsSource}" Margin="5,0,0,0" Width="195" HorizontalAlignment="Left" IsEnabled="{Binding ComboBoxAreaIsEnabled}"
+                                                          SelectedIndex="{Binding ComboBoxAreaSelectedIndex}" DropDownClosed="OnComboBoxAreaDownClosed" >
+                                                </ComboBox>
+                                                <Button IsEnabled="{Binding ButtonSetAreaIsEnabled}" Grid.Column="1" Margin="5,0,13,0" Style="{StaticResource ButtonStyle14B}" Click="OnButtonSetAreaClick" Content="{Binding Group_Setting_Set, Source={StaticResource Resources}}"/>
+                                            </Grid>
+
+                                            <GroupBox Margin="-6,0,-6,0" Height="170" Width="320" HorizontalAlignment="Left" VerticalAlignment="Top" BorderBrush="LightSlateGray">
+                                                <GroupBox.Header>
+                                                    <Label VerticalAlignment="Center" Content="{Binding Group_Setting_Measure_Frequency, Source={StaticResource Resources}}"></Label>
+                                                </GroupBox.Header>
+                                                <StackPanel Background="#FFEEEEEE" Orientation="Vertical">
+                                                    <TextBlock Margin="5,0,0,0" Style="{StaticResource TextBlockStyle11}" Text="{Binding Group_Setting_Baseband, Source={StaticResource Resources}}"/>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="200"/>
+                                                            <ColumnDefinition Width="120"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <ComboBox Margin="5,0,0,0" x:Name="ComboBoxFrequency" IsEnabled="False"/>
+                                                        <Button IsEnabled="{Binding ButtonSetFrequencyIsEnabled}" Grid.Column="1" Margin="5,0,13,0" Style="{StaticResource ButtonStyle14B}" Click="OnButtonSetFrequencyClick" Content="{Binding Group_Setting_Set, Source={StaticResource Resources}}"/>
+                                                    </Grid>
+                                                    <Grid Margin="0,8,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="120"/>
+                                                            <ColumnDefinition Width="80"/>
+                                                            <ColumnDefinition Width="120"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0" Margin="5,0,0,0" Style="{StaticResource TextBlockStyle12}" Text="{Binding Group_Setting_Measure_Input, Source={StaticResource Resources}}"/>
+                                                        <TextBox Grid.Column="1" x:Name="TextBoxMeasureFrequency" Width="80" Style="{StaticResource TextBoxStyle}" Margin="0" PreviewTextInput="TextBox_PreviewTextInput" PreviewKeyDown="TextBox_PreviewKeyDown"/>
+                                                        <Button Grid.Column="2" IsEnabled="{Binding ButtonAdiustIsEnabled}" Margin="2,1,10,0" Style="{StaticResource ButtonStyle14B}" Click="OnButtonAdjustClick" Content="{Binding Group_Setting_Adjust, Source={StaticResource Resources}}"/>
+                                                    </Grid>
+                                                    <TextBlock Margin="5,5,0,0" Style="{StaticResource TextBlockStyle11}" Text="{Binding Group_Setting_Adjust_Frequency, Source={StaticResource Resources}}"></TextBlock>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="65"/>
+                                                            <ColumnDefinition Width="65"/>
+                                                            <ColumnDefinition Width="70"/>
+                                                            <ColumnDefinition Width="120"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Button IsEnabled="{Binding ButtonSetFrequencyPlusIsEnabled}" Grid.Column="0" FontSize="16" Height="26" Width="60" HorizontalAlignment="Right" FontFamily="微軟正黑體" Click="OnButtonSetFrequencyPlusClick">+</Button>
+                                                        <Button IsEnabled="{Binding ButtonSetFrequencyMinusIsEnabled}" Grid.Column="1" FontSize="16" Height="26" Width="60" HorizontalAlignment="Right" FontFamily="微軟正黑體" Click="OnButtonSetFrequencyMinusClick">-</Button>
+                                                        <ComboBox ItemsSource="{Binding ComboboxStepItemsSource}" SelectedIndex="{Binding ComboboxStepSelectedIndex}" Grid.Column="2" Height="26" Width="65" HorizontalAlignment="Right"/>
+                                                        <Button IsEnabled="{Binding ButtonSetFrequencyResetIsEnabled}" Grid.Column="3" Margin="5,0,13,0" Style="{StaticResource ButtonStyle14B}" Click="OnButtonSetFrequencyResetClick" Content="{Binding Group_Setting_Reset, Source={StaticResource Resources}}"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </GroupBox>
+                                            <TextBlock Margin="5,5,0,0" Style="{StaticResource TextBlockStyle11}" Text="{Binding Group_Setting_Power, Source={StaticResource Resources}}"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="200"/>
+                                                    <ColumnDefinition Width="120"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ComboBox Margin="5,0,0,0" ItemsSource="{Binding ComboboxPowerItemsSource}" SelectedIndex="{Binding ComboboxPowerSelectedIndex}"/>
+                                                <Button Grid.Column="1" IsEnabled="{Binding ButtonSetPowerIsEnabled}" Margin="5,0,12,0" Style="{StaticResource ButtonStyle14B}" VerticalAlignment="Top" Click="OnButtonSetPowerClick" Content="{Binding Group_Setting_Set, Source={StaticResource Resources}}"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </GroupBox>
+                                    <GroupBox IsEnabled="{Binding GroupModuleMeasureIsEnabled}"  Grid.Row="1" Height="115" Width="320" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,-5,0,0" BorderBrush="LightSlateGray">
+                                        <GroupBox.Header>
+                                            <Label Content="{Binding Group_Setting_Measure, Source={StaticResource Resources}}"/>
+                                        </GroupBox.Header>
+                                        <StackPanel Background="#FFEEEEEE" Orientation="Vertical">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="70"/>
+                                                    <ColumnDefinition Width="70"/>
+                                                    <ColumnDefinition Width="75"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Margin="5,0,0,0" Grid.Column="0" Style="{StaticResource TextBlockStyle11}" Text="{Binding Group_Setting_Baseband_Mode, Source={StaticResource Resources}}"/>
+                                                <RadioButton x:Name="BasebandCarryMode" IsChecked="{Binding BasebandCarryModeIsChecked}" Grid.Column="1" Tag="1" FontFamily="微軟正黑體" VerticalAlignment="Center" Checked="OnRadioButtonBasebandModeChecked"  Content="{Binding Group_Setting_Baseband_Mode_Carry, Source={StaticResource Resources}}"/>
+                                                <RadioButton x:Name="BasebandRXMode" Grid.Column="2" Tag="2" FontFamily="微軟正黑體" VerticalAlignment="Center" Checked="OnRadioButtonBasebandModeChecked" Content="{Binding Group_Setting_Baseband_Mode_RX, Source={StaticResource Resources}}"/>
+                                            </Grid>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="200"/>
+                                                    <ColumnDefinition Width="120"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ComboBox x:Name="ComboBoxMeasureFrequency" Grid.Column="0" Margin="5,0,0,0" Height="30" FontFamily="微軟正黑體" FontSize="14"/>
+                                                <Button IsEnabled="{Binding ButtonMeasureSetFrequencyIsEnabled}" cla:FocusExtension.IsFocused ="{Binding IsButtonMeasureSetFrequencyFocused}" Grid.Column="1" Margin="5,0,12,0" Style="{StaticResource ButtonStyle14B}" 
+                                                        Click="OnButtonMeasureSetFrequencyClick" Content="{Binding Group_Setting_Set, Source={StaticResource Resources}}"/>
+                                            </Grid>
+                                            <TextBlock Margin="5,5,0,0" Style="{StaticResource TextBlockStyle11}" Text="{Binding Group_Setting_TagTest, Source={StaticResource Resources}}"/>
+                                            <Button x:Name="ButtonMeasureRun" IsEnabled="{Binding ButtonMeasureRunIsEnabled}" Margin="0,-15,2,0" Style="{StaticResource ButtonStyle14B}" HorizontalAlignment="Right" Click="OnButtonMeasureRunClick" Content="{Binding Group_Setting_Run, Source={StaticResource Resources}}"/>
+                                        </StackPanel>
+                                    </GroupBox>
+                                    <GroupBox x:Name="GroupBaudRate" Grid.Row="2"  Height="70" Width="320" HorizontalAlignment="Left" VerticalAlignment="Top"  Margin="5,-10,0,0" BorderBrush="LightSlateGray">
+                                        <GroupBox.Header>
+                                            <Label Content="{Binding Group_Setting_BaudRate, Source={StaticResource Resources}}"/>
+                                        </GroupBox.Header>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="200"/>
+                                                <ColumnDefinition Width="120"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ComboBox Margin="5,0,0,0" ItemsSource="{Binding BaudRate}" SelectedItem="{Binding ComboBoxBaudRateSelectedBaudRate}" DisplayMemberPath="Content" 
+                                                      DropDownClosed="OnComboBoxBaudRateDownClosed">
+                                            </ComboBox>
+                                            <Button Grid.Column="1" IsEnabled="{Binding ButtonSetBuadRateIsEnabled}" Margin="5,0,12,0" Style="{StaticResource ButtonStyle14B}" VerticalAlignment="Top" Click="OnButtonSetBuadRateClick" Content="{Binding Group_Setting_Set, Source={StaticResource Resources}}"/>
+                                            </Grid>
+                                    </GroupBox>
+                                    
+                                </Grid>
+                            </StackPanel>
+                            <GroupBox Grid.Column="1" Height="130" Width="420" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,0,0,0" Grid.RowSpan="7" BorderBrush="LightSlateGray">
+                                <GroupBox.Header>
+                                    <Label Content="{Binding Group_Status, Source={StaticResource Resources}}"/>
+                                </GroupBox.Header>
+                                <StackPanel Background="#FFEEEEEE" Orientation="Vertical">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="3*"/>
+                                            <ColumnDefinition Width="14*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource TextBlockStyle12}" HorizontalAlignment="Right" Text="{Binding Group_Status_Area, Source={StaticResource Resources}}"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBlockStyle12}" Margin="2,0,0,0" x:Name="mLabelArea"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource TextBlockStyle12}" HorizontalAlignment="Right" Text="{Binding Group_Status_Frequency, Source={StaticResource Resources}}"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBlockStyle12}" Margin="2,0,0,0" x:Name="mLabelFrequncy"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource TextBlockStyle12}" HorizontalAlignment="Right" Text="{Binding Group_Status_Offset, Source={StaticResource Resources}}"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource TextBlockStyle12}" Margin="2,0,0,0" x:Name="mLabelFrequncyOffset"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource TextBlockStyle12}" HorizontalAlignment="Right" Text="{Binding Group_Status_Power, Source={StaticResource Resources}}"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource TextBlockStyle12}" Margin="2,0,0,0" x:Name="mLabelPower"/>
+                                    </Grid>
+                                    <Button IsEnabled="{Binding ButtonUpdateIsEnabled}" Margin="5,0,5,5" Style="{StaticResource ButtonStyle14B}" HorizontalAlignment="Right" Click="OnButtonUpdateClick" Content="{Binding Group_Status_Update, Source={StaticResource Resources}}"/>
+                                </StackPanel>
+                            </GroupBox>
+                            <ListBox Grid.Column="1" x:Name="ListBoxInfo"  HorizontalAlignment="Left" VerticalAlignment="Top" Width="420" Height="343" Margin="5,140,0,0" FontFamily="Consolas">
+                                <ListBox.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Delete All" Click="OnListBoxMenuItemClick_Delete"/>
+                                    </ContextMenu>
+                                </ListBox.ContextMenu>
+                            </ListBox>
+                        </Grid>
+                    </Border>
+                </DockPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

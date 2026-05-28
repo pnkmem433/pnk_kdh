@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <Arduino.h>
 #include <SPI.h>
@@ -66,12 +66,15 @@ private:
   bool _irqMode = false;
   bool _enabled = true;
   uint32_t _lastEnableMs = 0;
+  uint32_t _disabledStartMs = 0;
   uint32_t _suppressRemoveUntil = 0;
+  uint32_t _bootWarmupUntilMs = 0;
   static void taskThunk(void *context);
   void taskTick();
   bool checkHardware();
   String uidToHex(const uint8_t *uid, uint8_t uidLength);
   void reinitIfNeeded();
+  void shiftTimingWindows(uint32_t deltaMs);
 
   uint8_t _sck;
   uint8_t _miso;
@@ -86,11 +89,19 @@ private:
   ErrorCallback _onError;
 
   String _lastUid;
+  String _pendingReadUid;
   bool _cardPresent = false;
+  bool _publishedPresent = false;
+  bool _removePending = false;
   uint8_t _failCount = 0;
   uint8_t _missCount = 0;
+  uint8_t _pendingReadCount = 0;
   uint32_t _lastPollMs = 0;
   uint32_t _lastSeenMs = 0;
+  uint32_t _pendingReadStartMs = 0;
+  uint32_t _removePendingStartMs = 0;
+  uint32_t _lastEventMs = 0;
+  uint8_t _lastEventType = 0;
   TaskRunner *_task;
   bool _ok = false;
   uint32_t _lastCheckMs = 0;

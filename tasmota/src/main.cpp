@@ -26,6 +26,39 @@ DigitalOut led2(Config::kLedPin, false);
 
 String controlTopic = "smart_plug/{uuid}";
 
+enum class StatusLedMode {
+  Off,
+  WifiRetry,
+  MqttRetry,
+  OtaBusy
+};
+
+StatusLedMode currentLedMode = StatusLedMode::Off;
+
+void applyStatusLed(StatusLedMode nextMode) {
+  if (currentLedMode == nextMode) {
+    return;
+  }
+
+  currentLedMode = nextMode;
+
+  switch (currentLedMode) {
+    case StatusLedMode::Off:
+      led2.stopBlink();
+      led2.off();
+      break;
+    case StatusLedMode::WifiRetry:
+      led2.blink(Config::kWifiLedBlinkMs);
+      break;
+    case StatusLedMode::MqttRetry:
+      led2.blink(Config::kMqttLedBlinkMs);
+      break;
+    case StatusLedMode::OtaBusy:
+      led2.blink(Config::kOtaLedBlinkMs);
+      break;
+  }
+}
+
 void serviceDelay(unsigned long durationMs, bool serviceWifi = false) {
   unsigned long startedMs = millis();
   while (millis() - startedMs < durationMs) {
@@ -68,12 +101,13 @@ void setup() {
   led2.stopBlink();
   wifi.begin();
 
-  led2.blink(250);
+  applyStatusLed(StatusLedMode::OtaBusy);
   serviceDelay(2000, true);
-  led2.stopBlink();
   updater.performFirmwareUpdate(
       [](float progress) { Serial.printf("Update Progress: %.2f%%\n", progress * 100.0f); },
-      [](FirmwareUpdateResult result) { Serial.printf("Update Result: %d\n", static_cast<int>(result)); });
+      [](FirmwareUpdateResult result) { Serial.printf("Update Result: %d\n", static_cast<int>(result)); },
+      []() { led2.tick(); });
+  applyStatusLed(StatusLedMode::Off);
 
   led2.blink(100);
   serviceDelay(2000, true);
@@ -159,11 +193,11 @@ void loop() {
   button.tick(Config::kDebounceMs);
 
   if (!wifi.connected()) {
-    led2.blink(500);
+    applyStatusLed(StatusLedMode::WifiRetry);
   } else if (!mqtt.connected()) {
-    led2.blink(100);
+    applyStatusLed(StatusLedMode::MqttRetry);
   } else {
-    led2.off();
+    applyStatusLed(StatusLedMode::Off);
   }
 
   if (now - lastPrint > 5000) {

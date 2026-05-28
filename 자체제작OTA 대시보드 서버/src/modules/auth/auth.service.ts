@@ -27,12 +27,12 @@ export class AuthService {
     if (user && await bcrypt.compare(userLoginDto.password, user.password)) {
       const access_token = this.jwtService.sign(
         { seq: user.seq, type: 'access' },
-        { expiresIn: '15m' },
+        { expiresIn: '365d' },
       );
 
       const refresh_token = this.jwtService.sign(
         { seq: user.seq, type: 'refresh' },
-        { expiresIn: '7d' },
+        { expiresIn: '3650d' },
       );
 
       // DB에 refresh token 저장 (hash 처리)
@@ -67,8 +67,8 @@ export class AuthService {
     }
 
     // 새로운 access & refresh token 발급
-    const newAccessToken = this.jwtService.sign({ seq: user.seq, type: 'access' }, { expiresIn: '15m' });
-    const newRefreshToken = this.jwtService.sign({ seq: user.seq, type: 'refresh' }, { expiresIn: '7d' });
+    const newAccessToken = this.jwtService.sign({ seq: user.seq, type: 'access' }, { expiresIn: '365d' });
+    const newRefreshToken = this.jwtService.sign({ seq: user.seq, type: 'refresh' }, { expiresIn: '3650d' });
 
     const hashedRefreshToken = await bcrypt.hash(newRefreshToken, 10);
     await this.usersRepository.update(user.seq, { refreshToken: hashedRefreshToken });

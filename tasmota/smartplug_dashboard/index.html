@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Plug Dashboard</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --border: #dde3ea;
+      --text: #101828;
+      --muted: #667085;
+      --green: #16a34a;
+      --green-soft: rgba(22, 163, 74, 0.10);
+      --gray-soft: #eef2f6;
+      --shadow: 0 12px 36px rgba(15, 23, 42, 0.08);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Noto Sans KR", sans-serif;
+      background: linear-gradient(180deg, #f8fafc 0%, #f3f5f7 100%);
+      color: var(--text);
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 28px 20px 48px;
+    }
+
+    .shell {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 10px 14px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+    }
+
+    .status-chip::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #d0d5dd;
+    }
+
+    .status-chip.connected::before {
+      background: var(--green);
+    }
+
+    .empty {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      min-height: 240px;
+      color: var(--muted);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 24px;
+      right: 24px;
+      height: 4px;
+      border-radius: 999px;
+      background: #d0d5dd;
+    }
+
+    .card.on::before {
+      background: var(--green);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .device-id {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      word-break: break-all;
+    }
+
+    .badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid var(--border);
+      background: var(--gray-soft);
+      color: #344054;
+    }
+
+    .badge.on {
+      background: var(--green-soft);
+      color: var(--green);
+      border-color: rgba(22, 163, 74, 0.18);
+    }
+
+    .meta-box {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--surface-soft);
+      border: 1px solid #e6ebf1;
+    }
+
+    .line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .line-icon {
+      width: 28px;
+      height: 28px;
+      flex: 0 0 auto;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #eef2f6;
+      color: #475467;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .line-text {
+      min-width: 0;
+      font-size: 14px;
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    .line-subtle {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      flex: 1 1 0;
+      border-radius: 16px;
+      border: 1px solid transparent;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .btn-on {
+      background: var(--green);
+      color: #fff;
+    }
+
+    .btn-on:hover {
+      filter: brightness(0.96);
+    }
+
+    .btn-off {
+      background: #fff;
+      color: #344054;
+      border-color: var(--border);
+    }
+
+    .btn-off:hover {
+      background: #f8fafc;
+    }
+
+    @media (min-width: 700px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1080px) {
+      .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1380px) {
+      .grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="shell">
+      <section class="hero">
+        <div>
+          <h1 class="title">Smart Plug Dashboard</h1>
+          <p class="subtitle">상태 확인 중심 대시보드. 장치는 자동으로 카드에 추가됩니다.</p>
+        </div>
+        <div id="mqttStatus" class="status-chip">MQTT 연결 확인 중</div>
+      </section>
+
+      <section id="empty" class="empty">
+        아직 수신된 장치가 없습니다.
+      </section>
+
+      <section id="grid" class="grid"></section>
+    </div>
+  </div>
+
+  <script>
+    const devices = new Map();
+    let eventSource = null;
+
+    const els = {
+      mqttStatus: document.getElementById('mqttStatus'),
+      empty: document.getElementById('empty'),
+      grid: document.getElementById('grid')
+    };
+
+    function ensureDevice(uuid) {
+      if (!devices.has(uuid)) {
+        devices.set(uuid, {
+          uuid,
+          state: 'unknown',
+          webserver: null,
+          ssid: '',
+          ipAddress: '',
+          lastSeen: '',
+          online: true
+        });
+      }
+      return devices.get(uuid);
+    }
+
+    function normalizeState(value) {
+      const state = String(value || '').toLowerCase();
+      if (state === 'on') return 'on';
+      if (state === 'off') return 'off';
+      return 'unknown';
+    }
+
+    function mergePlug(data) {
+      const plug = ensureDevice(data.uuid);
+      plug.state = normalizeState(data.state);
+      plug.webserver = typeof data.webserver === 'number' ? data.webserver : plug.webserver;
+      plug.ssid = data.ssid || plug.ssid || '';
+      plug.ipAddress = data.ipAddress || plug.ipAddress || '';
+      plug.lastSeen = data.lastSeen || plug.lastSeen || '';
+      plug.online = data.online !== false;
+    }
+
+    function formatLastSeen(value) {
+      if (!value) return '-';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '-';
+      return new Intl.DateTimeFormat('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      }).format(date);
+    }
+
+    async function sendCommand(uuid, cmd) {
+      const response = await fetch(`/api/plugs/${encodeURIComponent(uuid)}/command`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cmd })
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        alert(data.error || '명령 전송에 실패했습니다.');
+      }
+    }
+
+    function render() {
+      const plugs = [...devices.values()].sort((a, b) => a.uuid.localeCompare(b.uuid));
+      els.empty.style.display = plugs.length === 0 ? 'flex' : 'none';
+      els.grid.innerHTML = '';
+
+      for (const plug of plugs) {
+        const stateText = plug.online ? plug.state.toUpperCase() : 'OFFLINE';
+        const card = document.createElement('article');
+        card.className = `card ${plug.state === 'on' && plug.online ? 'on' : 'off'}`;
+        card.innerHTML = `
+          <div class="card-header">
+            <h2 class="device-id">${plug.uuid}</h2>
+            <div class="badges">
+              <span class="badge ${plug.state === 'on' && plug.online ? 'on' : ''}">${stateText}</span>
+              ${plug.webserver !== null ? `<span class="badge">WEB ${plug.webserver}</span>` : ''}
+            </div>
+          </div>
+
+          <div class="meta-box">
+            ${plug.ssid ? `
+              <div class="line">
+                <span class="line-icon">W</span>
+                <span class="line-text">${plug.ssid}</span>
+              </div>
+            ` : ''}
+            ${plug.ipAddress ? `
+              <div class="line">
+                <span class="line-icon">IP</span>
+                <span class="line-text">${plug.ipAddress}</span>
+              </div>
+            ` : ''}
+            <div class="line">
+              <span class="line-icon">T</span>
+              <span class="line-text line-subtle">마지막 수신: ${formatLastSeen(plug.lastSeen)}</span>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-on" type="button" data-id="${plug.uuid}" data-cmd="on">ON</button>
+            <button class="btn btn-off" type="button" data-id="${plug.uuid}" data-cmd="off">OFF</button>
+          </div>
+        `;
+        els.grid.appendChild(card);
+      }
+    }
+
+    async function loadSnapshot() {
+      const response = await fetch('/api/plugs');
+      if (!response.ok) throw new Error('snapshot failed');
+      const data = await response.json();
+      devices.clear();
+      for (const plug of data.plugs) {
+        mergePlug(plug);
+      }
+      els.mqttStatus.textContent = data.mqtt.connected ? 'MQTT 연결됨' : 'MQTT 재연결 중';
+      els.mqttStatus.classList.toggle('connected', !!data.mqtt.connected);
+      render();
+    }
+
+    function connectEvents() {
+      if (eventSource) eventSource.close();
+
+      eventSource = new EventSource('/api/events');
+
+      eventSource.addEventListener('snapshot', (event) => {
+        const data = JSON.parse(event.data);
+        devices.clear();
+        for (const plug of data.plugs) {
+          mergePlug(plug);
+        }
+        els.mqttStatus.textContent = data.mqtt.connected ? 'MQTT 연결됨' : 'MQTT 재연결 중';
+        els.mqttStatus.classList.toggle('connected', !!data.mqtt.connected);
+        render();
+      });
+
+      eventSource.addEventListener('plug', (event) => {
+        const data = JSON.parse(event.data);
+        mergePlug(data);
+        render();
+      });
+
+      eventSource.addEventListener('mqtt', (event) => {
+        const data = JSON.parse(event.data);
+        els.mqttStatus.textContent = data.connected ? 'MQTT 연결됨' : 'MQTT 재연결 중';
+        els.mqttStatus.classList.toggle('connected', !!data.connected);
+      });
+    }
+
+    els.grid.addEventListener('click', async (event) => {
+      const button = event.target.closest('button[data-id][data-cmd]');
+      if (!button) return;
+      await sendCommand(button.dataset.id, button.dataset.cmd);
+    });
+
+    loadSnapshot().catch(() => {});
+    connectEvents();
+    render();
+  </script>
+</body>
+</html>

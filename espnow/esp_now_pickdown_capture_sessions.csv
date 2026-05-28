@@ -1,0 +1,3 @@
+﻿session_started_at,serial_port,baudrate,phase,environment,pattern,master_poll_interval_ms,remove_time_ms,nfc_poll_interval_ms,first_test_id
+2026-05-08 11:27:44,COM19,115200,PICKDOWN_SCREEN,NORMAL,ONE_HOUR_HOLD_STABILITY,5,700,25,1
+2026-05-08 12:01:54,COM19,115200,PICKDOWN_SCREEN,NORMAL,ONE_HOUR_HOLD_STABILITY,5,700,25,1
