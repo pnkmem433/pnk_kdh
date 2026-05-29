@@ -1,0 +1,1564 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RFID 테스트케이스 구조화</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(14, 165, 233, 0.08), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.08), transparent 28%),
+        #f8fafc;
+    }
+
+    .soft-shadow {
+      box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+    }
+
+    .test-case-button {
+      position: relative;
+    }
+
+    .test-case-button.is-active {
+      border-color: #0284c7;
+      background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.18), 0 16px 32px rgba(14, 165, 233, 0.12);
+      color: #0f172a;
+      transform: translateY(-1px);
+    }
+
+    .test-case-button.is-active::before {
+      content: "";
+      position: absolute;
+      left: -1px;
+      top: 14px;
+      bottom: 14px;
+      width: 6px;
+      border-radius: 9999px;
+      background: linear-gradient(180deg, #0ea5e9, #0284c7);
+    }
+
+    .test-case-button.is-active .test-case-code {
+      color: #0369a1;
+    }
+
+    .test-case-button.is-active .test-case-selected-badge {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .test-case-selected-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      border: 1px solid #7dd3fc;
+      background: #e0f2fe;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      color: #075985;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: 160ms ease;
+      pointer-events: none;
+    }
+
+    .condition-chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 9999px;
+      border: 1px solid #bae6fd;
+      background: #f0f9ff;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      line-height: 1.4;
+      color: #075985;
+    }
+
+    .test-case-button.is-preview {
+      border-color: #f59e0b;
+      background: linear-gradient(135deg, #fffbeb, #ffffff);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.16);
+      color: #0f172a;
+    }
+
+    .button-mapped-highlight {
+      outline: 3px solid #0ea5e9;
+      outline-offset: 2px;
+      transform: scale(1.02);
+      z-index: 10;
+    }
+
+    .factor-card {
+      border-radius: 1rem;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      padding: 1rem;
+      transition: 160ms ease;
+    }
+
+    .factor-card.is-preview {
+      border-color: #e2e8f0;
+      background: #ffffff;
+      box-shadow: none;
+    }
+
+    .factor-value {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 9999px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.82rem;
+      font-weight: 800;
+      line-height: 1.4;
+      color: #0f172a;
+    }
+
+    .factor-value.is-selected {
+      border-color: #bae6fd;
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .factor-value.is-preview {
+      border-color: #fcd34d;
+      background: #fffbeb;
+      color: #b45309;
+      box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.16);
+    }
+
+    .factor-value.is-match {
+      border-color: #86efac;
+      background: #dcfce7;
+      color: #166534;
+      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.16);
+    }
+  </style>
+</head>
+<body data-section-theme="sky" class="min-h-screen text-slate-900">
+  <main class="mx-auto max-w-7xl px-6 py-12">
+    <section class="rounded-[2rem] border border-slate-200 bg-white p-8 soft-shadow">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div class="max-w-5xl">
+          <div class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">Styling Booth RFID Test Map</div>
+          <h1 class="mt-3 text-3xl font-black text-slate-950">RFID 테스트케이스 구조화</h1>
+          <p class="mt-4 text-sm leading-7 text-slate-600">
+            상단은 경우의 수 구조를 정리하고, 하단은 실제 수행한 테스트를 조건별 상세 카드로 바로 읽을 수 있게 정리했습니다.
+            파일명에 들어 있는 실제 실험 조건을 짧게 풀어쓴 표현으로, 어떤 위치와 어떤 배치가 대응되는지 한눈에 따라갈 수 있게 구성했습니다.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-3 text-sm font-semibold">
+          <a href="./index.html" class="rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sky-800">기록 목록으로</a>
+          <a href="../index.html" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-700">메인 홈으로</a>
+        </div>
+      </div>
+
+      <div class="mt-8 grid gap-4 lg:grid-cols-4">
+        <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+          <h2 class="text-sm font-bold text-slate-950">주요 축 요약</h2>
+          <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+            <li>옷 수량</li>
+            <li>배치 방식</li>
+            <li>훅 / 바닥 위치</li>
+            <li>벽과의 거리 / 태그 방향</li>
+            <li>안테나 위치</li>
+            <li>천장 차폐 / RF 전력 세기</li>
+          </ul>
+        </article>
+        <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+          <h2 class="text-sm font-bold text-slate-950">구조화에 쓰인 조건</h2>
+          <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+            <li>옷 재질 자체는 주축으로 보기에는 영향이 작음</li>
+            <li>일반 사람 자체 조건은 주요 축에서 제외</li>
+            <li>사람 영향은 별도 보조 테스트로 분리</li>
+          </ul>
+        </article>
+        <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+          <h2 class="text-sm font-bold text-slate-950">용어 통일</h2>
+          <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+            <li>벽과의 거리: 벽과 멂 / 벽과 가까움 / 혼합</li>
+            <li>태그 방향: 안테나와 마주봄 / 반대 방향 / 혼합</li>
+            <li>안테나 위치: 앞·중·뒤와 좌·중·우의 결합</li>
+          </ul>
+        </article>
+        <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+          <h2 class="text-sm font-bold text-slate-950">읽는 순서</h2>
+          <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+            <li>1. 구조화에서 전체 축 확인</li>
+            <li>2. 상세 카드에서 실제 수행 테스트 확인</li>
+            <li>3. 파일명 기반 매핑으로 어떤 조건인지 확인</li>
+          </ul>
+        </article>
+      </div>
+
+      <section class="mt-8 rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 lg:p-6">
+        <div class="mb-4 flex flex-wrap items-center gap-3 text-xs font-semibold">
+          <span class="rounded-full border border-sky-300 bg-sky-100 px-3 py-1 text-sky-800">기존 수행 축</span>
+          <span class="rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-amber-800">추가 / 미실시 축</span>
+          <span class="rounded-full border border-slate-300 bg-white px-3 py-1 text-slate-700">점선 / ... = 생략된 조합</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <svg viewBox="0 0 1960 980" class="min-w-[1450px] w-full">
+            <defs>
+              <style>
+                .title { font: 800 30px sans-serif; fill: #0f172a; }
+                .label { font: 700 20px sans-serif; fill: #0f172a; }
+                .small { font: 600 15px sans-serif; fill: #334155; }
+                .tiny { font: 600 13px sans-serif; fill: #475569; }
+                .node { rx: 18; ry: 18; stroke-width: 2; }
+                .axis { rx: 28; ry: 28; fill: #fff; stroke: #cbd5e1; stroke-width: 2; }
+                .solid { stroke: #94a3b8; stroke-width: 2.1; fill: none; }
+                .dash { stroke: #94a3b8; stroke-width: 2.1; fill: none; stroke-dasharray: 8 8; }
+              </style>
+            </defs>
+
+            <text x="60" y="46" class="title">1. 경우의 수 구조도</text>
+
+            <rect x="56" y="82" width="1848" height="146" class="axis" />
+            <text x="980" y="118" text-anchor="middle" class="label">옷 수량</text>
+            <text x="980" y="144" text-anchor="middle" class="tiny">각 수량에서 아래 조건 축들이 다시 선택된다</text>
+
+            <rect x="180" y="164" width="112" height="46" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="500" y="164" width="112" height="46" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="820" y="164" width="112" height="46" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1140" y="164" width="112" height="46" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1460" y="164" width="112" height="46" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1690" y="160" width="156" height="54" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <text x="236" y="193" text-anchor="middle" class="small">1벌</text>
+            <text x="556" y="193" text-anchor="middle" class="small">2벌</text>
+            <text x="876" y="193" text-anchor="middle" class="small">3벌</text>
+            <text x="1196" y="193" text-anchor="middle" class="small">4벌</text>
+            <text x="1516" y="193" text-anchor="middle" class="small">5벌</text>
+            <text x="1768" y="193" text-anchor="middle" class="small">가혹 7벌</text>
+
+            <rect x="70" y="278" width="246" height="214" class="axis" />
+            <text x="193" y="314" text-anchor="middle" class="label">배치 방식</text>
+            <rect x="94" y="356" width="198" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="94" y="408" width="198" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="94" y="460" width="198" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <text x="193" y="381" text-anchor="middle" class="small">벽걸이</text>
+            <text x="193" y="433" text-anchor="middle" class="small">바닥 적층</text>
+            <text x="193" y="485" text-anchor="middle" class="small">바닥 분산</text>
+
+            <rect x="350" y="278" width="320" height="214" class="axis" />
+            <text x="510" y="314" text-anchor="middle" class="label">벽걸이 위치</text>
+            <rect x="380" y="360" width="56" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="448" y="360" width="56" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="516" y="360" width="56" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="584" y="360" width="56" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="414" y="412" width="56" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="482" y="412" width="56" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="550" y="412" width="56" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <text x="408" y="385" text-anchor="middle" class="small">1</text>
+            <text x="476" y="385" text-anchor="middle" class="small">2</text>
+            <text x="544" y="385" text-anchor="middle" class="small">3</text>
+            <text x="612" y="385" text-anchor="middle" class="small">4</text>
+            <text x="442" y="437" text-anchor="middle" class="small">5</text>
+            <text x="510" y="437" text-anchor="middle" class="small">6</text>
+            <text x="578" y="437" text-anchor="middle" class="small">7</text>
+            <text x="510" y="474" text-anchor="middle" class="tiny">왼쪽훅=1, 중앙훅=4, 오른쪽훅=7</text>
+
+            <rect x="704" y="278" width="252" height="214" class="axis" />
+            <text x="830" y="314" text-anchor="middle" class="label">바닥 위치</text>
+            <rect x="734" y="386" width="58" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="799" y="386" width="58" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="864" y="386" width="58" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <text x="763" y="411" text-anchor="middle" class="small">좌</text>
+            <text x="828" y="411" text-anchor="middle" class="small">중</text>
+            <text x="893" y="411" text-anchor="middle" class="small">우</text>
+
+            <rect x="990" y="278" width="220" height="214" class="axis" />
+            <text x="1100" y="314" text-anchor="middle" class="label">벽과의 거리</text>
+            <text x="1100" y="338" text-anchor="middle" class="tiny">벽 기준으로 가까운지 먼지</text>
+            <rect x="1024" y="374" width="152" height="42" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1024" y="430" width="152" height="42" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <text x="1100" y="400" text-anchor="middle" class="small">벽과 멂</text>
+            <text x="1100" y="456" text-anchor="middle" class="small">벽과 가까움</text>
+
+            <rect x="1244" y="278" width="236" height="214" class="axis" />
+            <text x="1362" y="314" text-anchor="middle" class="label">태그 방향</text>
+            <rect x="1278" y="352" width="168" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1278" y="402" width="168" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1278" y="452" width="168" height="38" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <text x="1362" y="376" text-anchor="middle" class="small">안테나와 마주봄</text>
+            <text x="1362" y="426" text-anchor="middle" class="small">안테나 반대 방향</text>
+            <text x="1362" y="476" text-anchor="middle" class="small">혼합</text>
+
+            <rect x="1514" y="278" width="372" height="310" class="axis" />
+            <text x="1700" y="314" text-anchor="middle" class="label">안테나 위치</text>
+            <text x="1700" y="338" text-anchor="middle" class="tiny">앞 중 뒤와 좌 중 우가 결합된 하나의 위치 축</text>
+            <text x="1606" y="382" text-anchor="middle" class="tiny">좌</text>
+            <text x="1700" y="382" text-anchor="middle" class="tiny">중</text>
+            <text x="1794" y="382" text-anchor="middle" class="tiny">우</text>
+            <text x="1564" y="432" text-anchor="middle" class="tiny">앞</text>
+            <text x="1564" y="492" text-anchor="middle" class="tiny">중</text>
+            <text x="1564" y="552" text-anchor="middle" class="tiny">뒤</text>
+
+            <rect x="1580" y="404" width="74" height="40" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <rect x="1674" y="404" width="74" height="40" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <rect x="1768" y="404" width="74" height="40" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <rect x="1580" y="464" width="74" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1674" y="464" width="74" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1768" y="464" width="74" height="40" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="1580" y="524" width="74" height="40" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <rect x="1674" y="524" width="74" height="40" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <rect x="1768" y="524" width="74" height="40" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <text x="1617" y="429" text-anchor="middle" class="tiny">앞-좌</text>
+            <text x="1711" y="429" text-anchor="middle" class="tiny">앞-중</text>
+            <text x="1805" y="429" text-anchor="middle" class="tiny">앞-우</text>
+            <text x="1617" y="489" text-anchor="middle" class="tiny">중-좌</text>
+            <text x="1711" y="489" text-anchor="middle" class="tiny">중-중</text>
+            <text x="1805" y="489" text-anchor="middle" class="tiny">중-우</text>
+            <text x="1617" y="549" text-anchor="middle" class="tiny">뒤-좌</text>
+            <text x="1711" y="549" text-anchor="middle" class="tiny">뒤-중</text>
+            <text x="1805" y="549" text-anchor="middle" class="tiny">뒤-우</text>
+
+            <rect x="626" y="640" width="310" height="168" class="axis" />
+            <text x="781" y="676" text-anchor="middle" class="label">천장 차폐</text>
+            <rect x="670" y="744" width="116" height="42" fill="#dbeafe" stroke="#60a5fa" class="node" />
+            <rect x="798" y="744" width="116" height="42" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <text x="728" y="770" text-anchor="middle" class="small">차폐 없음</text>
+            <text x="856" y="770" text-anchor="middle" class="small">차폐 있음</text>
+
+            <rect x="1000" y="640" width="370" height="168" class="axis" />
+            <text x="1185" y="676" text-anchor="middle" class="label">안테나 RF 전력 세기</text>
+            <rect x="1046" y="744" width="278" height="42" fill="#fcd34d" stroke="#f59e0b" class="node" />
+            <text x="1185" y="770" text-anchor="middle" class="small">-2 ~ 25 dBm</text>
+
+            <path d="M236 210 C236 252, 193 260, 193 278" class="solid" />
+            <path d="M236 210 C236 258, 510 260, 510 278" class="solid" />
+            <path d="M236 210 C236 264, 830 260, 830 278" class="solid" />
+            <path d="M236 210 C236 270, 1100 260, 1100 278" class="solid" />
+            <path d="M236 210 C236 276, 1362 260, 1362 278" class="solid" />
+            <path d="M236 210 C236 282, 1700 260, 1700 278" class="solid" />
+
+            <path d="M1516 210 C1516 262, 1700 260, 1700 278" class="solid" />
+            <path d="M1768 214 C1768 268, 1700 260, 1700 278" class="solid" />
+
+            <path d="M1700 588 C1700 630, 781 620, 781 640" class="dash" />
+            <path d="M1700 588 C1700 636, 1185 620, 1185 640" class="dash" />
+
+            <text x="920" y="252" text-anchor="middle" class="small">...</text>
+            <text x="1450" y="618" text-anchor="middle" class="small">...</text>
+          </svg>
+        </div>
+      </section>
+
+
+
+      <section id="performedTests" class="mt-8 rounded-[1.75rem] border border-slate-200 bg-white p-6 soft-shadow">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Test Case Explorer</div>
+            <h2 class="mt-2 text-2xl font-black text-slate-950">2. 실제 수행 테스트</h2>
+            <p class="mt-2 text-sm leading-7 text-slate-600">
+              아래 카드는 지금까지 실제로 수행한 테스트입니다. <span class="font-semibold text-slate-800">클릭한 테스트만 오른쪽 중요 요인 카드에 고정 표시되고</span>,
+              클릭하면 현재 선택이 고정되어 어떤 축을 택한 테스트였는지 바로 확인할 수 있게 구성했습니다.
+            </p>
+          </div>
+          <div class="rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+            click = 선택 고정
+          </div>
+        </div>
+
+        <div class="mt-6 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+          <div class="space-y-5">
+            <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="text-lg font-bold text-slate-950">1. 벽걸이 분산 비교</h3>
+                <span class="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">1-1 ~ 1-3</span>
+              </div>
+              <div class="mt-4 grid gap-3 md:grid-cols-3">
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="1-1">
+                  <div class="test-case-code text-sm font-black text-slate-950">1-1</div>
+                  <p class="mt-1 text-sm text-slate-600">한 벽걸이 밀집</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="1-2">
+                  <div class="test-case-code text-sm font-black text-slate-950">1-2</div>
+                  <p class="mt-1 text-sm text-slate-600">3-0-0-2-0-0-2 벽걸이</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="1-3">
+                  <div class="test-case-code text-sm font-black text-slate-950">1-3</div>
+                  <p class="mt-1 text-sm text-slate-600">3-1-2-1 분산</p>
+                </button>
+              </div>
+            </article>
+
+            <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="text-lg font-bold text-slate-950">2. 소재 차폐 비교</h3>
+                <span class="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">1-8 ~ 1-11</span>
+              </div>
+              <div class="mt-4 grid gap-3 md:grid-cols-2">
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="1-9">
+                  <div class="test-case-code text-sm font-black text-slate-950">1-9</div>
+                  <p class="mt-1 text-sm text-slate-600">기준 배치</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="1-8">
+                  <div class="test-case-code text-sm font-black text-slate-950">1-8</div>
+                  <p class="mt-1 text-sm text-slate-600">2-0-0-0-1-2-0 벽걸이</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="1-10">
+                  <div class="test-case-code text-sm font-black text-slate-950">1-10</div>
+                  <p class="mt-1 text-sm text-slate-600">2-0-1-0-0-2-0 벽걸이</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="1-11">
+                  <div class="test-case-code text-sm font-black text-slate-950">1-11</div>
+                  <p class="mt-1 text-sm text-slate-600">2-0-1-0-1-2-0 벽걸이</p>
+                </button>
+              </div>
+            </article>
+
+            <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="text-lg font-bold text-slate-950">3. 청바지/바람막이 추가 비교</h3>
+                <span class="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">1-4 ~ 1-7, 1-12</span>
+              </div>
+              <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="1-6">
+                  <div class="test-case-code text-sm font-black text-slate-950">1-6</div>
+                  <p class="mt-1 text-sm text-slate-600">2-0-0-0-0-2-0 벽걸이</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="1-5">
+                  <div class="test-case-code text-sm font-black text-slate-950">1-5</div>
+                  <p class="mt-1 text-sm text-slate-600">2-0-1-0-0-2-0 벽걸이</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="1-7">
+                  <div class="test-case-code text-sm font-black text-slate-950">1-7</div>
+                  <p class="mt-1 text-sm text-slate-600">2-0-0-0-1-2-0 벽걸이</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="1-4">
+                  <div class="test-case-code text-sm font-black text-slate-950">1-4</div>
+                  <p class="mt-1 text-sm text-slate-600">2-0-1-0-1-2-0 벽걸이</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="1-12">
+                  <div class="test-case-code text-sm font-black text-slate-950">1-12</div>
+                  <p class="mt-1 text-sm text-slate-600">특수 배치</p>
+                </button>
+              </div>
+            </article>
+
+            <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="text-lg font-bold text-slate-950">4. 바닥 적층 방향 비교</h3>
+                <span class="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">2-1 ~ 2-3, 2-5 ~ 2-7</span>
+              </div>
+              <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="2-1">
+                  <div class="test-case-code text-sm font-black text-slate-950">2-1</div>
+                  <p class="mt-1 text-sm text-slate-600">19번만 마주봄</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="2-2">
+                  <div class="test-case-code text-sm font-black text-slate-950">2-2</div>
+                  <p class="mt-1 text-sm text-slate-600">19번만 반대 방향</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="2-3">
+                  <div class="test-case-code text-sm font-black text-slate-950">2-3</div>
+                  <p class="mt-1 text-sm text-slate-600">19번 제외 나머지 마주봄</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="2-5">
+                  <div class="test-case-code text-sm font-black text-slate-950">2-5</div>
+                  <p class="mt-1 text-sm text-slate-600">전체 반대 방향</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="2-6">
+                  <div class="test-case-code text-sm font-black text-slate-950">2-6</div>
+                  <p class="mt-1 text-sm text-slate-600">10번만 마주봄</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="2-7">
+                  <div class="test-case-code text-sm font-black text-slate-950">2-7</div>
+                  <p class="mt-1 text-sm text-slate-600">19번만 QR 보이게</p>
+                </button>
+              </div>
+            </article>
+
+            <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="text-lg font-bold text-slate-950">5. 바닥 랜덤 배치 비교</h3>
+                <span class="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">2-4</span>
+              </div>
+              <div class="mt-4">
+                <button type="button" class="test-case-button w-full rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="2-4">
+                  <div class="test-case-code text-sm font-black text-slate-950">2-4</div>
+                  <p class="mt-1 text-sm text-slate-600">바닥 분산</p>
+                </button>
+              </div>
+            </article>
+
+            <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="text-lg font-bold text-slate-950">6. 안테나 위치 비교</h3>
+                <span class="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">1-5 new, 2-5 new, 3-2 new, 3-6 new</span>
+              </div>
+              <div class="mt-4 grid gap-3 md:grid-cols-2">
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="1-5 new">
+                  <div class="test-case-code text-sm font-black text-slate-950">1-5 new</div>
+                  <p class="mt-1 text-sm text-slate-600">왼쪽 벽걸이 후면 + 안테나 위치 비교</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="2-5 new">
+                  <div class="test-case-code text-sm font-black text-slate-950">2-5 new</div>
+                  <p class="mt-1 text-sm text-slate-600">중앙 벽걸이 후면 + 안테나 위치 비교</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="3-2 new">
+                  <div class="test-case-code text-sm font-black text-slate-950">3-2 new</div>
+                  <p class="mt-1 text-sm text-slate-600">오른쪽 벽걸이 정면 + 안테나 위치 비교</p>
+                </button>
+                <button type="button" class="test-case-button rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-sky-300" data-test-id="3-6 new">
+                  <div class="test-case-code text-sm font-black text-slate-950">3-6 new</div>
+                  <p class="mt-1 text-sm text-slate-600">오른쪽 벽걸이 후면 + 안테나 위치 비교</p>
+                </button>
+              </div>
+            </article>
+          </div>
+
+          <aside class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 xl:sticky xl:top-6 xl:self-start">
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Selected Test</div>            <div class="mt-3 flex items-start justify-between gap-3">
+              <div>
+                <div id="selectedTestCode" class="text-2xl font-black text-slate-950">1-1</div>
+                <p id="selectedTestGroup" class="mt-1 text-sm font-semibold text-sky-700"></p>
+              </div>
+              <div class="flex flex-col items-end gap-2">
+                <span id="selectedTestBadge" class="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700"></span>
+                <div id="previewTestBox" class="hidden rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2">
+                  <div class="flex flex-wrap items-center justify-end gap-2 text-xs font-semibold text-amber-900">
+                    <span id="previewTestCode" class="font-black"></span>
+                    <span id="previewTestGroup" class="text-amber-700"></span>
+                  </div>
+                  <p id="previewTestSummary" class="hidden"></p>
+                </div>
+              </div>
+            </div>
+
+            <p id="selectedTestSummary" class="mt-4 text-sm leading-7 text-slate-700"></p>
+
+            <div class="mt-6">
+              <div class="flex items-center justify-between gap-3">
+                <div class="text-sm font-bold text-slate-950">중요 요인 매핑</div>
+                <div class="text-xs font-semibold text-slate-500">테스트가 택한 조건</div>
+              </div>
+              <div id="selectedFactorGrid" class="mt-3 grid gap-3 sm:grid-cols-2"></div>
+            </div>
+
+            <div class="mt-6">
+              <div class="text-sm font-bold text-slate-950">조건 칩</div>
+              <div id="selectedTestConditions" class="mt-3 flex flex-wrap gap-2"></div>
+            </div>
+
+            <div id="selectedTestNoteBox" class="mt-5 hidden rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-7 text-slate-700">
+              <div class="font-bold text-slate-950">추가 메모</div>
+              <p id="selectedTestNote" class="mt-2"></p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="nextTestPriority" class="mt-8 rounded-[1.75rem] border border-slate-200 bg-white p-6 soft-shadow">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Next Test Priority</div>
+            <h2 class="mt-2 text-2xl font-black text-slate-950">3. 다음 테스트 설계 우선순위 제안</h2>
+            <p class="mt-2 text-sm leading-7 text-slate-600">
+              목표는 <span class="font-semibold text-slate-800">피팅룸 안의 모든 RFID 태그는 읽히고, 피팅룸 밖 태그는 읽히지 않게</span> 만드는 것입니다.
+              이번 우선순위는 사람 영향과 1벌 단독 원리 확인을 제외하고, <span class="font-semibold text-slate-800">옷이 많은 실제 간섭 조건에서 기존 실패 케이스를 얼마나 회복시키는지</span>를 중심으로 다시 구성했습니다.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+            <span class="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-rose-700">5벌 이상 실사용 중심</span>
+            <span class="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700">실패 케이스 회복 우선</span>
+          </div>
+        </div>
+
+        <div class="mt-4 rounded-[1.25rem] border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-7 text-slate-700">
+          <span class="font-bold text-slate-900">+ 추가 검토 변수:</span>
+          <span class="font-semibold text-amber-900">천장 차폐</span>는 아직 실제로 분리 측정한 항목이 아니므로 현재 우선순위 1~4에는 넣지 않았습니다.
+          다만 상부 안테나를 쓰는 구조상 영향 가능성은 있어, <span class="font-semibold text-slate-900">안테나 위치, 벽 근접, 벽걸이 위치, 밀집/분산 테스트를 끝낸 뒤</span>
+          후순위 추가 테스트로 천장 차폐 유무를 따로 확인하는 흐름이 적절합니다.
+        </div>
+
+        <div class="mt-6 overflow-x-auto rounded-[1.25rem] border border-slate-200">
+          <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50 text-slate-800">
+              <tr>
+                <th class="px-4 py-3 text-left font-bold">영향 우선순위</th>
+                <th class="px-4 py-3 text-left font-bold">핵심 변수</th>
+                <th class="px-4 py-3 text-left font-bold">왜 먼저 봐야 하는가</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white text-slate-700">
+              <tr>
+                <td class="px-4 py-3 font-bold text-slate-900">1</td>
+                <td class="px-4 py-3 font-semibold text-slate-900">안테나 위치</td>
+                <td class="px-4 py-3">같은 실패 케이스도 안테나 위치만 바꾸면 0.00회에서 66.33~69.00회까지 회복된 사례가 있어, 현재 확인된 가장 큰 회복 변수입니다.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 font-bold text-slate-900">2</td>
+                <td class="px-4 py-3 font-semibold text-slate-900">벽과 태그의 거리</td>
+                <td class="px-4 py-3">1벌 테스트에서 같은 왼쪽 벽걸이 조건도 정면은 60.33~65.33회였지만 후면은 29.33회 또는 0.00회까지 떨어져, 벽 근접 영향이 매우 크게 나타났습니다.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 font-bold text-slate-900">3</td>
+                <td class="px-4 py-3 font-semibold text-slate-900">벽걸이 위치</td>
+                <td class="px-4 py-3">왼쪽, 중앙, 오른쪽 벽걸이가 같은 성능을 보이지 않았고, 중앙 취약 구간과 좌우 구조 차이가 반복적으로 관찰돼 위치 자체가 큰 변수로 확인됐습니다.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 font-bold text-slate-900">4</td>
+                <td class="px-4 py-3 font-semibold text-slate-900">태그 밀집 / 분산</td>
+                <td class="px-4 py-3">5벌 이상 조건에서 한 벽걸이 밀집은 평균 2.33회, 분산 배치는 20.00회, 연속 분산은 51.00회까지 올라가 배치만으로도 인식 횟수 차이가 크게 벌어졌습니다.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-6 overflow-x-auto rounded-[1.25rem] border border-slate-200">
+          <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-sky-50 text-slate-800">
+              <tr>
+                <th class="px-4 py-3 text-left font-bold">우선순위</th>
+                <th class="px-4 py-3 text-left font-bold">테스트</th>
+                <th class="px-4 py-3 text-left font-bold">검증 목적</th>
+                <th class="px-4 py-3 text-left font-bold">수행 조건</th>
+                <th class="px-4 py-3 text-left font-bold">고정 변수</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white text-slate-700 align-top">
+              <tr>
+                <td class="px-4 py-3 font-bold text-slate-900">1</td>
+                <td class="px-4 py-3 font-semibold text-slate-900">안테나 위치 3x2 정밀 스윕</td>
+                <td class="px-4 py-3">현재 가장 큰 회복 변수인 안테나 위치에서 먼저 최적 구간을 찾기 위함입니다.</td>
+                <td class="px-4 py-3">중앙축(앞-중, 중-중, 뒤-중)과 오른쪽축(앞-우, 중-우, 뒤-우)을 같은 5벌 기준 배치에서 비교</td>
+                <td class="px-4 py-3">5벌, 벽걸이, 중앙 벽걸이 기준 배치, 실제 사용 조건 유지</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 font-bold text-slate-900">2</td>
+                <td class="px-4 py-3 font-semibold text-slate-900">벽 근접 거리 단계 테스트</td>
+                <td class="px-4 py-3">벽과 태그의 거리만 바꿨을 때 인식 횟수가 얼마나 줄어드는지 확인하기 위함입니다.</td>
+                <td class="px-4 py-3">같은 5벌 조합과 같은 벽걸이 위치를 유지한 채, 문제 의심 옷 1벌을 먼저 뒤집고 필요하면 2벌까지 늘려 비교합니다.</td>
+                <td class="px-4 py-3">안테나 위치는 1번 최고 후보 고정, 5벌 유지, 동일 의류 조합 유지, 벽걸이 위치 동일</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 font-bold text-slate-900">3</td>
+                <td class="px-4 py-3 font-semibold text-slate-900">벽걸이 위치 구조 재검증</td>
+                <td class="px-4 py-3">좋은 안테나 위치를 써도 특정 벽걸이만 계속 약하면 구조적 취약 구간으로 판단하기 위함입니다.</td>
+                <td class="px-4 py-3">왼쪽, 중앙, 오른쪽 벽걸이에서 같은 5벌 배치와 같은 거리 조건을 맞춰 비교</td>
+                <td class="px-4 py-3">안테나 위치 최적 후보, 태그 수량 동일, 실제 사용 조건 유지</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 font-bold text-slate-900">4</td>
+                <td class="px-4 py-3 font-semibold text-slate-900">밀집 vs 분산 재검증</td>
+                <td class="px-4 py-3">좋은 안테나 위치와 거리 조건을 써도 밀집 자체가 근본 문제인지 확인하기 위함입니다.</td>
+                <td class="px-4 py-3">한 벽걸이 밀집, 3-0-0-2-0-0-2 배치, 3-1-2-1 분산, 중앙 집중 배치를 같은 안테나 위치에서 비교</td>
+                <td class="px-4 py-3">5벌, 안테나 위치 최적 후보, 벽걸이 위치 비교 기준 고정</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-6 rounded-[1.25rem] border border-sky-200 bg-sky-50 px-5 py-4 text-sm leading-7 text-slate-700">
+          <span class="font-bold text-slate-900">정리:</span>
+          지금 단계에서는 <span class="font-semibold text-sky-800">안테나 위치 최적화 → 벽 근접 거리 정량화 → 벽걸이 위치 구조 확인 → 밀집/분산 재검증</span> 순으로 좁혀가는 것이 가장 효율적입니다.
+          즉 먼저 가장 크게 회복되는 축을 찾고, 그다음 실제 감소폭이 큰 구조 변수들을 순서대로 분리해서 확인해야 합니다.
+        </div>
+      </section>
+  </main>
+
+  <script>
+    const testCaseData = {
+      "1-1": {
+        group: "1. 벽걸이 분산 비교",
+        summary: "7벌을 한 벽걸이에 모두 몰아 걸어 태그 밀집이 가장 큰 상태를 만든 기준 실패 테스트입니다.",
+        conditions: ["옷 수량: 7벌", "배치 방식: 벽걸이", "세부 위치: 한 벽걸이 밀집", "태그 방향: 혼합", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "7벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "한 벽걸이 밀집",
+          "벽과의 거리": "혼합",
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "분산 없음"
+        }
+      },
+      "1-2": {
+        group: "1. 벽걸이 분산 비교",
+        summary: "7벌을 3-0-0-2-0-0-2 벽걸이로 분산해 한 위치 밀집이 완화되면 얼마나 회복되는지 본 테스트입니다.",
+        conditions: ["옷 수량: 7벌", "배치 방식: 벽걸이", "벽걸이 위치: 3-0-0-2-0-0-2", "태그 방향: 혼합", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "7벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "3-0-0-2-0-0-2",
+          "벽과의 거리": "혼합",
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "분산 벽걸이"
+        }
+      },
+      "1-3": {
+        group: "1. 벽걸이 분산 비교",
+        summary: "7벌을 3-1-2-1로 이어서 분산해 밀집과 벽걸이 위치 효과를 함께 본 테스트입니다.",
+        conditions: ["옷 수량: 7벌", "배치 방식: 벽걸이", "벽걸이 위치: 3-1-2-1 벽걸이", "태그 방향: 혼합", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "7벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "3-1-2-1 벽걸이",
+          "벽과의 거리": "혼합",
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "연속 벽걸이 분산"
+        }
+      },
+      "1-9": {
+        group: "2. 소재 차폐 비교",
+        summary: "중앙 벽걸이 5벌 기준 배치에서 추가 소재 없이 측정한 기준 테스트입니다.",
+        conditions: ["옷 수량: 5벌", "배치 방식: 벽걸이", "벽걸이 위치: 중앙 벽걸이 5벌", "추가 소재: 없음", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "5벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "중앙 벽걸이 5벌",
+          "벽과의 거리": "혼합",
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "추가 소재 없음"
+        }
+      },
+      "1-8": {
+        group: "2. 소재 차폐 비교",
+        summary: "기준 배치에서 바람막이만 추가해 차폐 소재가 인식에 주는 영향을 본 테스트입니다.",
+        conditions: ["기준 배치: 1-9", "추가 소재: 바람막이", "벽걸이 위치: 중앙 벽걸이 5벌", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "5벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "중앙 벽걸이 5벌",
+          "벽과의 거리": "혼합",
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "바람막이 추가"
+        }
+      },
+      "1-10": {
+        group: "2. 소재 차폐 비교",
+        summary: "기준 배치에서 청바지만 추가해 두꺼운 소재가 만드는 차폐 변화를 본 테스트입니다.",
+        conditions: ["기준 배치: 1-9", "추가 소재: 청바지", "벽걸이 위치: 중앙 벽걸이 5벌", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "5벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "중앙 벽걸이 5벌",
+          "벽과의 거리": "혼합",
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "청바지 추가"
+        }
+      },
+      "1-11": {
+        group: "2. 소재 차폐 비교",
+        summary: "기준 배치에서 청바지와 바람막이를 동시에 추가해 가장 강한 소재 차폐를 만든 테스트입니다.",
+        conditions: ["기준 배치: 1-9", "추가 소재: 청바지 + 바람막이", "벽걸이 위치: 중앙 벽걸이 5벌", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "5벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "중앙 벽걸이 5벌",
+          "벽과의 거리": "혼합",
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "청바지 + 바람막이"
+        }
+      },
+      "1-6": {
+        group: "3. 청바지/바람막이 추가 비교",
+        summary: "2-0-0-0-0-2-0 벽걸이 구조를 만든 뒤 추가 의류 없이 측정한 비교 기준 테스트입니다.",
+        conditions: ["옷 수량: 4벌", "배치 방식: 벽걸이", "벽걸이 위치: 2-0-0-0-0-2-0", "추가 소재: 없음", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "4벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "2-0-0-0-0-2-0",
+          "벽과의 거리": "혼합",
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "기본 4벌"
+        }
+      },
+      "1-5": {
+        group: "3. 청바지/바람막이 추가 비교",
+        summary: "2-0-1-0-0-2-0 벽걸이에서 청바지를 추가했을 때 밀집과 차폐가 어떻게 바뀌는지 본 테스트입니다.",
+        conditions: ["옷 수량: 5벌", "배치 방식: 벽걸이", "벽걸이 위치: 2-0-1-0-0-2-0", "추가 소재: 청바지", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "5벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "2-0-1-0-0-2-0",
+          "벽과의 거리": "혼합",
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "청바지 추가"
+        }
+      },
+      "1-7": {
+        group: "3. 청바지/바람막이 추가 비교",
+        summary: "2-0-0-0-1-2-0 벽걸이에서 바람막이만 추가했을 때 차폐 구조가 바뀌는지 본 테스트입니다.",
+        conditions: ["옷 수량: 5벌", "배치 방식: 벽걸이", "벽걸이 위치: 2-0-0-0-1-2-0", "추가 소재: 바람막이", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "5벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "2-0-0-0-1-2-0",
+          "벽과의 거리": "혼합",
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "바람막이 추가"
+        }
+      },
+      "1-4": {
+        group: "3. 청바지/바람막이 추가 비교",
+        summary: "2-0-1-0-1-2-0 벽걸이에서 청바지와 바람막이를 함께 추가한 가혹 조건 테스트입니다.",
+        conditions: ["옷 수량: 6벌", "배치 방식: 벽걸이", "벽걸이 위치: 2-0-1-0-1-2-0", "추가 소재: 청바지 + 바람막이", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "6벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "2-0-1-0-1-2-0",
+          "벽과의 거리": "혼합",
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "청바지 + 바람막이"
+        }
+      },
+      "1-12": {
+        group: "3. 청바지/바람막이 추가 비교",
+        summary: "왼쪽, 바로 옆, 중앙, 오른쪽 벽걸이를 섞어 배치 구조 자체를 바꾼 특수 테스트입니다.",
+        conditions: ["옷 수량: 5벌", "배치 방식: 벽걸이", "벽걸이 위치: 2-1-2-0-0-1-0", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "5벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "2-1-2-0-0-1-0",
+          "벽과의 거리": "혼합",
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "특수 배치"
+        }
+      },
+      "2-1": {
+        group: "4. 바닥 적층 방향 비교",
+        summary: "7벌 적층에서 최하단 19번 태그만 안테나와 마주보게 둔 기준 방향 테스트입니다.",
+        conditions: ["옷 수량: 7벌", "배치 방식: 바닥 적층", "기준 태그: 19번", "방향 조건: 19번만 마주봄", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "7벌",
+          "배치 방식": "바닥 적층",
+          "바닥 위치": "최하단 19번 기준",
+          "벽과의 거리": "해당 없음",
+          "태그 방향": "19번만 마주봄",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "나머지 혼합"
+        }
+      },
+      "2-2": {
+        group: "4. 바닥 적층 방향 비교",
+        summary: "7벌 적층에서 최하단 19번 태그만 반대 방향으로 둬 바닥 적층의 방향 민감도를 본 테스트입니다.",
+        conditions: ["옷 수량: 7벌", "배치 방식: 바닥 적층", "기준 태그: 19번", "방향 조건: 19번만 반대 방향", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "7벌",
+          "배치 방식": "바닥 적층",
+          "바닥 위치": "최하단 19번 기준",
+          "벽과의 거리": "해당 없음",
+          "태그 방향": "19번만 반대 방향",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "나머지 혼합"
+        }
+      },
+      "2-3": {
+        group: "4. 바닥 적층 방향 비교",
+        summary: "19번을 제외한 나머지 태그만 마주보게 둬 특정 하단 태그가 전체 적층을 어떻게 바꾸는지 본 테스트입니다.",
+        conditions: ["옷 수량: 7벌", "배치 방식: 바닥 적층", "방향 조건: 19번 제외 나머지 마주봄", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "7벌",
+          "배치 방식": "바닥 적층",
+          "바닥 위치": "최하단 19번 기준",
+          "벽과의 거리": "해당 없음",
+          "태그 방향": "19번 제외 나머지 마주봄",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "19번은 혼합"
+        }
+      },
+      "2-5": {
+        group: "4. 바닥 적층 방향 비교",
+        summary: "적층된 전체 태그를 반대 방향으로 통일해 바닥 적층의 역방향 가혹 조건을 만든 테스트입니다.",
+        conditions: ["옷 수량: 7벌", "배치 방식: 바닥 적층", "방향 조건: 전체 반대 방향", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "7벌",
+          "배치 방식": "바닥 적층",
+          "바닥 위치": "전체 적층",
+          "벽과의 거리": "해당 없음",
+          "태그 방향": "전체 반대 방향",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "전 태그 역방향"
+        }
+      },
+      "2-6": {
+        group: "4. 바닥 적층 방향 비교",
+        summary: "최상단 10번 태그만 마주보게 두고 나머지는 그대로 둬 상단 열린 태그 효과를 본 테스트입니다.",
+        conditions: ["옷 수량: 7벌", "배치 방식: 바닥 적층", "방향 조건: 10번만 마주봄", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "7벌",
+          "배치 방식": "바닥 적층",
+          "바닥 위치": "최상단 10번 기준",
+          "벽과의 거리": "해당 없음",
+          "태그 방향": "10번만 마주봄",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "나머지 혼합"
+        }
+      },
+      "2-7": {
+        group: "4. 바닥 적층 방향 비교",
+        summary: "19번 태그만 QR이 보이게 두고 나머지를 가려, 하단 한 장만 열린 경우를 확인한 테스트입니다.",
+        conditions: ["옷 수량: 7벌", "배치 방식: 바닥 적층", "방향 조건: 19번만 QR 보이게", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "7벌",
+          "배치 방식": "바닥 적층",
+          "바닥 위치": "최하단 19번 기준",
+          "벽과의 거리": "해당 없음",
+          "태그 방향": "19번만 QR 보이게",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "나머지 가림"
+        }
+      },
+      "2-4": {
+        group: "5. 바닥 랜덤 배치 비교",
+        summary: "7벌을 바닥에 랜덤으로 분산시켜 적층이 아닌 실사용 혼합 상태를 만든 테스트입니다.",
+        conditions: ["옷 수량: 7벌", "배치 방식: 바닥 분산", "세부 위치: 랜덤 분산", "태그 방향: 혼합", "안테나 위치: 중-중(기존)"],
+        factors: {
+          "옷 수량": "7벌",
+          "배치 방식": "바닥 분산",
+          "바닥 위치": "랜덤 분산",
+          "벽과의 거리": "해당 없음",
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중(기존)",
+          "추가 변수": "비적층"
+        }
+      },
+      "1-5 new": {
+        group: "6. 안테나 위치 비교",
+        summary: "왼쪽 1번 훅의 후면 조건에서 안테나를 좌·중·우로 옮겼을 때 회복 폭이 어떻게 달라지는지 본 테스트입니다.",
+        conditions: ["옷 수량: 1벌", "배치 방식: 벽걸이", "벽걸이 위치: 왼쪽 1번", "벽과의 거리: 가까움(후면)", "안테나 위치: 좌 / 중 / 우 비교"],
+        factors: {
+          "옷 수량": "1벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "1번 벽걸이",
+          "벽과의 거리": "가까움(후면)",
+          "태그 방향": "QR 안 보이게",
+          "안테나 위치": "좌 / 중 / 우 비교",
+          "추가 변수": "후면 실패 케이스"
+        },
+        note: "파일명 기준 매핑: 정면은 벽과 멂, 후면은 벽과 가까움으로 읽습니다. 벽걸이 1번은 왼쪽, 4번은 중앙, 7번은 오른쪽 벽걸이입니다."
+      },
+      "2-5 new": {
+        group: "6. 안테나 위치 비교",
+        summary: "중앙 4번 훅의 후면 조건에서 안테나 위치를 바꿔 중앙축 상쇄가 완화되는지 본 테스트입니다.",
+        conditions: ["옷 수량: 1벌", "배치 방식: 벽걸이", "벽걸이 위치: 중앙 4번", "벽과의 거리: 가까움(후면)", "안테나 위치: 좌 / 중 / 우 비교"],
+        factors: {
+          "옷 수량": "1벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "4번 벽걸이",
+          "벽과의 거리": "가까움(후면)",
+          "태그 방향": "QR 안 보이게",
+          "안테나 위치": "좌 / 중 / 우 비교",
+          "추가 변수": "중앙 후면 실패"
+        },
+        note: "중앙 벽걸이은 위치에 따라 좌우 반사 상쇄가 달라질 가능성이 커서, 같은 후면 조건이라도 좌/중/우 안테나 이동 효과를 따로 봐야 합니다."
+      },
+      "3-2 new": {
+        group: "6. 안테나 위치 비교",
+        summary: "오른쪽 7번 훅의 정면 조건에서 안테나 위치별 회복 폭을 비교한 테스트입니다.",
+        conditions: ["옷 수량: 1벌", "배치 방식: 벽걸이", "벽걸이 위치: 오른쪽 7번", "벽과의 거리: 멂(정면)", "안테나 위치: 좌 / 중 / 우 비교"],
+        factors: {
+          "옷 수량": "1벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "7번 벽걸이", "벽과의 거리": "멂(정면)",
+          "태그 방향": "QR 안 보이게",
+          "안테나 위치": "좌 / 중 / 우 비교",
+          "추가 변수": "정면 회복 구간"
+        },
+        note: "오른쪽 벽걸이은 기존 결과에서 좌우 이동 효과가 가장 크게 나타난 대표 회복 구간입니다."
+      },
+      "3-6 new": {
+        group: "6. 안테나 위치 비교",
+        summary: "오른쪽 7번 훅의 후면 조건에서 안테나를 옮겨도 얼마나 회복되는지 확인한 테스트입니다.",
+        conditions: ["옷 수량: 1벌", "배치 방식: 벽걸이", "벽걸이 위치: 오른쪽 7번", "벽과의 거리: 가까움(후면)", "안테나 위치: 좌 / 중 / 우 비교"],
+        factors: {
+          "옷 수량": "1벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": "7번 벽걸이", "벽과의 거리": "가까움(후면)",
+          "태그 방향": "QR 보이게",
+          "안테나 위치": "좌 / 중 / 우 비교",
+          "추가 변수": "후면 회복 한계 확인"
+        },
+        note: "후면 조건은 안테나 이동으로 일부 회복되더라도 완전 회복이 어려운 대표 실패 축으로 보고 있습니다."
+      }
+    };
+
+    const factorOrder = [
+      "옷 수량",
+      "배치 방식",
+      "벽걸이 위치",
+      "바닥 위치",
+      "벽과의 거리",
+      "태그 방향",
+      "안테나 위치",
+      "천장 차폐",
+      "전력 세기(-2~25 dBm)"
+    ];
+
+    const factorOptions = {
+      "옷 수량": ["1벌", "2벌", "3벌", "4벌", "5벌", "6벌", "가혹 7벌"],
+      "배치 방식": ["벽걸이", "바닥 적층", "바닥 분산"],
+      "벽걸이 위치": ["1", "2", "3", "4", "5", "6", "7"],
+      "바닥 위치": ["좌", "중", "우"],
+      "벽과의 거리": ["벽과 멂", "벽과 가까움"],
+      "태그 방향": ["안테나와 마주봄", "안테나 반대 방향", "혼합"],
+      "안테나 위치": ["좌", "중", "우", "앞", "뒤", "앞-좌", "앞-중", "앞-우", "중-좌", "중-중", "중-우", "뒤-좌", "뒤-중", "뒤-우"],
+      "천장 차폐": ["차폐 없음", "차폐 있음"],
+      "전력 세기(-2~25 dBm)": ["조절 안함", "조절함"]
+    };
+
+    const normalizedCases = {
+      "1-1": {
+        buttonLabel: "7벌을 한 벽걸이에 모두 몰아 건 기준 배치",
+        summary: "7벌을 한 벽걸이에 모두 몰아 걸어 태그 밀집이 가장 큰 상태를 만든 기준 실패 테스트입니다.",
+        factors: {
+          "옷 수량": "가혹 7벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["1"],
+          "바닥 위치": [],
+          "벽과의 거리": "벽과 가까움",
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "1-2": {
+        buttonLabel: "7벌을 1,4,7 위치로 나눠 분산 배치",
+        summary: "7벌을 3-0-0-2-0-0-2로 나눠 걸어, 한 위치 밀집이 완화되면 얼마나 회복되는지 본 분산 테스트입니다.",
+        factors: {
+          "옷 수량": "가혹 7벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["1", "4", "7"],
+          "바닥 위치": [],
+          "벽과의 거리": ["벽과 멂", "벽과 가까움"],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "1-3": {
+        buttonLabel: "7벌을 여러 벽걸이에 이어 분산 배치",
+        summary: "7벌을 3-1-2-1로 이어서 분산해 밀집과 벽걸이 위치 효과를 함께 본 테스트입니다.",
+        factors: {
+          "옷 수량": "가혹 7벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["1", "3", "5", "7"],
+          "바닥 위치": [],
+          "벽과의 거리": ["벽과 멂", "벽과 가까움"],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "1-9": {
+        buttonLabel: "소재 추가 없는 5벌 기준 배치",
+        summary: "추가 의류 없이 5벌 기준 배치를 먼저 측정한 기준 테스트입니다.",
+        factors: {
+          "옷 수량": "5벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["4"],
+          "바닥 위치": [],
+          "벽과의 거리": "벽과 멂",
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "1-8": {
+        buttonLabel: "기준 배치에서 바람막이만 추가",
+        summary: "기준 5벌 배치에 바람막이만 추가해 가벼운 소재 차폐가 인식에 주는 변화를 본 테스트입니다.",
+        factors: {
+          "옷 수량": "5벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["1", "5", "6"],
+          "바닥 위치": [],
+          "벽과의 거리": ["벽과 멂", "벽과 가까움"],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "1-10": {
+        buttonLabel: "기준 배치에서 청바지만 추가",
+        summary: "기준 5벌 배치에 청바지만 추가해 두꺼운 소재가 만드는 차폐 변화를 본 테스트입니다.",
+        factors: {
+          "옷 수량": "5벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["1", "3", "6"],
+          "바닥 위치": [],
+          "벽과의 거리": ["벽과 멂", "벽과 가까움"],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "1-11": {
+        buttonLabel: "기준 배치에서 청바지와 바람막이 추가",
+        summary: "기준 5벌 배치에 청바지와 바람막이를 함께 추가해 가장 강한 소재 차폐 조합을 본 테스트입니다.",
+        factors: {
+          "옷 수량": "5벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["1", "3", "5", "6"],
+          "바닥 위치": [],
+          "벽과의 거리": ["벽과 멂", "벽과 가까움"],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "1-6": {
+        buttonLabel: "추가 의류 없는 4벌 기준 배치",
+        summary: "4벌 기준 배치를 만든 뒤 추가 의류 없이 시작 성능을 확인한 기준 테스트입니다.",
+        factors: {
+          "옷 수량": "4벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["1", "6"],
+          "바닥 위치": [],
+          "벽과의 거리": ["벽과 멂", "벽과 가까움"],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "1-5": {
+        buttonLabel: "4벌 기준에서 청바지만 추가",
+        summary: "4벌 기준 배치에서 청바지만 추가해 기존 위치는 유지한 채 소재만 바뀌는 경우를 비교한 테스트입니다.",
+        factors: {
+          "옷 수량": "5벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["1", "3", "6"],
+          "바닥 위치": [],
+          "벽과의 거리": ["벽과 멂", "벽과 가까움"],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "1-7": {
+        buttonLabel: "4벌 기준에서 바람막이만 추가",
+        summary: "4벌 기준 배치에서 바람막이만 추가해 위치는 그대로 두고 차폐 소재만 바뀌는 경우를 본 테스트입니다.",
+        factors: {
+          "옷 수량": "5벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["1", "5", "6"],
+          "바닥 위치": [],
+          "벽과의 거리": ["벽과 멂", "벽과 가까움"],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "1-4": {
+        buttonLabel: "4벌 기준에서 청바지와 바람막이 추가",
+        summary: "4벌 기준 배치에 청바지와 바람막이를 함께 추가한 가장 가혹한 추가 의류 조합 테스트입니다.",
+        factors: {
+          "옷 수량": "6벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["1", "3", "5", "6"],
+          "바닥 위치": [],
+          "벽과의 거리": ["벽과 멂", "벽과 가까움"],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "1-12": {
+        buttonLabel: "추가 의류 없이 위치 조합만 변경",
+        summary: "추가 의류 없이 벽걸이 위치 조합만 바꿔 배치 구조 자체가 인식에 미치는 영향을 본 특수 배치 테스트입니다.",
+        factors: {
+          "옷 수량": "5벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["1", "2", "3", "6"],
+          "바닥 위치": [],
+          "벽과의 거리": ["벽과 멂", "벽과 가까움"],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "2-1": {
+        buttonLabel: "최하단 19번만 안테나와 마주보는 적층",
+        summary: "바닥 적층에서 최하단 19번 태그만 안테나와 마주보게 두고 나머지는 혼합으로 둔 기준 테스트입니다.",
+        factors: {
+          "옷 수량": "가혹 7벌",
+          "배치 방식": "바닥 적층",
+          "벽걸이 위치": [],
+          "바닥 위치": "중",
+          "벽과의 거리": [],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "2-2": {
+        buttonLabel: "최하단 19번만 안테나 반대 방향 적층",
+        summary: "바닥 적층에서 최하단 19번 태그만 반대 방향으로 둬 방향 민감도를 본 테스트입니다.",
+        factors: {
+          "옷 수량": "가혹 7벌",
+          "배치 방식": "바닥 적층",
+          "벽걸이 위치": [],
+          "바닥 위치": "중",
+          "벽과의 거리": [],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "2-3": {
+        buttonLabel: "19번 제외 나머지만 안테나와 마주보는 적층",
+        summary: "19번을 제외한 나머지 태그만 안테나와 마주보게 둬 특정 하단 태그가 전체 적층에 미치는 영향을 본 테스트입니다.",
+        factors: {
+          "옷 수량": "가혹 7벌",
+          "배치 방식": "바닥 적층",
+          "벽걸이 위치": [],
+          "바닥 위치": "중",
+          "벽과의 거리": [],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "2-5": {
+        buttonLabel: "전체 태그를 안테나 반대 방향으로 둔 적층",
+        summary: "적층된 전체 태그를 모두 안테나 반대 방향으로 통일해 바닥 적층 가혹 조건을 만든 테스트입니다.",
+        factors: {
+          "옷 수량": "가혹 7벌",
+          "배치 방식": "바닥 적층",
+          "벽걸이 위치": [],
+          "바닥 위치": "중",
+          "벽과의 거리": [],
+          "태그 방향": "안테나 반대 방향",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "2-6": {
+        buttonLabel: "최상단 10번만 안테나와 마주보는 적층",
+        summary: "최상단 10번 태그만 안테나와 마주보게 두고 나머지는 혼합으로 둬 상단 열린 태그 효과를 본 테스트입니다.",
+        factors: {
+          "옷 수량": "가혹 7벌",
+          "배치 방식": "바닥 적층",
+          "벽걸이 위치": [],
+          "바닥 위치": "중",
+          "벽과의 거리": [],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "2-7": {
+        buttonLabel: "19번만 QR 보이게 둔 적층",
+        summary: "19번 태그만 QR이 보이게 두고 나머지를 가려, 하단 한 장만 열린 경우를 확인한 테스트입니다.",
+        factors: {
+          "옷 수량": "가혹 7벌",
+          "배치 방식": "바닥 적층",
+          "벽걸이 위치": [],
+          "바닥 위치": "중",
+          "벽과의 거리": [],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "2-4": {
+        buttonLabel: "7벌을 바닥에 랜덤 분산 배치",
+        summary: "7벌을 바닥에 랜덤으로 분산시켜 적층이 아닌 실사용 혼합 상태를 본 테스트입니다.",
+        factors: {
+          "옷 수량": "가혹 7벌",
+          "배치 방식": "바닥 분산",
+          "벽걸이 위치": [],
+          "바닥 위치": ["좌", "중", "우"],
+          "벽과의 거리": [],
+          "태그 방향": "혼합",
+          "안테나 위치": "중-중",
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "1-5 new": {
+        buttonLabel: "왼쪽 벽걸이 후면에서 안테나 위치만 비교",
+        summary: "왼쪽 벽걸이 후면 조건을 유지한 채 안테나 위치만 바꿔 회복 폭을 비교한 테스트입니다.",
+        factors: {
+          "옷 수량": "1벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["1"],
+          "바닥 위치": [],
+          "벽과의 거리": "벽과 가까움",
+          "태그 방향": "안테나와 마주봄",
+          "안테나 위치": ["중-좌", "중-중", "중-우"],
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "2-5 new": {
+        buttonLabel: "중앙 벽걸이 후면에서 안테나 위치만 비교",
+        summary: "중앙 벽걸이 후면 조건을 유지한 채 안테나 위치만 바꿔 중앙축 상쇄 완화 여부를 본 테스트입니다.",
+        factors: {
+          "옷 수량": "1벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["4"],
+          "바닥 위치": [],
+          "벽과의 거리": "벽과 가까움",
+          "태그 방향": "안테나와 마주봄",
+          "안테나 위치": ["중-좌", "중-중", "중-우"],
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "3-2 new": {
+        buttonLabel: "오른쪽 벽걸이 정면에서 안테나 위치만 비교",
+        summary: "오른쪽 벽걸이 정면 조건을 유지한 채 안테나 위치만 바꿔 회복 폭을 비교한 테스트입니다.",
+        factors: {
+          "옷 수량": "1벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["7"],
+          "바닥 위치": [],
+          "벽과의 거리": "벽과 멂",
+          "태그 방향": "안테나와 마주봄",
+          "안테나 위치": ["중-좌", "중-중", "중-우"],
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      },
+      "3-6 new": {
+        buttonLabel: "오른쪽 벽걸이 후면에서 안테나 위치만 비교",
+        summary: "오른쪽 벽걸이 후면 조건을 유지한 채 안테나 위치만 바꿔 회복 한계를 비교한 테스트입니다.",
+        factors: {
+          "옷 수량": "1벌",
+          "배치 방식": "벽걸이",
+          "벽걸이 위치": ["7"],
+          "바닥 위치": [],
+          "벽과의 거리": "벽과 가까움",
+          "태그 방향": "안테나 반대 방향",
+          "안테나 위치": ["중-좌", "중-중", "중-우"],
+          "천장 차폐": "차폐 없음",
+          "전력 세기(-2~25 dBm)": "조절 안함"
+        }
+      }
+    };
+
+    Object.entries(normalizedCases).forEach(([testId, patch]) => {
+      if (!testCaseData[testId]) return;
+      testCaseData[testId].summary = patch.summary;
+      testCaseData[testId].factors = patch.factors;
+      testCaseData[testId].buttonLabel = patch.buttonLabel;
+    });
+
+
+    const selectedTestCode = document.getElementById("selectedTestCode");
+    const selectedTestGroup = document.getElementById("selectedTestGroup");
+    const selectedTestBadge = document.getElementById("selectedTestBadge");
+    const selectedTestSummary = document.getElementById("selectedTestSummary");
+    const previewTestBox = document.getElementById("previewTestBox");
+    const previewTestCode = document.getElementById("previewTestCode");
+    const previewTestGroup = document.getElementById("previewTestGroup");
+    const previewTestSummary = document.getElementById("previewTestSummary");
+    const selectedFactorGrid = document.getElementById("selectedFactorGrid");
+    const selectedTestConditions = document.getElementById("selectedTestConditions");
+    const selectedTestNoteBox = document.getElementById("selectedTestNoteBox");
+    const selectedTestNote = document.getElementById("selectedTestNote");
+
+    let pinnedTestId = "1-1";
+    let hoveredTestId = null;
+
+    function normalizeToList(value) {
+      if (Array.isArray(value)) return value.map(String);
+      if (value === null || value === undefined || value === "") return [];
+      return [String(value)];
+    }
+
+    function createFactorCard(label, selectedValue, previewValue) {
+      const card = document.createElement("div");
+      card.className = "factor-card";
+
+      const title = document.createElement("div");
+      title.className = "text-xs font-semibold uppercase tracking-[0.14em] text-slate-500";
+      title.textContent = label;
+
+      const chipWrap = document.createElement("div");
+      chipWrap.className = "mt-3 flex flex-wrap gap-2";
+
+      const options = factorOptions[label] || [];
+      const selectedList = new Set(normalizeToList(selectedValue));
+      const previewList = new Set(normalizeToList(previewValue));
+
+      if (!options.length) {
+        const fallback = document.createElement("div");
+        fallback.className = "factor-value is-selected";
+        fallback.textContent = normalizeToList(selectedValue).join(", ") || "해당 없음";
+        chipWrap.appendChild(fallback);
+      } else {
+        options.forEach((option) => {
+          const isSelected = selectedList.has(option);
+          const isPreview = previewList.has(option);
+          const chip = document.createElement("div");
+          let chipClass = "factor-value";
+
+          if (isSelected) chipClass += " is-selected button-mapped-highlight";
+          if (isPreview) chipClass += " is-preview";
+          if (isSelected && isPreview) chipClass += " is-match";
+
+          chip.className = chipClass;
+          chip.textContent = option;
+          chipWrap.appendChild(chip);
+        });
+      }
+
+      card.appendChild(title);
+      card.appendChild(chipWrap);
+      return card;
+    }
+
+    function renderTestPanel() {
+      const selectedTest = testCaseData[pinnedTestId];
+      if (!selectedTest) return;
+
+      const previewTest = hoveredTestId && hoveredTestId !== pinnedTestId ? testCaseData[hoveredTestId] : null;
+
+      selectedTestCode.textContent = pinnedTestId;
+      selectedTestGroup.textContent = selectedTest.group;
+      selectedTestSummary.textContent = selectedTest.summary;
+      selectedTestBadge.textContent = `현재 선택: ${pinnedTestId}`;
+      selectedTestBadge.className = "rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700";
+
+      if (previewTest) {
+        previewTestCode.textContent = `미리 보기: ${hoveredTestId}`;
+        previewTestGroup.textContent = previewTest.group;
+        previewTestSummary.textContent = previewTest.summary;
+        previewTestBox.classList.remove("hidden");
+      } else {
+        previewTestCode.textContent = "";
+        previewTestGroup.textContent = "";
+        previewTestSummary.textContent = "";
+        previewTestBox.classList.add("hidden");
+      }
+
+      selectedFactorGrid.innerHTML = "";
+      factorOrder.forEach((label) => {
+        const selectedValue = selectedTest.factors[label] || "해당 없음";
+        const previewValue = previewTest ? (previewTest.factors[label] || "해당 없음") : "";
+        selectedFactorGrid.appendChild(createFactorCard(label, selectedValue, previewValue));
+      });
+
+      selectedTestConditions.innerHTML = "";
+      factorOrder.forEach((label) => {
+        const selectedValues = normalizeToList(selectedTest.factors[label]);
+        if (!selectedValues.length) return;
+
+        const chip = document.createElement("span");
+        chip.className = "condition-chip";
+        chip.textContent = `${label}: ${selectedValues.join(", ")}`;
+        selectedTestConditions.appendChild(chip);
+      });
+
+      if (previewTest) {
+        factorOrder.forEach((label) => {
+          const previewValues = normalizeToList(previewTest.factors[label]);
+          if (!previewValues.length) return;
+
+          const chip = document.createElement("span");
+          chip.className = "condition-chip is-preview";
+          chip.textContent = `미리보기 ${label}: ${previewValues.join(", ")}`;
+          selectedTestConditions.appendChild(chip);
+        });
+      }
+
+      if (selectedTest.note) {
+        selectedTestNote.textContent = selectedTest.note;
+        selectedTestNoteBox.classList.remove("hidden");
+      } else {
+        selectedTestNote.textContent = "";
+        selectedTestNoteBox.classList.add("hidden");
+      }
+
+      buttons.forEach((button) => {
+        const isActive = button.dataset.testId === pinnedTestId;
+        const isPreview = hoveredTestId && button.dataset.testId === hoveredTestId && hoveredTestId !== pinnedTestId;
+        button.classList.toggle("is-active", isActive);
+        button.classList.toggle("is-preview", isPreview);
+      });
+    }
+
+    document.querySelectorAll(".test-case-button").forEach((button) => {
+      const label = button.querySelector("p");
+      const code = button.dataset.testId;
+      if (label && testCaseData[code]?.buttonLabel) {
+        label.textContent = testCaseData[code].buttonLabel;
+      }
+    });
+
+    const buttons = Array.from(document.querySelectorAll(".test-case-button"));
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        pinnedTestId = button.dataset.testId;
+        renderTestPanel();
+      });
+
+      button.addEventListener("mouseenter", () => {
+        hoveredTestId = button.dataset.testId;
+        renderTestPanel();
+      });
+
+      button.addEventListener("mouseleave", () => {
+        hoveredTestId = null;
+        renderTestPanel();
+      });
+    });
+
+    renderTestPanel();
+  </script>
+  <script src="../common_section_nav.js"></script>
+  <script src="../common_auto_reload.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

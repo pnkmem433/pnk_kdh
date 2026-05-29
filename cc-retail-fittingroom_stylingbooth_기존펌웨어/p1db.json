@@ -1,0 +1,1800 @@
+﻿{
+    "raw":  [
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\중앙\\1-1 한태그 중앙 배치.csv",
+                    "file_name":  "1-1 한태그 중앙 배치.csv",
+                    "base_name":  "1-1 한태그 중앙 배치",
+                    "location":  "정중앙 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           38,
+                                           38,
+                                           42,
+                                           36,
+                                           38
+                                       ],
+                    "trimmed_mean":  38
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\중앙\\1-2 한태그 중앙 뒤집어서 배치.csv",
+                    "file_name":  "1-2 한태그 중앙 뒤집어서 배치.csv",
+                    "base_name":  "1-2 한태그 중앙 뒤집어서 배치",
+                    "location":  "정중앙 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           53,
+                                           44,
+                                           50,
+                                           52,
+                                           48
+                                       ],
+                    "trimmed_mean":  50
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\중앙\\0 비교태그 center 2cm left 가로 .csv",
+                    "file_name":  "0 비교태그 center 2cm left 가로 .csv",
+                    "base_name":  "0 비교태그 center 2cm left 가로 ",
+                    "location":  "정중앙 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           18,
+                                           14,
+                                           17,
+                                           18,
+                                           17
+                                       ],
+                    "trimmed_mean":  17.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\중앙\\0 비교태그 only center.csv",
+                    "file_name":  "0 비교태그 only center.csv",
+                    "base_name":  "0 비교태그 only center",
+                    "location":  "정중앙 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           43,
+                                           40,
+                                           39,
+                                           39,
+                                           40
+                                       ],
+                    "trimmed_mean":  39.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\중앙\\0 비교태그 center 2cm left.csv",
+                    "file_name":  "0 비교태그 center 2cm left.csv",
+                    "base_name":  "0 비교태그 center 2cm left",
+                    "location":  "정중앙 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U3400CC00000300000217C81709D585CB",
+                    "session_counts":  [
+                                           16,
+                                           12,
+                                           8,
+                                           7,
+                                           7
+                                       ],
+                    "trimmed_mean":  9
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\중앙\\1-2 retest 비교태그 center 2cm left more 뒤집음.csv",
+                    "file_name":  "1-2 retest 비교태그 center 2cm left more 뒤집음.csv",
+                    "base_name":  "1-2 retest 비교태그 center 2cm left more 뒤집음",
+                    "location":  "정중앙 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           19,
+                                           16,
+                                           19,
+                                           24,
+                                           20
+                                       ],
+                    "trimmed_mean":  19.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\중앙\\0 기준태그 center 2cm left 세로.csv",
+                    "file_name":  "0 기준태그 center 2cm left 세로.csv",
+                    "base_name":  "0 기준태그 center 2cm left 세로",
+                    "location":  "정중앙 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           3,
+                                           4,
+                                           2,
+                                           2,
+                                           2
+                                       ],
+                    "trimmed_mean":  2.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\중앙\\0 비교태그 center 2cm left 세로 10번테스트.csv",
+                    "file_name":  "0 비교태그 center 2cm left 세로 10번테스트.csv",
+                    "base_name":  "0 비교태그 center 2cm left 세로 10번테스트",
+                    "location":  "정중앙 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           0,
+                                           0,
+                                           1,
+                                           1,
+                                           1
+                                       ],
+                    "trimmed_mean":  0.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽\\1-10 한태그 왼쪽 끝 가로 뒤집어 배치.csv",
+                    "file_name":  "1-10 한태그 왼쪽 끝 가로 뒤집어 배치.csv",
+                    "base_name":  "1-10 한태그 왼쪽 끝 가로 뒤집어 배치",
+                    "location":  "좌측 벽면 중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           60,
+                                           60,
+                                           58,
+                                           63,
+                                           65
+                                       ],
+                    "trimmed_mean":  61
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽\\1-3 한태그 왼쪽끝 세로 정상 배치.csv",
+                    "file_name":  "1-3 한태그 왼쪽끝 세로 정상 배치.csv",
+                    "base_name":  "1-3 한태그 왼쪽끝 세로 정상 배치",
+                    "location":  "좌측 벽면 중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           38,
+                                           38,
+                                           40,
+                                           37,
+                                           42
+                                       ],
+                    "trimmed_mean":  38.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽\\1-4 한태그 왼쪽끝 세로 뒤집어 배치.csv",
+                    "file_name":  "1-4 한태그 왼쪽끝 세로 뒤집어 배치.csv",
+                    "base_name":  "1-4 한태그 왼쪽끝 세로 뒤집어 배치",
+                    "location":  "좌측 벽면 중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           39,
+                                           40,
+                                           37,
+                                           40,
+                                           41
+                                       ],
+                    "trimmed_mean":  39.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽\\1-5 한태그 왼쪽 끝 세로로 세워서 배치.csv",
+                    "file_name":  "1-5 한태그 왼쪽 끝 세로로 세워서 배치.csv",
+                    "base_name":  "1-5 한태그 왼쪽 끝 세로로 세워서 배치",
+                    "location":  "좌측 벽면 중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           40,
+                                           41,
+                                           35,
+                                           40,
+                                           41
+                                       ],
+                    "trimmed_mean":  40.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽\\1-6 한태그 왼쪽 끝 가로로 눕혀서 배치.csv",
+                    "file_name":  "1-6 한태그 왼쪽 끝 가로로 눕혀서 배치.csv",
+                    "base_name":  "1-6 한태그 왼쪽 끝 가로로 눕혀서 배치",
+                    "location":  "좌측 벽면 중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           38,
+                                           40,
+                                           39,
+                                           40,
+                                           39
+                                       ],
+                    "trimmed_mean":  39.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽\\1-7 한태그 왼쪽 끝 가로로 눕히고 뒤집어 배치.csv",
+                    "file_name":  "1-7 한태그 왼쪽 끝 가로로 눕히고 뒤집어 배치.csv",
+                    "base_name":  "1-7 한태그 왼쪽 끝 가로로 눕히고 뒤집어 배치",
+                    "location":  "좌측 벽면 중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           41,
+                                           43,
+                                           44,
+                                           41,
+                                           44
+                                       ],
+                    "trimmed_mean":  42.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽\\1-8 한태그 왼쪽 끝 세로로 세우고 뒤집어 배치.csv",
+                    "file_name":  "1-8 한태그 왼쪽 끝 세로로 세우고 뒤집어 배치.csv",
+                    "base_name":  "1-8 한태그 왼쪽 끝 세로로 세우고 뒤집어 배치",
+                    "location":  "좌측 벽면 중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           44,
+                                           43,
+                                           43,
+                                           42,
+                                           41
+                                       ],
+                    "trimmed_mean":  42.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽\\1-9 한태그 왼쪽 끝 가로 정상 배치.csv",
+                    "file_name":  "1-9 한태그 왼쪽 끝 가로 정상 배치.csv",
+                    "base_name":  "1-9 한태그 왼쪽 끝 가로 정상 배치",
+                    "location":  "좌측 벽면 중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           60,
+                                           57,
+                                           55,
+                                           59,
+                                           59
+                                       ],
+                    "trimmed_mean":  58.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\위쪽\\2-1 한태그 위쪽 끝 가로 정상 배치.csv",
+                    "file_name":  "2-1 한태그 위쪽 끝 가로 정상 배치.csv",
+                    "base_name":  "2-1 한태그 위쪽 끝 가로 정상 배치",
+                    "location":  "상단 정중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           41,
+                                           43,
+                                           42,
+                                           43,
+                                           38
+                                       ],
+                    "trimmed_mean":  42
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\위쪽\\2-2 한태그 위쪽 끝 가로 뒤집어 배치.csv",
+                    "file_name":  "2-2 한태그 위쪽 끝 가로 뒤집어 배치.csv",
+                    "base_name":  "2-2 한태그 위쪽 끝 가로 뒤집어 배치",
+                    "location":  "상단 정중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           38,
+                                           41,
+                                           41,
+                                           40,
+                                           41
+                                       ],
+                    "trimmed_mean":  40.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\위쪽\\2-3 한태그 위쪽 끝 가로 세워서 정상 배치.csv",
+                    "file_name":  "2-3 한태그 위쪽 끝 가로 세워서 정상 배치.csv",
+                    "base_name":  "2-3 한태그 위쪽 끝 가로 세워서 정상 배치",
+                    "location":  "상단 정중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           38,
+                                           42,
+                                           37,
+                                           44,
+                                           42
+                                       ],
+                    "trimmed_mean":  40.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\위쪽\\2-4 한태그 위쪽 끝 가로 세워서 뒤집어 배치.csv",
+                    "file_name":  "2-4 한태그 위쪽 끝 가로 세워서 뒤집어 배치.csv",
+                    "base_name":  "2-4 한태그 위쪽 끝 가로 세워서 뒤집어 배치",
+                    "location":  "상단 정중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           38,
+                                           39,
+                                           40,
+                                           39,
+                                           37
+                                       ],
+                    "trimmed_mean":  38.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\위쪽\\2-5 한태그 위쪽 끝 세로 정상 배치 .csv",
+                    "file_name":  "2-5 한태그 위쪽 끝 세로 정상 배치 .csv",
+                    "base_name":  "2-5 한태그 위쪽 끝 세로 정상 배치 ",
+                    "location":  "상단 정중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           51,
+                                           51,
+                                           49,
+                                           53,
+                                           54
+                                       ],
+                    "trimmed_mean":  51.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\위쪽\\2-6 한태그 위쪽 끝 세로 뒤집어 배치.csv",
+                    "file_name":  "2-6 한태그 위쪽 끝 세로 뒤집어 배치.csv",
+                    "base_name":  "2-6 한태그 위쪽 끝 세로 뒤집어 배치",
+                    "location":  "상단 정중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           46,
+                                           46,
+                                           47,
+                                           48,
+                                           50
+                                       ],
+                    "trimmed_mean":  47
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\위쪽\\2-7 한태그 위쪽 끝 세로 세워서 정상 배치.csv",
+                    "file_name":  "2-7 한태그 위쪽 끝 세로 세워서 정상 배치.csv",
+                    "base_name":  "2-7 한태그 위쪽 끝 세로 세워서 정상 배치",
+                    "location":  "상단 정중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           40,
+                                           37,
+                                           43,
+                                           38,
+                                           39
+                                       ],
+                    "trimmed_mean":  39
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\위쪽\\2-8 한태그 위쪽 끝 세로 세워서 뒤집어 배치.csv",
+                    "file_name":  "2-8 한태그 위쪽 끝 세로 세워서 뒤집어 배치.csv",
+                    "base_name":  "2-8 한태그 위쪽 끝 세로 세워서 뒤집어 배치",
+                    "location":  "상단 정중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           42,
+                                           43,
+                                           41,
+                                           42,
+                                           43
+                                       ],
+                    "trimmed_mean":  42.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽\\3-1 한태그 오른쪽 끝 세로 정상 배치.csv",
+                    "file_name":  "3-1 한태그 오른쪽 끝 세로 정상 배치.csv",
+                    "base_name":  "3-1 한태그 오른쪽 끝 세로 정상 배치",
+                    "location":  "우측 벽면 중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           37,
+                                           36,
+                                           38,
+                                           36,
+                                           40
+                                       ],
+                    "trimmed_mean":  37
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽\\3-2 한태그 오른쪽 끝 세로 뒤집어 배치.csv",
+                    "file_name":  "3-2 한태그 오른쪽 끝 세로 뒤집어 배치.csv",
+                    "base_name":  "3-2 한태그 오른쪽 끝 세로 뒤집어 배치",
+                    "location":  "우측 벽면 중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           41,
+                                           42,
+                                           38,
+                                           39,
+                                           42
+                                       ],
+                    "trimmed_mean":  40.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽\\3-3 한태그 오른쪽 끝 세로 세워서 정상 배치.csv",
+                    "file_name":  "3-3 한태그 오른쪽 끝 세로 세워서 정상 배치.csv",
+                    "base_name":  "3-3 한태그 오른쪽 끝 세로 세워서 정상 배치",
+                    "location":  "우측 벽면 중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           40,
+                                           36,
+                                           42,
+                                           39,
+                                           39
+                                       ],
+                    "trimmed_mean":  39.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽\\3-4 한태그 오른쪽 끝 세로 세워서 뒤집어 배치.csv",
+                    "file_name":  "3-4 한태그 오른쪽 끝 세로 세워서 뒤집어 배치.csv",
+                    "base_name":  "3-4 한태그 오른쪽 끝 세로 세워서 뒤집어 배치",
+                    "location":  "우측 벽면 중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           39,
+                                           44,
+                                           38,
+                                           43,
+                                           44
+                                       ],
+                    "trimmed_mean":  42
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽\\3-5 한태그 오른쪽 끝 가로 정상 배치.csv",
+                    "file_name":  "3-5 한태그 오른쪽 끝 가로 정상 배치.csv",
+                    "base_name":  "3-5 한태그 오른쪽 끝 가로 정상 배치",
+                    "location":  "우측 벽면 중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           38,
+                                           38,
+                                           34,
+                                           40,
+                                           40
+                                       ],
+                    "trimmed_mean":  38.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽\\3-6 한태그 오른쪽 끝 가로 뒤집어 배치.csv",
+                    "file_name":  "3-6 한태그 오른쪽 끝 가로 뒤집어 배치.csv",
+                    "base_name":  "3-6 한태그 오른쪽 끝 가로 뒤집어 배치",
+                    "location":  "우측 벽면 중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           40,
+                                           43,
+                                           39,
+                                           39,
+                                           40
+                                       ],
+                    "trimmed_mean":  39.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽\\3-7 한태그 오른쪽 끝 가로 세워서 정상 배치.csv",
+                    "file_name":  "3-7 한태그 오른쪽 끝 가로 세워서 정상 배치.csv",
+                    "base_name":  "3-7 한태그 오른쪽 끝 가로 세워서 정상 배치",
+                    "location":  "우측 벽면 중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           37,
+                                           41,
+                                           43,
+                                           41,
+                                           42
+                                       ],
+                    "trimmed_mean":  41.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽\\3-8 한태그 오른쪽 끝 가로 세워서 뒤집어 배치.csv",
+                    "file_name":  "3-8 한태그 오른쪽 끝 가로 세워서 뒤집어 배치.csv",
+                    "base_name":  "3-8 한태그 오른쪽 끝 가로 세워서 뒤집어 배치",
+                    "location":  "우측 벽면 중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           39,
+                                           41,
+                                           39,
+                                           39,
+                                           40
+                                       ],
+                    "trimmed_mean":  39.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\아래쪽\\4-1 한태그 아래 끝 가로 정상 배치.csv",
+                    "file_name":  "4-1 한태그 아래 끝 가로 정상 배치.csv",
+                    "base_name":  "4-1 한태그 아래 끝 가로 정상 배치",
+                    "location":  "바닥 정중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           44,
+                                           38,
+                                           43,
+                                           44,
+                                           42
+                                       ],
+                    "trimmed_mean":  43
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\아래쪽\\4-2 한태그 아래 끝 가로 뒤집어 배치.csv",
+                    "file_name":  "4-2 한태그 아래 끝 가로 뒤집어 배치.csv",
+                    "base_name":  "4-2 한태그 아래 끝 가로 뒤집어 배치",
+                    "location":  "바닥 정중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           42,
+                                           53,
+                                           51,
+                                           47,
+                                           43
+                                       ],
+                    "trimmed_mean":  47
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\아래쪽\\4-3 한태그 아래 끝 가로 세워서 정상 배치.csv",
+                    "file_name":  "4-3 한태그 아래 끝 가로 세워서 정상 배치.csv",
+                    "base_name":  "4-3 한태그 아래 끝 가로 세워서 정상 배치",
+                    "location":  "바닥 정중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           42,
+                                           42,
+                                           37,
+                                           42,
+                                           42
+                                       ],
+                    "trimmed_mean":  42
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\아래쪽\\4-4 한태그 아래 끝 가로 세워서 뒤집어 배치.csv",
+                    "file_name":  "4-4 한태그 아래 끝 가로 세워서 뒤집어 배치.csv",
+                    "base_name":  "4-4 한태그 아래 끝 가로 세워서 뒤집어 배치",
+                    "location":  "바닥 정중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           40,
+                                           41,
+                                           43,
+                                           43,
+                                           38
+                                       ],
+                    "trimmed_mean":  41.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\아래쪽\\4-5 한태그 아래 끝 세로 정상 배치.csv",
+                    "file_name":  "4-5 한태그 아래 끝 세로 정상 배치.csv",
+                    "base_name":  "4-5 한태그 아래 끝 세로 정상 배치",
+                    "location":  "바닥 정중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           70,
+                                           66,
+                                           63,
+                                           69,
+                                           71
+                                       ],
+                    "trimmed_mean":  68.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\아래쪽\\4-6 한태그 아래 끝 세로 뒤집어 배치.csv",
+                    "file_name":  "4-6 한태그 아래 끝 세로 뒤집어 배치.csv",
+                    "base_name":  "4-6 한태그 아래 끝 세로 뒤집어 배치",
+                    "location":  "바닥 정중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           63,
+                                           64,
+                                           64,
+                                           67,
+                                           68
+                                       ],
+                    "trimmed_mean":  65
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\아래쪽\\4-7 한태그 아래 끝 세로 세워서 정상 배치.csv",
+                    "file_name":  "4-7 한태그 아래 끝 세로 세워서 정상 배치.csv",
+                    "base_name":  "4-7 한태그 아래 끝 세로 세워서 정상 배치",
+                    "location":  "바닥 정중앙",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           41,
+                                           41,
+                                           40,
+                                           45,
+                                           40
+                                       ],
+                    "trimmed_mean":  40.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\아래쪽\\4-8 한태그 아래 끝 세로 세워서 뒤집어 배치.csv",
+                    "file_name":  "4-8 한태그 아래 끝 세로 세워서 뒤집어 배치.csv",
+                    "base_name":  "4-8 한태그 아래 끝 세로 세워서 뒤집어 배치",
+                    "location":  "바닥 정중앙",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           40,
+                                           40,
+                                           38,
+                                           40,
+                                           41
+                                       ],
+                    "trimmed_mean":  40
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽위\\5-1 한태그 왼쪽위 모서리 세로 정상 배치.csv",
+                    "file_name":  "5-1 한태그 왼쪽위 모서리 세로 정상 배치.csv",
+                    "base_name":  "5-1 한태그 왼쪽위 모서리 세로 정상 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           39,
+                                           44,
+                                           42,
+                                           42,
+                                           46
+                                       ],
+                    "trimmed_mean":  42.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽위\\5-10 한태그 왼쪽위 모서리 가로 가로 세워서 뒤집어 배치.csv",
+                    "file_name":  "5-10 한태그 왼쪽위 모서리 가로 가로 세워서 뒤집어 배치.csv",
+                    "base_name":  "5-10 한태그 왼쪽위 모서리 가로 가로 세워서 뒤집어 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           42,
+                                           44,
+                                           44,
+                                           46,
+                                           38
+                                       ],
+                    "trimmed_mean":  43.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽위\\5-11 한태그 왼쪽위 모서리 가로 세로 세워서 정상 배치.csv",
+                    "file_name":  "5-11 한태그 왼쪽위 모서리 가로 세로 세워서 정상 배치.csv",
+                    "base_name":  "5-11 한태그 왼쪽위 모서리 가로 세로 세워서 정상 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           39,
+                                           41,
+                                           43,
+                                           44,
+                                           43
+                                       ],
+                    "trimmed_mean":  42.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽위\\5-12 한태그 왼쪽위 모서리 가로 세로 세워서 뒤집어 배치.csv",
+                    "file_name":  "5-12 한태그 왼쪽위 모서리 가로 세로 세워서 뒤집어 배치.csv",
+                    "base_name":  "5-12 한태그 왼쪽위 모서리 가로 세로 세워서 뒤집어 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           42,
+                                           46,
+                                           45,
+                                           43,
+                                           44
+                                       ],
+                    "trimmed_mean":  44
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽위\\5-2 한태그 왼쪽위 모서리 세로 뒤집어 배치.csv",
+                    "file_name":  "5-2 한태그 왼쪽위 모서리 세로 뒤집어 배치.csv",
+                    "base_name":  "5-2 한태그 왼쪽위 모서리 세로 뒤집어 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           41,
+                                           42,
+                                           47,
+                                           41,
+                                           47
+                                       ],
+                    "trimmed_mean":  43.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽위\\5-3 한태그 왼쪽위 모서리 세로 가로로 세워서 정상 배치.csv",
+                    "file_name":  "5-3 한태그 왼쪽위 모서리 세로 가로로 세워서 정상 배치.csv",
+                    "base_name":  "5-3 한태그 왼쪽위 모서리 세로 가로로 세워서 정상 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           43,
+                                           42,
+                                           40,
+                                           41,
+                                           45
+                                       ],
+                    "trimmed_mean":  42
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽위\\5-4 한태그 왼쪽위 모서리 세로 가로로 세워서 뒤집어 배치.csv",
+                    "file_name":  "5-4 한태그 왼쪽위 모서리 세로 가로로 세워서 뒤집어 배치.csv",
+                    "base_name":  "5-4 한태그 왼쪽위 모서리 세로 가로로 세워서 뒤집어 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           37,
+                                           45,
+                                           43,
+                                           44,
+                                           44
+                                       ],
+                    "trimmed_mean":  43.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽위\\5-5 한태그 왼쪽위 모서리 세로 세로로 세워서 정상 배치.csv",
+                    "file_name":  "5-5 한태그 왼쪽위 모서리 세로 세로로 세워서 정상 배치.csv",
+                    "base_name":  "5-5 한태그 왼쪽위 모서리 세로 세로로 세워서 정상 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           44,
+                                           39,
+                                           46,
+                                           43,
+                                           43
+                                       ],
+                    "trimmed_mean":  43.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽위\\5-6 한태그 왼쪽위 모서리 세로 세로로 세워서 뒤집어 배치.csv",
+                    "file_name":  "5-6 한태그 왼쪽위 모서리 세로 세로로 세워서 뒤집어 배치.csv",
+                    "base_name":  "5-6 한태그 왼쪽위 모서리 세로 세로로 세워서 뒤집어 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           35,
+                                           43,
+                                           40,
+                                           44,
+                                           41
+                                       ],
+                    "trimmed_mean":  41.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽위\\5-7 한태그 왼쪽위 모서리 가로 정상 배치.csv",
+                    "file_name":  "5-7 한태그 왼쪽위 모서리 가로 정상 배치.csv",
+                    "base_name":  "5-7 한태그 왼쪽위 모서리 가로 정상 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           37,
+                                           43,
+                                           36,
+                                           42,
+                                           42
+                                       ],
+                    "trimmed_mean":  40.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽위\\5-8 한태그 왼쪽위 모서리 가로 뒤집어 배치.csv",
+                    "file_name":  "5-8 한태그 왼쪽위 모서리 가로 뒤집어 배치.csv",
+                    "base_name":  "5-8 한태그 왼쪽위 모서리 가로 뒤집어 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           43,
+                                           44,
+                                           44,
+                                           41,
+                                           43
+                                       ],
+                    "trimmed_mean":  43.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽위\\5-9 한태그 왼쪽위 모서리 가로 가로 세워서 정상 배치.csv",
+                    "file_name":  "5-9 한태그 왼쪽위 모서리 가로 가로 세워서 정상 배치.csv",
+                    "base_name":  "5-9 한태그 왼쪽위 모서리 가로 가로 세워서 정상 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           41,
+                                           42,
+                                           45,
+                                           41,
+                                           39
+                                       ],
+                    "trimmed_mean":  41.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽아래\\8-1 한태그 왼쪽아래 모서리 가로 정상 배치.csv",
+                    "file_name":  "8-1 한태그 왼쪽아래 모서리 가로 정상 배치.csv",
+                    "base_name":  "8-1 한태그 왼쪽아래 모서리 가로 정상 배치",
+                    "location":  "바닥 좌측 구석",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           55,
+                                           53,
+                                           52,
+                                           56,
+                                           62
+                                       ],
+                    "trimmed_mean":  54.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽아래\\8-10 한태그 왼쪽아래 모서리 세로 가로 세워서 뒤집어 배치.csv",
+                    "file_name":  "8-10 한태그 왼쪽아래 모서리 세로 가로 세워서 뒤집어 배치.csv",
+                    "base_name":  "8-10 한태그 왼쪽아래 모서리 세로 가로 세워서 뒤집어 배치",
+                    "location":  "바닥 좌측 구석",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           43,
+                                           48,
+                                           46,
+                                           45,
+                                           44
+                                       ],
+                    "trimmed_mean":  45
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽아래\\8-11 한태그 왼쪽아래 모서리 세로 세로 세워서 정상 배치.csv",
+                    "file_name":  "8-11 한태그 왼쪽아래 모서리 세로 세로 세워서 정상 배치.csv",
+                    "base_name":  "8-11 한태그 왼쪽아래 모서리 세로 세로 세워서 정상 배치",
+                    "location":  "바닥 좌측 구석",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           43,
+                                           40,
+                                           43,
+                                           44,
+                                           45
+                                       ],
+                    "trimmed_mean":  43.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽아래\\8-12 한태그 왼쪽아래 모서리 세로 세로 세워서 뒤집어 배치.csv",
+                    "file_name":  "8-12 한태그 왼쪽아래 모서리 세로 세로 세워서 뒤집어 배치.csv",
+                    "base_name":  "8-12 한태그 왼쪽아래 모서리 세로 세로 세워서 뒤집어 배치",
+                    "location":  "바닥 좌측 구석",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           45,
+                                           38,
+                                           44,
+                                           42,
+                                           40
+                                       ],
+                    "trimmed_mean":  42
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽아래\\8-2 한태그 왼쪽아래 모서리 가로 뒤집어 배치.csv",
+                    "file_name":  "8-2 한태그 왼쪽아래 모서리 가로 뒤집어 배치.csv",
+                    "base_name":  "8-2 한태그 왼쪽아래 모서리 가로 뒤집어 배치",
+                    "location":  "바닥 좌측 구석",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           45,
+                                           50,
+                                           49,
+                                           57,
+                                           49
+                                       ],
+                    "trimmed_mean":  49.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽아래\\8-3 한태그 왼쪽아래 모서리 가로 가로 세워서 정상 배치.csv",
+                    "file_name":  "8-3 한태그 왼쪽아래 모서리 가로 가로 세워서 정상 배치.csv",
+                    "base_name":  "8-3 한태그 왼쪽아래 모서리 가로 가로 세워서 정상 배치",
+                    "location":  "바닥 좌측 구석",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           38,
+                                           41,
+                                           44,
+                                           41,
+                                           41
+                                       ],
+                    "trimmed_mean":  41
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽아래\\8-4 한태그 왼쪽아래 모서리 가로 가로 세워서 뒤집어 배치.csv",
+                    "file_name":  "8-4 한태그 왼쪽아래 모서리 가로 가로 세워서 뒤집어 배치.csv",
+                    "base_name":  "8-4 한태그 왼쪽아래 모서리 가로 가로 세워서 뒤집어 배치",
+                    "location":  "바닥 좌측 구석",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           44,
+                                           44,
+                                           39,
+                                           45,
+                                           43
+                                       ],
+                    "trimmed_mean":  43.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽아래\\8-5 한태그 왼쪽아래 모서리 가로 세로 세워서 정상 배치.csv",
+                    "file_name":  "8-5 한태그 왼쪽아래 모서리 가로 세로 세워서 정상 배치.csv",
+                    "base_name":  "8-5 한태그 왼쪽아래 모서리 가로 세로 세워서 정상 배치",
+                    "location":  "바닥 좌측 구석",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           49,
+                                           44,
+                                           41,
+                                           45,
+                                           42
+                                       ],
+                    "trimmed_mean":  43.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽아래\\8-6 한태그 왼쪽아래 모서리 가로 세로 세워서 뒤집어 배치.csv",
+                    "file_name":  "8-6 한태그 왼쪽아래 모서리 가로 세로 세워서 뒤집어 배치.csv",
+                    "base_name":  "8-6 한태그 왼쪽아래 모서리 가로 세로 세워서 뒤집어 배치",
+                    "location":  "바닥 좌측 구석",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           42,
+                                           45,
+                                           38,
+                                           40,
+                                           45
+                                       ],
+                    "trimmed_mean":  42.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽아래\\8-7 한태그 왼쪽아래 모서리 세로 정상 배치.csv",
+                    "file_name":  "8-7 한태그 왼쪽아래 모서리 세로 정상 배치.csv",
+                    "base_name":  "8-7 한태그 왼쪽아래 모서리 세로 정상 배치",
+                    "location":  "바닥 좌측 구석",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           55,
+                                           63,
+                                           59,
+                                           63,
+                                           60
+                                       ],
+                    "trimmed_mean":  60.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽아래\\8-8 한태그 왼쪽아래 모서리 세로 뒤집어 배치.csv",
+                    "file_name":  "8-8 한태그 왼쪽아래 모서리 세로 뒤집어 배치.csv",
+                    "base_name":  "8-8 한태그 왼쪽아래 모서리 세로 뒤집어 배치",
+                    "location":  "바닥 좌측 구석",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           48,
+                                           44,
+                                           50,
+                                           46,
+                                           44
+                                       ],
+                    "trimmed_mean":  46
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽아래\\8-9 한태그 왼쪽아래 모서리 세로 가로 세워서 정상 배치.csv",
+                    "file_name":  "8-9 한태그 왼쪽아래 모서리 세로 가로 세워서 정상 배치.csv",
+                    "base_name":  "8-9 한태그 왼쪽아래 모서리 세로 가로 세워서 정상 배치",
+                    "location":  "바닥 좌측 구석",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           40,
+                                           47,
+                                           44,
+                                           43,
+                                           43
+                                       ],
+                    "trimmed_mean":  43.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽위\\6-1 한태그 오른쪽위 모서리 세로 정상 배치.csv",
+                    "file_name":  "6-1 한태그 오른쪽위 모서리 세로 정상 배치.csv",
+                    "base_name":  "6-1 한태그 오른쪽위 모서리 세로 정상 배치",
+                    "location":  "우측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           41,
+                                           42,
+                                           41,
+                                           42,
+                                           38
+                                       ],
+                    "trimmed_mean":  41.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽위\\6-11 한태그 오른쪽위 모서리 가로 세로 세워서 정상 배치.csv",
+                    "file_name":  "6-11 한태그 오른쪽위 모서리 가로 세로 세워서 정상 배치.csv",
+                    "base_name":  "6-11 한태그 오른쪽위 모서리 가로 세로 세워서 정상 배치",
+                    "location":  "우측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           41,
+                                           40,
+                                           42,
+                                           42,
+                                           40
+                                       ],
+                    "trimmed_mean":  41
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽위\\6-12 한태그 오른쪽위 모서리 가로 세로 세워서 뒤집어 배치.csv",
+                    "file_name":  "6-12 한태그 오른쪽위 모서리 가로 세로 세워서 뒤집어 배치.csv",
+                    "base_name":  "6-12 한태그 오른쪽위 모서리 가로 세로 세워서 뒤집어 배치",
+                    "location":  "우측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           45,
+                                           42,
+                                           41,
+                                           37,
+                                           45
+                                       ],
+                    "trimmed_mean":  42.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽위\\6-2 한태그 오른쪽위 모서리 세로 뒤집어 배치.csv",
+                    "file_name":  "6-2 한태그 오른쪽위 모서리 세로 뒤집어 배치.csv",
+                    "base_name":  "6-2 한태그 오른쪽위 모서리 세로 뒤집어 배치",
+                    "location":  "우측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           41,
+                                           43,
+                                           43,
+                                           43,
+                                           44
+                                       ],
+                    "trimmed_mean":  43
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽위\\6-3 한태그 오른쪽위 모서리 세로 가로 세워서 정상 배치.csv",
+                    "file_name":  "6-3 한태그 오른쪽위 모서리 세로 가로 세워서 정상 배치.csv",
+                    "base_name":  "6-3 한태그 오른쪽위 모서리 세로 가로 세워서 정상 배치",
+                    "location":  "우측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           44,
+                                           43,
+                                           46,
+                                           40,
+                                           45
+                                       ],
+                    "trimmed_mean":  44
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽위\\6-4 한태그 오른쪽위 모서리 세로 가로 세워서 뒤집어 배치.csv",
+                    "file_name":  "6-4 한태그 오른쪽위 모서리 세로 가로 세워서 뒤집어 배치.csv",
+                    "base_name":  "6-4 한태그 오른쪽위 모서리 세로 가로 세워서 뒤집어 배치",
+                    "location":  "우측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           42,
+                                           44,
+                                           45,
+                                           48,
+                                           41
+                                       ],
+                    "trimmed_mean":  43.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽위\\6-5 한태그 오른쪽위 모서리 세로 세로 세워서 정상 배치.csv",
+                    "file_name":  "6-5 한태그 오른쪽위 모서리 세로 세로 세워서 정상 배치.csv",
+                    "base_name":  "6-5 한태그 오른쪽위 모서리 세로 세로 세워서 정상 배치",
+                    "location":  "우측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           44,
+                                           42,
+                                           40,
+                                           45,
+                                           42
+                                       ],
+                    "trimmed_mean":  42.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽위\\6-6 한태그 오른쪽위 모서리 세로 세로 세워서 뒤집어 배치.csv",
+                    "file_name":  "6-6 한태그 오른쪽위 모서리 세로 세로 세워서 뒤집어 배치.csv",
+                    "base_name":  "6-6 한태그 오른쪽위 모서리 세로 세로 세워서 뒤집어 배치",
+                    "location":  "우측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           44,
+                                           46,
+                                           41,
+                                           43,
+                                           45
+                                       ],
+                    "trimmed_mean":  44
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽위\\6-7 한태그 오른쪽위 모서리 가로 정상 배치.csv",
+                    "file_name":  "6-7 한태그 오른쪽위 모서리 가로 정상 배치.csv",
+                    "base_name":  "6-7 한태그 오른쪽위 모서리 가로 정상 배치",
+                    "location":  "우측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           43,
+                                           41,
+                                           46,
+                                           42,
+                                           45
+                                       ],
+                    "trimmed_mean":  43.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽위\\6-8 한태그 오른쪽위 모서리 가로 뒤집어 배치.csv",
+                    "file_name":  "6-8 한태그 오른쪽위 모서리 가로 뒤집어 배치.csv",
+                    "base_name":  "6-8 한태그 오른쪽위 모서리 가로 뒤집어 배치",
+                    "location":  "우측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           39,
+                                           41,
+                                           38,
+                                           42,
+                                           43
+                                       ],
+                    "trimmed_mean":  40.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽위\\6-9 한태그 오른쪽위 모서리 가로 가로 세워서 정상 배치.csv",
+                    "file_name":  "6-9 한태그 오른쪽위 모서리 가로 가로 세워서 정상 배치.csv",
+                    "base_name":  "6-9 한태그 오른쪽위 모서리 가로 가로 세워서 정상 배치",
+                    "location":  "우측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           43,
+                                           45,
+                                           42,
+                                           45,
+                                           40
+                                       ],
+                    "trimmed_mean":  43.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽아래\\7-1 한태그 오른쪽아래 모서리 가로 정상 배치.csv",
+                    "file_name":  "7-1 한태그 오른쪽아래 모서리 가로 정상 배치.csv",
+                    "base_name":  "7-1 한태그 오른쪽아래 모서리 가로 정상 배치",
+                    "location":  "바닥 우측 구석",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           40,
+                                           43,
+                                           42,
+                                           41,
+                                           41
+                                       ],
+                    "trimmed_mean":  41.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽아래\\7-10 한태그 오른쪽아래 모서리 세로 가로 세워서 뒤집어 배치.csv",
+                    "file_name":  "7-10 한태그 오른쪽아래 모서리 세로 가로 세워서 뒤집어 배치.csv",
+                    "base_name":  "7-10 한태그 오른쪽아래 모서리 세로 가로 세워서 뒤집어 배치",
+                    "location":  "바닥 우측 구석",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           40,
+                                           46,
+                                           39,
+                                           39,
+                                           41
+                                       ],
+                    "trimmed_mean":  40
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽아래\\7-11 한태그 오른쪽아래 모서리 세로 세로 세워서 정상 배치.csv",
+                    "file_name":  "7-11 한태그 오른쪽아래 모서리 세로 세로 세워서 정상 배치.csv",
+                    "base_name":  "7-11 한태그 오른쪽아래 모서리 세로 세로 세워서 정상 배치",
+                    "location":  "바닥 우측 구석",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           39,
+                                           43,
+                                           40,
+                                           45,
+                                           45
+                                       ],
+                    "trimmed_mean":  42.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽아래\\7-12 한태그 오른쪽아래 모서리 세로 세로 세워서 뒤집어 배치.csv",
+                    "file_name":  "7-12 한태그 오른쪽아래 모서리 세로 세로 세워서 뒤집어 배치.csv",
+                    "base_name":  "7-12 한태그 오른쪽아래 모서리 세로 세로 세워서 뒤집어 배치",
+                    "location":  "바닥 우측 구석",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           40,
+                                           43,
+                                           41,
+                                           41,
+                                           45
+                                       ],
+                    "trimmed_mean":  41.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽아래\\7-2 한태그 오른쪽아래 모서리 가로 뒤집어 배치.csv",
+                    "file_name":  "7-2 한태그 오른쪽아래 모서리 가로 뒤집어 배치.csv",
+                    "base_name":  "7-2 한태그 오른쪽아래 모서리 가로 뒤집어 배치",
+                    "location":  "바닥 우측 구석",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           52,
+                                           57,
+                                           55,
+                                           53,
+                                           55
+                                       ],
+                    "trimmed_mean":  54.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽아래\\7-3 한태그 오른쪽아래 모서리 가로 가로 세워서 정상 배치.csv",
+                    "file_name":  "7-3 한태그 오른쪽아래 모서리 가로 가로 세워서 정상 배치.csv",
+                    "base_name":  "7-3 한태그 오른쪽아래 모서리 가로 가로 세워서 정상 배치",
+                    "location":  "바닥 우측 구석",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           43,
+                                           45,
+                                           45,
+                                           45,
+                                           44
+                                       ],
+                    "trimmed_mean":  44.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽아래\\7-4 한태그 오른쪽아래 모서리 가로 가로 세워서 뒤집어 배치.csv",
+                    "file_name":  "7-4 한태그 오른쪽아래 모서리 가로 가로 세워서 뒤집어 배치.csv",
+                    "base_name":  "7-4 한태그 오른쪽아래 모서리 가로 가로 세워서 뒤집어 배치",
+                    "location":  "바닥 우측 구석",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           41,
+                                           46,
+                                           43,
+                                           39,
+                                           47
+                                       ],
+                    "trimmed_mean":  43.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽아래\\7-5 한태그 오른쪽아래 모서리 가로 세로 세워서 정상 배치 .csv",
+                    "file_name":  "7-5 한태그 오른쪽아래 모서리 가로 세로 세워서 정상 배치 .csv",
+                    "base_name":  "7-5 한태그 오른쪽아래 모서리 가로 세로 세워서 정상 배치 ",
+                    "location":  "바닥 우측 구석",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           43,
+                                           47,
+                                           39,
+                                           47,
+                                           46
+                                       ],
+                    "trimmed_mean":  45.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽아래\\7-6 한태그 오른쪽아래 모서리 가로 세로 세워서 뒤집어 배치.csv",
+                    "file_name":  "7-6 한태그 오른쪽아래 모서리 가로 세로 세워서 뒤집어 배치.csv",
+                    "base_name":  "7-6 한태그 오른쪽아래 모서리 가로 세로 세워서 뒤집어 배치",
+                    "location":  "바닥 우측 구석",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           43,
+                                           42,
+                                           45,
+                                           38,
+                                           43
+                                       ],
+                    "trimmed_mean":  42.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽아래\\7-7 한태그 오른쪽아래 모서리 세로 정상 배치.csv",
+                    "file_name":  "7-7 한태그 오른쪽아래 모서리 세로 정상 배치.csv",
+                    "base_name":  "7-7 한태그 오른쪽아래 모서리 세로 정상 배치",
+                    "location":  "바닥 우측 구석",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U3000BB09001D620901702570918DDEC9",
+                    "session_counts":  [
+                                           54,
+                                           56,
+                                           51,
+                                           54,
+                                           55
+                                       ],
+                    "trimmed_mean":  54.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽아래\\7-8 한태그 오른쪽아래 모서리 세로 뒤집어 배치.csv",
+                    "file_name":  "7-8 한태그 오른쪽아래 모서리 세로 뒤집어 배치.csv",
+                    "base_name":  "7-8 한태그 오른쪽아래 모서리 세로 뒤집어 배치",
+                    "location":  "바닥 우측 구석",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           44,
+                                           46,
+                                           42,
+                                           44,
+                                           45
+                                       ],
+                    "trimmed_mean":  44.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽아래\\7-9 한태그 오른쪽아래 모서리 세로 가로 세워서 정상 배치.csv",
+                    "file_name":  "7-9 한태그 오른쪽아래 모서리 세로 가로 세워서 정상 배치.csv",
+                    "base_name":  "7-9 한태그 오른쪽아래 모서리 세로 가로 세워서 정상 배치",
+                    "location":  "바닥 우측 구석",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           43,
+                                           45,
+                                           41,
+                                           39,
+                                           38
+                                       ],
+                    "trimmed_mean":  41
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽 높은 곳\\9-1 한태그 오른쪽 높은 곳 세로 가로 세워서 정상 배치.csv",
+                    "file_name":  "9-1 한태그 오른쪽 높은 곳 세로 가로 세워서 정상 배치.csv",
+                    "base_name":  "9-1 한태그 오른쪽 높은 곳 세로 가로 세워서 정상 배치",
+                    "location":  "우측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           39,
+                                           42,
+                                           42,
+                                           40,
+                                           45
+                                       ],
+                    "trimmed_mean":  41.33
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽 높은 곳\\9-2 한태그 오른쪽 높은 곳 세로 가로 세워서 뒤집어 배치.csv",
+                    "file_name":  "9-2 한태그 오른쪽 높은 곳 세로 가로 세워서 뒤집어 배치.csv",
+                    "base_name":  "9-2 한태그 오른쪽 높은 곳 세로 가로 세워서 뒤집어 배치",
+                    "location":  "우측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           41,
+                                           45,
+                                           42,
+                                           43,
+                                           44
+                                       ],
+                    "trimmed_mean":  43
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽 높은 곳\\9-3 한태그 오른쪽 높은 곳 세로 세로 세워서 정상 배치.csv",
+                    "file_name":  "9-3 한태그 오른쪽 높은 곳 세로 세로 세워서 정상 배치.csv",
+                    "base_name":  "9-3 한태그 오른쪽 높은 곳 세로 세로 세워서 정상 배치",
+                    "location":  "우측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           43,
+                                           45,
+                                           44,
+                                           41,
+                                           44
+                                       ],
+                    "trimmed_mean":  43.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\오른쪽 높은 곳\\9-4 한태그 오른쪽 높은 곳 세로 세로 세워서 뒤집어 배치.csv",
+                    "file_name":  "9-4 한태그 오른쪽 높은 곳 세로 세로 세워서 뒤집어 배치.csv",
+                    "base_name":  "9-4 한태그 오른쪽 높은 곳 세로 세로 세워서 뒤집어 배치",
+                    "location":  "우측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           45,
+                                           45,
+                                           46,
+                                           44,
+                                           0
+                                       ],
+                    "trimmed_mean":  44.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽 높은 곳\\10-1 한태그 왼쪽 높은 곳 세로 세워서 정상 배치 .csv",
+                    "file_name":  "10-1 한태그 왼쪽 높은 곳 세로 세워서 정상 배치 .csv",
+                    "base_name":  "10-1 한태그 왼쪽 높은 곳 세로 세워서 정상 배치 ",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           47,
+                                           45,
+                                           45,
+                                           45,
+                                           45
+                                       ],
+                    "trimmed_mean":  45
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽 높은 곳\\10-2 한태그 왼쪽 높은 곳 세로 세워서 뒤집어 배치.csv",
+                    "file_name":  "10-2 한태그 왼쪽 높은 곳 세로 세워서 뒤집어 배치.csv",
+                    "base_name":  "10-2 한태그 왼쪽 높은 곳 세로 세워서 뒤집어 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           48,
+                                           43,
+                                           43,
+                                           43,
+                                           45
+                                       ],
+                    "trimmed_mean":  43.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽 높은 곳\\10-3 한태그 왼쪽 높은 곳 가로 세워서 정상 옷걸이에 안 막히게 배치.csv",
+                    "file_name":  "10-3 한태그 왼쪽 높은 곳 가로 세워서 정상 옷걸이에 안 막히게 배치.csv",
+                    "base_name":  "10-3 한태그 왼쪽 높은 곳 가로 세워서 정상 옷걸이에 안 막히게 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           43,
+                                           48,
+                                           39,
+                                           44,
+                                           42
+                                       ],
+                    "trimmed_mean":  43
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽 높은 곳\\10-4 한태그 왼쪽 높은 곳 가로 세워서 뒤집어 옷걸이 안 막히게 배치.csv",
+                    "file_name":  "10-4 한태그 왼쪽 높은 곳 가로 세워서 뒤집어 옷걸이 안 막히게 배치.csv",
+                    "base_name":  "10-4 한태그 왼쪽 높은 곳 가로 세워서 뒤집어 옷걸이 안 막히게 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           44,
+                                           43,
+                                           42,
+                                           43,
+                                           42
+                                       ],
+                    "trimmed_mean":  42.67
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽 높은 곳\\10-5 한태그 왼쪽 높은 곳 가로 세워서 정상 옷걸이에 막히게 배치.csv",
+                    "file_name":  "10-5 한태그 왼쪽 높은 곳 가로 세워서 정상 옷걸이에 막히게 배치.csv",
+                    "base_name":  "10-5 한태그 왼쪽 높은 곳 가로 세워서 정상 옷걸이에 막히게 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "정방향 (태그가 리더기를 향함)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           42,
+                                           42,
+                                           47,
+                                           45,
+                                           42
+                                       ],
+                    "trimmed_mean":  43
+                },
+                {
+                    "full_path":  "G:\\.shortcut-targets-by-id\\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh\\3D 프린터 사용방법 인수인계\\촬영 사진 영상\\강동현\\스타일링부스 실습\\기존 스타일링 부스 RFID리더 테스트 Phase 1\\왼쪽 높은 곳\\10-6 한태그 왼쪽 높은 곳 가로 세워서 뒤집어 옷걸이에 막히게 배치.csv",
+                    "file_name":  "10-6 한태그 왼쪽 높은 곳 가로 세워서 뒤집어 옷걸이에 막히게 배치.csv",
+                    "base_name":  "10-6 한태그 왼쪽 높은 곳 가로 세워서 뒤집어 옷걸이에 막히게 배치",
+                    "location":  "좌측 상단 훅",
+                    "orientation":  "역방향 (태그가 리더기를 등짐)",
+                    "target_tag":  "U30004954303030313100000000001C1A",
+                    "session_counts":  [
+                                           42,
+                                           43,
+                                           42,
+                                           45,
+                                           44
+                                       ],
+                    "trimmed_mean":  43
+                }
+            ],
+    "groups":  [
+                   {
+                       "location":  "바닥 우측 구석",
+                       "orientation":  "역방향 (태그가 리더기를 등짐)",
+                       "source_files":  [
+                                            "7-10 한태그 오른쪽아래 모서리 세로 가로 세워서 뒤집어 배치",
+                                            "7-12 한태그 오른쪽아래 모서리 세로 세로 세워서 뒤집어 배치",
+                                            "7-2 한태그 오른쪽아래 모서리 가로 뒤집어 배치",
+                                            "7-4 한태그 오른쪽아래 모서리 가로 가로 세워서 뒤집어 배치",
+                                            "7-6 한태그 오른쪽아래 모서리 가로 세로 세워서 뒤집어 배치",
+                                            "7-8 한태그 오른쪽아래 모서리 세로 뒤집어 배치"
+                                        ],
+                       "integrated_mean":  44.39,
+                       "file_count":  6
+                   },
+                   {
+                       "location":  "바닥 우측 구석",
+                       "orientation":  "정방향 (태그가 리더기를 향함)",
+                       "source_files":  [
+                                            "7-1 한태그 오른쪽아래 모서리 가로 정상 배치",
+                                            "7-11 한태그 오른쪽아래 모서리 세로 세로 세워서 정상 배치",
+                                            "7-3 한태그 오른쪽아래 모서리 가로 가로 세워서 정상 배치",
+                                            "7-5 한태그 오른쪽아래 모서리 가로 세로 세워서 정상 배치 ",
+                                            "7-7 한태그 오른쪽아래 모서리 세로 정상 배치",
+                                            "7-9 한태그 오른쪽아래 모서리 세로 가로 세워서 정상 배치"
+                                        ],
+                       "integrated_mean":  44.89,
+                       "file_count":  6
+                   },
+                   {
+                       "location":  "바닥 정중앙",
+                       "orientation":  "역방향 (태그가 리더기를 등짐)",
+                       "source_files":  [
+                                            "4-2 한태그 아래 끝 가로 뒤집어 배치",
+                                            "4-4 한태그 아래 끝 가로 세워서 뒤집어 배치",
+                                            "4-6 한태그 아래 끝 세로 뒤집어 배치",
+                                            "4-8 한태그 아래 끝 세로 세워서 뒤집어 배치"
+                                        ],
+                       "integrated_mean":  48.33,
+                       "file_count":  4
+                   },
+                   {
+                       "location":  "바닥 정중앙",
+                       "orientation":  "정방향 (태그가 리더기를 향함)",
+                       "source_files":  [
+                                            "4-1 한태그 아래 끝 가로 정상 배치",
+                                            "4-3 한태그 아래 끝 가로 세워서 정상 배치",
+                                            "4-5 한태그 아래 끝 세로 정상 배치",
+                                            "4-7 한태그 아래 끝 세로 세워서 정상 배치"
+                                        ],
+                       "integrated_mean":  48.5,
+                       "file_count":  4
+                   },
+                   {
+                       "location":  "바닥 좌측 구석",
+                       "orientation":  "역방향 (태그가 리더기를 등짐)",
+                       "source_files":  [
+                                            "8-10 한태그 왼쪽아래 모서리 세로 가로 세워서 뒤집어 배치",
+                                            "8-12 한태그 왼쪽아래 모서리 세로 세로 세워서 뒤집어 배치",
+                                            "8-2 한태그 왼쪽아래 모서리 가로 뒤집어 배치",
+                                            "8-4 한태그 왼쪽아래 모서리 가로 가로 세워서 뒤집어 배치",
+                                            "8-6 한태그 왼쪽아래 모서리 가로 세로 세워서 뒤집어 배치",
+                                            "8-8 한태그 왼쪽아래 모서리 세로 뒤집어 배치"
+                                        ],
+                       "integrated_mean":  44.72,
+                       "file_count":  6
+                   },
+                   {
+                       "location":  "바닥 좌측 구석",
+                       "orientation":  "정방향 (태그가 리더기를 향함)",
+                       "source_files":  [
+                                            "8-1 한태그 왼쪽아래 모서리 가로 정상 배치",
+                                            "8-11 한태그 왼쪽아래 모서리 세로 세로 세워서 정상 배치",
+                                            "8-3 한태그 왼쪽아래 모서리 가로 가로 세워서 정상 배치",
+                                            "8-5 한태그 왼쪽아래 모서리 가로 세로 세워서 정상 배치",
+                                            "8-7 한태그 왼쪽아래 모서리 세로 정상 배치",
+                                            "8-9 한태그 왼쪽아래 모서리 세로 가로 세워서 정상 배치"
+                                        ],
+                       "integrated_mean":  47.78,
+                       "file_count":  6
+                   },
+                   {
+                       "location":  "상단 정중앙",
+                       "orientation":  "역방향 (태그가 리더기를 등짐)",
+                       "source_files":  [
+                                            "2-2 한태그 위쪽 끝 가로 뒤집어 배치",
+                                            "2-4 한태그 위쪽 끝 가로 세워서 뒤집어 배치",
+                                            "2-6 한태그 위쪽 끝 세로 뒤집어 배치",
+                                            "2-8 한태그 위쪽 끝 세로 세워서 뒤집어 배치"
+                                        ],
+                       "integrated_mean":  42.17,
+                       "file_count":  4
+                   },
+                   {
+                       "location":  "상단 정중앙",
+                       "orientation":  "정방향 (태그가 리더기를 향함)",
+                       "source_files":  [
+                                            "2-1 한태그 위쪽 끝 가로 정상 배치",
+                                            "2-3 한태그 위쪽 끝 가로 세워서 정상 배치",
+                                            "2-5 한태그 위쪽 끝 세로 정상 배치 ",
+                                            "2-7 한태그 위쪽 끝 세로 세워서 정상 배치"
+                                        ],
+                       "integrated_mean":  43.34,
+                       "file_count":  4
+                   },
+                   {
+                       "location":  "우측 벽면 중앙",
+                       "orientation":  "역방향 (태그가 리더기를 등짐)",
+                       "source_files":  [
+                                            "3-2 한태그 오른쪽 끝 세로 뒤집어 배치",
+                                            "3-4 한태그 오른쪽 끝 세로 세워서 뒤집어 배치",
+                                            "3-6 한태그 오른쪽 끝 가로 뒤집어 배치",
+                                            "3-8 한태그 오른쪽 끝 가로 세워서 뒤집어 배치"
+                                        ],
+                       "integrated_mean":  40.42,
+                       "file_count":  4
+                   },
+                   {
+                       "location":  "우측 벽면 중앙",
+                       "orientation":  "정방향 (태그가 리더기를 향함)",
+                       "source_files":  [
+                                            "3-1 한태그 오른쪽 끝 세로 정상 배치",
+                                            "3-3 한태그 오른쪽 끝 세로 세워서 정상 배치",
+                                            "3-5 한태그 오른쪽 끝 가로 정상 배치",
+                                            "3-7 한태그 오른쪽 끝 가로 세워서 정상 배치"
+                                        ],
+                       "integrated_mean":  39.08,
+                       "file_count":  4
+                   },
+                   {
+                       "location":  "우측 상단 훅",
+                       "orientation":  "역방향 (태그가 리더기를 등짐)",
+                       "source_files":  [
+                                            "6-12 한태그 오른쪽위 모서리 가로 세로 세워서 뒤집어 배치",
+                                            "6-2 한태그 오른쪽위 모서리 세로 뒤집어 배치",
+                                            "6-4 한태그 오른쪽위 모서리 세로 가로 세워서 뒤집어 배치",
+                                            "6-6 한태그 오른쪽위 모서리 세로 세로 세워서 뒤집어 배치",
+                                            "6-8 한태그 오른쪽위 모서리 가로 뒤집어 배치",
+                                            "9-2 한태그 오른쪽 높은 곳 세로 가로 세워서 뒤집어 배치",
+                                            "9-4 한태그 오른쪽 높은 곳 세로 세로 세워서 뒤집어 배치"
+                                        ],
+                       "integrated_mean":  43.1,
+                       "file_count":  7
+                   },
+                   {
+                       "location":  "우측 상단 훅",
+                       "orientation":  "정방향 (태그가 리더기를 향함)",
+                       "source_files":  [
+                                            "6-1 한태그 오른쪽위 모서리 세로 정상 배치",
+                                            "6-11 한태그 오른쪽위 모서리 가로 세로 세워서 정상 배치",
+                                            "6-3 한태그 오른쪽위 모서리 세로 가로 세워서 정상 배치",
+                                            "6-5 한태그 오른쪽위 모서리 세로 세로 세워서 정상 배치",
+                                            "6-7 한태그 오른쪽위 모서리 가로 정상 배치",
+                                            "6-9 한태그 오른쪽위 모서리 가로 가로 세워서 정상 배치",
+                                            "9-1 한태그 오른쪽 높은 곳 세로 가로 세워서 정상 배치",
+                                            "9-3 한태그 오른쪽 높은 곳 세로 세로 세워서 정상 배치"
+                                        ],
+                       "integrated_mean":  42.58,
+                       "file_count":  8
+                   },
+                   {
+                       "location":  "정중앙 훅",
+                       "orientation":  "역방향 (태그가 리더기를 등짐)",
+                       "source_files":  [
+                                            "1-2 한태그 중앙 뒤집어서 배치",
+                                            "1-2 retest 비교태그 center 2cm left more 뒤집음"
+                                        ],
+                       "integrated_mean":  34.66,
+                       "file_count":  2
+                   },
+                   {
+                       "location":  "정중앙 훅",
+                       "orientation":  "정방향 (태그가 리더기를 향함)",
+                       "source_files":  [
+                                            "1-1 한태그 중앙 배치",
+                                            "0 비교태그 center 2cm left 가로 ",
+                                            "0 비교태그 only center",
+                                            "0 비교태그 center 2cm left",
+                                            "0 기준태그 center 2cm left 세로",
+                                            "0 비교태그 center 2cm left 세로 10번테스트"
+                                        ],
+                       "integrated_mean":  17.83,
+                       "file_count":  6
+                   },
+                   {
+                       "location":  "좌측 벽면 중앙",
+                       "orientation":  "역방향 (태그가 리더기를 등짐)",
+                       "source_files":  [
+                                            "1-10 한태그 왼쪽 끝 가로 뒤집어 배치",
+                                            "1-4 한태그 왼쪽끝 세로 뒤집어 배치",
+                                            "1-7 한태그 왼쪽 끝 가로로 눕히고 뒤집어 배치",
+                                            "1-8 한태그 왼쪽 끝 세로로 세우고 뒤집어 배치"
+                                        ],
+                       "integrated_mean":  46.5,
+                       "file_count":  4
+                   },
+                   {
+                       "location":  "좌측 벽면 중앙",
+                       "orientation":  "정방향 (태그가 리더기를 향함)",
+                       "source_files":  [
+                                            "1-3 한태그 왼쪽끝 세로 정상 배치",
+                                            "1-5 한태그 왼쪽 끝 세로로 세워서 배치",
+                                            "1-6 한태그 왼쪽 끝 가로로 눕혀서 배치",
+                                            "1-9 한태그 왼쪽 끝 가로 정상 배치"
+                                        ],
+                       "integrated_mean":  44.16,
+                       "file_count":  4
+                   },
+                   {
+                       "location":  "좌측 상단 훅",
+                       "orientation":  "역방향 (태그가 리더기를 등짐)",
+                       "source_files":  [
+                                            "5-10 한태그 왼쪽위 모서리 가로 가로 세워서 뒤집어 배치",
+                                            "5-12 한태그 왼쪽위 모서리 가로 세로 세워서 뒤집어 배치",
+                                            "5-2 한태그 왼쪽위 모서리 세로 뒤집어 배치",
+                                            "5-4 한태그 왼쪽위 모서리 세로 가로로 세워서 뒤집어 배치",
+                                            "5-6 한태그 왼쪽위 모서리 세로 세로로 세워서 뒤집어 배치",
+                                            "5-8 한태그 왼쪽위 모서리 가로 뒤집어 배치",
+                                            "10-2 한태그 왼쪽 높은 곳 세로 세워서 뒤집어 배치",
+                                            "10-4 한태그 왼쪽 높은 곳 가로 세워서 뒤집어 옷걸이 안 막히게 배치",
+                                            "10-6 한태그 왼쪽 높은 곳 가로 세워서 뒤집어 옷걸이에 막히게 배치"
+                                        ],
+                       "integrated_mean":  43.15,
+                       "file_count":  9
+                   },
+                   {
+                       "location":  "좌측 상단 훅",
+                       "orientation":  "정방향 (태그가 리더기를 향함)",
+                       "source_files":  [
+                                            "5-1 한태그 왼쪽위 모서리 세로 정상 배치",
+                                            "5-11 한태그 왼쪽위 모서리 가로 세로 세워서 정상 배치",
+                                            "5-3 한태그 왼쪽위 모서리 세로 가로로 세워서 정상 배치",
+                                            "5-5 한태그 왼쪽위 모서리 세로 세로로 세워서 정상 배치",
+                                            "5-7 한태그 왼쪽위 모서리 가로 정상 배치",
+                                            "5-9 한태그 왼쪽위 모서리 가로 가로 세워서 정상 배치",
+                                            "10-1 한태그 왼쪽 높은 곳 세로 세워서 정상 배치 ",
+                                            "10-3 한태그 왼쪽 높은 곳 가로 세워서 정상 옷걸이에 안 막히게 배치",
+                                            "10-5 한태그 왼쪽 높은 곳 가로 세워서 정상 옷걸이에 막히게 배치"
+                                        ],
+                       "integrated_mean":  42.55,
+                       "file_count":  9
+                   }
+               ],
+    "updated_at":  "2026-05-21T11:36:40"
+}

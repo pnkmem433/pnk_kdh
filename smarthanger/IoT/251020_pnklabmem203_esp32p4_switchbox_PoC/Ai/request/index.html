@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ESP32-P4 Requests - 목록</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Noto Sans','맑은 고딕',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+    .container{max-width:1200px;margin:0 auto;background:#fff;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column;min-height:80vh}
+    .header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:28px 22px}
+    .header h1{font-size:1.6em;margin-bottom:8px}
+    .toolbar{display:flex;gap:10px;align-items:center;background:#fff;padding:12px 14px;border-bottom:1px solid #eee;position:sticky;top:0;z-index:2}
+    .toolbar input{flex:1;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:.95em}
+    .toolbar .meta{font-size:12px;color:#666;white-space:nowrap}
+    .list{flex:1;overflow:auto}
+    .row{display:grid;grid-template-columns:100px 1fr 140px 110px;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid #f0f0f0;background:#fff}
+    .row:hover{background:#f7f7ff}
+    .row .id{font-weight:700;opacity:.8}
+    .row .title{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+    .row .date,.row .author{font-size:12px;color:#666}
+    .pagination{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid #eee;background:#fff;position:sticky;bottom:0}
+    .page-controls{display:flex;gap:6px;flex-wrap:wrap}
+    .btn,.page{border:1px solid #ddd;background:#fff;padding:6px 10px;border-radius:6px;font-size:.9em;cursor:pointer}
+    .btn[disabled]{opacity:.5;cursor:not-allowed}
+    .page.active{border-color:#667eea;background:#eef0ff}
+    .empty{display:flex;align-items:center;justify-content:center;height:260px;color:#999}
+    a{color:inherit;text-decoration:none}
+    .tags{display:flex;gap:6px;flex-wrap:wrap}
+    .tag{background:#e3f2fd;color:#1976d2;border-radius:12px;font-size:11px;padding:2px 8px}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>📋 ESP32-P4 Request 목록</h1>
+    <div>총 <span id="total">0</span>건</div>
+  </div>
+
+  <div class="toolbar">
+    <input id="q" type="text" placeholder="검색(번호/제목/작성자/태그)..." />
+    <div class="meta"><span id="range">0-0</span> / <span id="count">0</span> (페이지 <span id="p">1</span>/<span id="tp">1</span>)</div>
+  </div>
+
+  <div id="list" class="list">
+    <div class="empty">로딩 중...</div>
+  </div>
+
+  <div class="pagination">
+    <div class="page-controls" id="pages"></div>
+    <div>
+      <button class="btn" id="first">⏮ 처음</button>
+      <button class="btn" id="prev">◀ 이전</button>
+      <button class="btn" id="next">다음 ▶</button>
+      <button class="btn" id="last">끝 ⏭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // === 설정: request(n).js 경로 ===
+  const BASE_PATH = ''; // 같은 폴더면 ''
+
+  // 외부 데이터 수집 버퍼
+  window.requestData = Array.isArray(window.requestData) ? window.requestData : [];
+
+  // 상태
+  let all = [];
+  let filtered = [];
+  const PAGE_SIZE = 10;
+  let page = 1;
+
+  // --- utils ---
+  const $ = sel => document.querySelector(sel);
+  const qEl = $('#q'), listEl = $('#list'), totalEl = $('#total'),
+        countEl = $('#count'), rangeEl = $('#range'), pEl = $('#p'), tpEl = $('#tp'), pagesEl = $('#pages');
+
+  function esc(x){ const d=document.createElement('div'); d.textContent=String(x??''); return d.innerHTML; }
+  function parseDateMaybe(d){ if(!d) return null; const dt=new Date(d); return isNaN(dt)?null:dt; }
+
+  // 최신순: date desc → request_number desc
+function sortLatestFirst(arr){
+  return [...arr].sort((a,b)=>{
+    const an = Number(a.request_number);
+    const bn = Number(b.request_number);
+    if(!Number.isNaN(an) && !Number.isNaN(bn)) return bn - an;
+    return 0;
+  });
+}
+
+
+  function applySearch(q){
+    const s=(q||'').trim().toLowerCase();
+    if(!s) return all.slice();
+    return all.filter(r=>{
+      const bag=[
+        String(r.request_number??''),
+        String(r.title??''),
+        String(r.author??''),
+        String(r.date??''),
+        ...(Array.isArray(r.tags)?r.tags.map(t=>String(t)):[])
+      ].join(' ').toLowerCase();
+      return bag.includes(s);
+    });
+  }
+
+  function getTotalPages(){ return Math.max(1, Math.ceil(filtered.length/PAGE_SIZE)); }
+  function getSlice(){ const start=(page-1)*PAGE_SIZE; return filtered.slice(start, start+PAGE_SIZE); }
+
+  function renderList(){
+    const rows=getSlice();
+    if(rows.length===0){
+      listEl.innerHTML=`<div class="empty">검색 결과가 없습니다.</div>`;
+      return;
+    }
+    listEl.innerHTML = rows.map(r=>{
+      const d=parseDateMaybe(r.date); const dateText=d? d.toISOString().slice(0,10) : (r.date||'');
+      const url = `detail.html?id=${encodeURIComponent(r.request_number)}`;
+      const tags = Array.isArray(r.tags)&&r.tags.length? `<div class="tags">${r.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`:'';
+      return `
+        <a class="row" href="${url}">
+          <div class="id">#${esc(r.request_number)}</div>
+          <div class="title">${esc(r.title||'제목 없음')}${tags}</div>
+          <div class="author">${esc(r.author||'Claude')}</div>
+          <div class="date">${esc(dateText)}</div>
+        </a>
+      `;
+    }).join('');
+  }
+
+  function renderPager(){
+    const totalPages=getTotalPages();
+    pEl.textContent=page; tpEl.textContent=totalPages;
+    const startIdx = filtered.length? (page-1)*PAGE_SIZE+1 : 0;
+    const endIdx   = Math.min(filtered.length, page*PAGE_SIZE);
+    rangeEl.textContent = `${startIdx}-${endIdx}`;
+    countEl.textContent = String(filtered.length);
+
+    // 버튼 상태
+    $('#first').disabled = page===1;
+    $('#prev').disabled  = page===1;
+    $('#next').disabled  = page===totalPages;
+    $('#last').disabled  = page===totalPages;
+
+    // 페이지 번호 윈도우(최대 7)
+    pagesEl.innerHTML='';
+    const windowSize=7;
+    let s=Math.max(1, page-Math.floor(windowSize/2));
+    let e=Math.min(totalPages, s+windowSize-1);
+    if(e-s+1<windowSize) s=Math.max(1, e-windowSize+1);
+    for(let p=s;p<=e;p++){
+      const b=document.createElement('button');
+      b.className='page'+(p===page?' active':'');
+      b.textContent=String(p);
+      b.onclick=()=>{page=p; syncUrl(); draw();};
+      pagesEl.appendChild(b);
+    }
+  }
+
+  function draw(){
+    renderList();
+    renderPager();
+  }
+
+  function syncUrl(){
+    const u=new URL(location.href);
+    const q=qEl.value.trim();
+    if(q) u.searchParams.set('q', q); else u.searchParams.delete('q');
+    u.searchParams.set('page', String(page));
+    history.replaceState(null,'',u.toString());
+  }
+
+  function initFromUrl(){
+    const u=new URL(location.href);
+    const q=u.searchParams.get('q')||'';
+    const p=Number(u.searchParams.get('page')||'1');
+    qEl.value=q;
+    page = Number.isFinite(p)&&p>0 ? p : 1;
+  }
+
+  // 이벤트
+  function debounce(fn,ms=200){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+  qEl.addEventListener('input', debounce(()=>{
+    filtered = sortLatestFirst(applySearch(qEl.value));
+    page=1; syncUrl(); draw();
+  }));
+
+  $('#first').onclick=()=>{page=1; syncUrl(); draw();};
+  $('#prev').onclick =()=>{page=Math.max(1,page-1); syncUrl(); draw();};
+  $('#next').onclick =()=>{page=Math.min(getTotalPages(),page+1); syncUrl(); draw();};
+  $('#last').onclick =()=>{page=getTotalPages(); syncUrl(); draw();};
+
+  // 외부 스크립트 로딩
+  let nextIdx=1, err=0;
+  function loadNext(){
+    const s=document.createElement('script');
+    s.src=`${BASE_PATH}request(${nextIdx}).js`;
+    s.onload=()=>{ err=0; nextIdx++; loadNext(); };
+    s.onerror=()=>{ err++; if(err>=3) finish(); else { nextIdx++; loadNext(); } };
+    document.head.appendChild(s);
+  }
+
+  function finish(){
+    all = sortLatestFirst((window.requestData||[]).filter(Boolean));
+    filtered = sortLatestFirst(applySearch(qEl.value));
+    totalEl.textContent = String(all.length);
+    draw();
+  }
+
+  // start
+  initFromUrl();
+  loadNext();
+</script>
+</body>
+</html>

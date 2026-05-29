@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RFID 테스트 결과 요약</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(14, 165, 233, 0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
+        #f8fafc;
+    }
+
+    .shadow-soft {
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+    }
+  </style>
+</head>
+<body data-section-theme="sky" class="min-h-screen text-slate-900">
+  <main id="app"></main>
+
+  <div id="imageModal" class="fixed inset-0 z-50 hidden bg-slate-100/95 p-4 backdrop-blur-sm md:p-8">
+    <button
+      id="closeModal"
+      class="absolute right-4 top-4 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm"
+    >
+      닫기
+    </button>
+    <div class="flex h-full items-center justify-center">
+      <div id="modalContent" class="w-full max-w-6xl overflow-hidden rounded-3xl border border-slate-300 bg-white shadow-2xl"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import {
+      reportMeta,
+      topIntro,
+      causeFlow,
+      topSummaryCards,
+      impactRows,
+      issueCauseCards,
+      conditionCompareRows,
+      quickConditionBlocks,
+      keyConclusion,
+      exampleSections,
+      peopleSection,
+      antennaSection,
+      externalEvidence,
+      solutionSection,
+      supportNotes,
+      testScopeSection,
+      antennaReviewSection,
+    } from "./data.js";
+
+    const app = document.getElementById("app");
+    const modal = document.getElementById("imageModal");
+    const modalContent = document.getElementById("modalContent");
+    const closeModal = document.getElementById("closeModal");
+
+    const toneMap = {
+      good: "border-emerald-200 bg-emerald-50 text-emerald-900",
+      bad: "border-rose-200 bg-rose-50 text-rose-900",
+      warn: "border-amber-200 bg-amber-50 text-amber-950",
+      info: "border-sky-200 bg-sky-50 text-sky-900",
+      neutral: "border-slate-200 bg-slate-50 text-slate-800",
+    };
+
+    const badgeMap = {
+      good: "border-emerald-200 bg-emerald-100 text-emerald-800",
+      bad: "border-rose-200 bg-rose-100 text-rose-800",
+      warn: "border-amber-200 bg-amber-100 text-amber-900",
+      info: "border-sky-200 bg-sky-100 text-sky-800",
+      neutral: "border-slate-200 bg-slate-100 text-slate-700",
+    };
+
+    const gradeByRead = (value) => {
+      if (value >= 40) return { icon: "🟢", label: "매우 좋음", tone: "good" };
+      if (value >= 20) return { icon: "🟡", label: "좋음", tone: "warn" };
+      if (value >= 5) return { icon: "🟠", label: "인식은 되나 약함", tone: "info" };
+      return { icon: "🔴", label: "실패", tone: "bad" };
+    };
+
+    const formatNum = (value, digits = 2) => {
+      if (value === null || value === undefined) return "미인식";
+      return Number(value).toFixed(digits).replace(/\.00$/, "");
+    };
+
+    const getDriveId = (url = "") => {
+      if (!url) return "";
+      if (url.includes("open?id=")) return url.split("open?id=")[1].split("&")[0];
+      if (url.includes("/file/d/")) return url.split("/file/d/")[1].split("/")[0];
+      return "";
+    };
+
+    const resolveMedia = (src = "") => {
+      const id = getDriveId(src);
+      if (id) {
+        return {
+          image: `https://drive.google.com/thumbnail?id=${id}&sz=w3000`,
+          open: `https://drive.google.com/open?id=${id}`,
+        };
+      }
+      return { image: src, open: src };
+    };
+
+    const mediaFrame = (item, aspect = "aspect-[4/3]") => {
+      if (!item?.src) {
+        return `<div class="${aspect} flex items-center justify-center bg-slate-100 text-sm text-slate-500">사진 없음</div>`;
+      }
+      const media = resolveMedia(item.src);
+      return `
+        <div class="${aspect} overflow-hidden bg-slate-100">
+          <img src="${media.image}" alt="${item.label || "이미지"}" class="h-full w-full object-cover" loading="lazy" referrerpolicy="no-referrer" />
+        </div>
+      `;
+    };
+
+    const imageOverlayButton = (item) => {
+      if (!item?.src) return "";
+      const media = resolveMedia(item.src);
+      return `
+        <button
+          class="image-trigger absolute inset-0"
+          data-src="${media.image}"
+          data-open="${media.open}"
+          data-label="${item.label || "이미지"}"
+          aria-label="${item.label || "이미지"} 확대"
+        ></button>
+      `;
+    };
+
+    const mediaActions = (item) => {
+      if (!item?.src) return "";
+      const media = resolveMedia(item.src);
+      return `
+        <button
+          class="image-trigger text-xs font-semibold text-sky-700 underline"
+          data-src="${media.image}"
+          data-open="${media.open}"
+          data-label="${item.label || "이미지"}"
+        >
+          확대 보기
+        </button>
+        <a href="${media.open}" target="_blank" class="text-xs font-semibold text-sky-700 underline">새 탭 열기</a>
+      `;
+    };
+
+    const tagRow = ([name, value]) => {
+      const grade = gradeByRead(value);
+      return `
+        <div class="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-sm">
+          <span class="text-slate-700">${name}</span>
+          <span class="font-semibold ${grade.tone === "bad" ? "text-rose-700" : grade.tone === "warn" ? "text-amber-700" : grade.tone === "info" ? "text-sky-700" : "text-emerald-700"}">${grade.icon} ${formatNum(value)}회</span>
+        </div>
+      `;
+    };
+
+    const exampleCard = (item, tone = "neutral") => {
+      const grade = gradeByRead(item.meanRead);
+      return `
+        <article class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div class="relative">
+            ${mediaFrame(item)}
+            ${imageOverlayButton(item)}
+          </div>
+          <div class="space-y-3 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-lg font-bold text-slate-900">${item.label}</div>
+                <div class="text-sm text-slate-500">${item.phase} ${item.testId}</div>
+              </div>
+              <span class="rounded-full border ${badgeMap[grade.tone]} px-3 py-1 text-xs font-semibold">${item.grade || `${grade.icon} ${grade.label}`}</span>
+            </div>
+            <div class="text-sm text-slate-700">${item.summary}</div>
+            <div class="rounded-2xl ${toneMap[tone]} p-3 text-sm">
+              <div class="font-semibold">${item.meanLabel || "평균 인식 횟수"}: ${formatNum(item.meanRead)}회</div>
+              <div class="mt-1">${item.compareRead}</div>
+            </div>
+            ${item.reason ? `
+              <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm leading-7 text-slate-700">
+                <span class="font-semibold text-slate-900">원인:</span> ${item.reason}
+              </div>
+            ` : ""}
+            ${item.tagReads?.length ? `
+              <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                <div class="mb-2 text-xs font-semibold text-slate-600">전체 태그 평균 인식 횟수 (각 태그 5회 평균)</div>
+                <div class="grid gap-2">${item.tagReads.map(tagRow).join("")}</div>
+              </div>
+            ` : ""}
+            <div class="flex items-center justify-between gap-3">
+              <div class="text-xs text-slate-500">사진이 안 보이면 공유 권한을 확인하세요.</div>
+              <div class="flex items-center gap-3">${mediaActions(item)}</div>
+            </div>
+          </div>
+        </article>
+      `;
+    };
+
+    const visualCard = (item) => `
+      <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="relative">
+          ${mediaFrame(item, "aspect-[16/10]")}
+          ${imageOverlayButton(item)}
+        </div>
+        <div class="space-y-2 p-4">
+          <div class="text-base font-bold text-slate-900">${item.label}</div>
+          <div class="text-sm text-slate-700">${item.summary}</div>
+          <div class="flex items-center justify-end gap-3">${mediaActions(item)}</div>
+        </div>
+      </article>
+    `;
+
+    const compactVisualCard = (item) => `
+      <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="relative">
+          ${mediaFrame(item, "aspect-[4/3]")}
+          ${imageOverlayButton(item)}
+        </div>
+        <div class="space-y-1 p-3">
+          <div class="text-sm font-bold text-slate-900">${item.label}</div>
+          <div class="text-xs text-slate-600">${item.summary}</div>
+          <div class="flex items-center justify-end gap-3">${mediaActions(item)}</div>
+        </div>
+      </article>
+    `;
+
+    const issueCard = (item) => `
+      <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex items-start gap-3">
+          <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">${item.step}</span>
+          <div class="min-w-0">
+            <h4 class="text-lg font-bold text-slate-900">${item.title}</h4>
+            <p class="mt-2 text-sm font-semibold text-slate-700">${item.summary}</p>
+            <p class="mt-2 text-sm leading-7 text-slate-600">${item.detail}</p>
+          </div>
+        </div>
+        ${item.qrMatrix?.length ? `
+          <div class="mt-4">
+            ${item.qrMatrixCaption ? `<div class="mb-2 text-sm font-semibold text-slate-600">${item.qrMatrixCaption}</div>` : ""}
+          <div class="overflow-hidden rounded-2xl border border-slate-200">
+            <div class="grid grid-cols-[1fr_0.8fr_0.8fr_1fr] gap-px bg-slate-200">
+              <div class="bg-slate-50 px-3 py-3 text-sm font-bold">훅 위치</div>
+              <div class="bg-slate-50 px-3 py-3 text-sm font-bold">QR 안 보이게</div>
+              <div class="bg-slate-50 px-3 py-3 text-sm font-bold">QR 보이게</div>
+              <div class="bg-slate-50 px-3 py-3 text-sm font-bold">해석</div>
+              ${item.qrMatrix
+                .map((row) => {
+                  const hiddenGrade = gradeByRead(row.hidden);
+                  const visibleGrade = gradeByRead(row.visible);
+                  return `
+                    <div class="bg-white px-3 py-3 text-sm font-semibold text-slate-900">${row.hook}</div>
+                    <div class="bg-white px-3 py-3 text-sm font-bold ${hiddenGrade.tone === "bad" ? "text-rose-700" : hiddenGrade.tone === "warn" ? "text-amber-700" : hiddenGrade.tone === "info" ? "text-sky-700" : "text-emerald-700"}">${hiddenGrade.icon} ${formatNum(row.hidden)}회</div>
+                    <div class="bg-white px-3 py-3 text-sm font-bold ${visibleGrade.tone === "bad" ? "text-rose-700" : visibleGrade.tone === "warn" ? "text-amber-700" : visibleGrade.tone === "info" ? "text-sky-700" : "text-emerald-700"}">${visibleGrade.icon} ${formatNum(row.visible)}회</div>
+                    <div class="bg-white px-3 py-3 text-sm text-slate-700">${row.note}</div>
+                  `;
+                })
+                .join("")}
+            </div>
+          </div>
+          </div>
+        ` : ""}
+        ${item.imageColumns?.length ? `
+          <div class="mt-4 grid gap-4 lg:grid-cols-3">
+            ${item.imageColumns
+              .map(
+                (column) => `
+                  <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                    <div class="mb-3 text-sm font-bold text-slate-900">${column.title}</div>
+                    <div class="grid gap-3">
+                      ${column.items.map(compactVisualCard).join("")}
+                    </div>
+                  </div>
+                `,
+              )
+              .join("")}
+          </div>
+        ` : item.images?.length ? `
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            ${item.images.map(visualCard).join("")}
+          </div>
+        ` : ""}
+      </article>
+    `;
+
+    const currentJudgmentSection = () => `
+      <section class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+        <div>
+          <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Current Judgment</div>
+          <h2 class="mt-2 text-3xl font-black text-slate-950">${solutionSection.title}</h2>
+          <p class="mt-4 text-sm leading-8 text-slate-700">${solutionSection.intro}</p>
+        </div>
+        ${solutionSection.priorityCards?.length ? `
+          <div class="mt-6 grid gap-4 lg:grid-cols-3">
+            ${solutionSection.priorityCards
+              .map(
+                (card) => `
+                  <article class="rounded-3xl border ${toneMap[card.tone]} p-5 shadow-sm">
+                    <div class="text-xs font-semibold uppercase tracking-[0.18em]">${card.label}</div>
+                    <div class="mt-3 text-2xl font-black">${card.value}</div>
+                    <p class="mt-2 text-sm leading-7">${card.text}</p>
+                  </article>
+                `,
+              )
+              .join("")}
+          </div>
+        ` : ""}
+        <div class="mt-6 overflow-hidden rounded-3xl border border-slate-200">
+          <div class="grid grid-cols-[1fr_1fr_1fr_1.2fr] gap-px bg-slate-200">
+            <div class="bg-slate-50 px-4 py-3 text-sm font-bold">방법</div>
+            <div class="bg-slate-50 px-4 py-3 text-sm font-bold">어떻게 적용하는가</div>
+            <div class="bg-slate-50 px-4 py-3 text-sm font-bold">필요 조건</div>
+            <div class="bg-slate-50 px-4 py-3 text-sm font-bold">한계</div>
+            ${solutionSection.methods
+              .map(
+                (item) => `
+                  <div class="px-4 py-4 text-sm font-semibold ${item.tone ? toneMap[item.tone] : "bg-white text-slate-900"}">
+                    <div class="flex items-center justify-between gap-2">
+                      <span>${item.name}</span>
+                      ${item.badge ? `<span class="rounded-full border ${badgeMap[item.tone || "neutral"]} px-2 py-0.5 text-[11px] font-bold">${item.badge}</span>` : ""}
+                    </div>
+                  </div>
+                  <div class="px-4 py-4 text-sm ${item.tone ? toneMap[item.tone] : "bg-white text-slate-700"}">${item.how}</div>
+                  <div class="px-4 py-4 text-sm ${item.tone ? toneMap[item.tone] : "bg-white text-slate-700"}">${item.needs}</div>
+                  <div class="px-4 py-4 text-sm ${item.tone ? toneMap[item.tone] : "bg-white text-slate-700"}">${item.limit}</div>
+                `,
+              )
+              .join("")}
+          </div>
+        </div>
+        <div class="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-5">
+          <div class="text-lg font-black text-slate-950">현재 한계</div>
+          <div class="mt-3 grid gap-2">
+            ${solutionSection.limits
+              .map((item) => `<div class="rounded-2xl bg-white px-4 py-3 text-sm text-slate-700">${item}</div>`)
+              .join("")}
+          </div>
+        </div>
+        <div class="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-6">
+          <div class="text-lg font-black text-emerald-950">현재 판단</div>
+          <div class="mt-3 grid gap-2">
+            ${solutionSection.judgment
+              .map((item, index) => `<div class="rounded-2xl bg-white px-4 py-3 text-sm ${index === 0 ? "font-bold text-emerald-900" : "text-slate-700"}">${item}</div>`)
+              .join("")}
+          </div>
+          <div class="mt-5 rounded-2xl border border-emerald-200 bg-white px-4 py-4 text-sm font-bold leading-7 text-emerald-900">${solutionSection.finalLine}</div>
+        </div>
+      </section>
+    `;
+
+    const renderCompareBlock = (title, caption, goodItems = [], badItems = [], neutralItems = [], note = "", meanNote = "") => `
+      <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+        <div class="mb-4">
+          <h4 class="text-xl font-bold text-slate-900">${title}</h4>
+          <p class="mt-1 text-sm text-slate-600">${caption}</p>
+          ${note ? `<p class="mt-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-7 text-slate-700">${note}</p>` : ""}
+          ${meanNote ? `<p class="mt-2 text-xs font-semibold text-slate-500">${meanNote}</p>` : ""}
+        </div>
+        <div class="grid gap-5 ${neutralItems.length ? "xl:grid-cols-3" : "xl:grid-cols-2"}">
+          ${goodItems.map((item) => exampleCard(item, "good")).join("")}
+          ${badItems.map((item) => exampleCard(item, "bad")).join("")}
+          ${neutralItems.map((item) => exampleCard(item, "neutral")).join("")}
+        </div>
+      </div>
+    `;
+
+    const highlightEvidenceIntro = (text) => {
+      const targets = ["배치 환경", "안테나 위치", "공간 구조", "태그 방향", "밀집도"];
+      return targets.reduce(
+        (acc, word) =>
+          acc.replaceAll(
+            word,
+            `<span class="rounded-md bg-amber-100 px-1.5 py-0.5 font-semibold text-amber-950">${word}</span>`,
+          ),
+        text,
+      );
+    };
+
+    const createAntennaLineSvg = (cases) => {
+      const categories = ["기존", "왼쪽", "중앙", "오른쪽"];
+      const series = cases.map((item, index) => ({
+        name: item.caseId,
+        color: ["#e15241", "#3b82b6", "#2eaf67", "#e78a23"][index],
+        points: [item.base, item.left, item.center, item.right],
+      }));
+
+      const width = 980;
+      const height = 520;
+      const pad = { top: 88, right: 30, bottom: 80, left: 72 };
+      const chartW = width - pad.left - pad.right;
+      const chartH = height - pad.top - pad.bottom;
+      const max = 75;
+      const xStep = chartW / (categories.length - 1);
+      const x = (idx) => pad.left + idx * xStep;
+      const y = (value) => pad.top + chartH - (value / max) * chartH;
+
+      let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="100%" height="460">`;
+      svg += `<rect width="${width}" height="${height}" fill="#ffffff"/>`;
+      svg += `<text x="${width / 2}" y="34" text-anchor="middle" font-size="28" font-weight="700" fill="#111827">RFID Tag Read Count vs. Antenna Position</text>`;
+      svg += `<text x="${width / 2}" y="66" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">파란셔츠(AA000010) 기준 - 기존 위치에서 0~4회인 실패 케이스 비교</text>`;
+
+      for (let i = 0; i <= 7; i += 1) {
+        const value = i * 10;
+        const yy = y(value);
+        svg += `<line x1="${pad.left}" y1="${yy}" x2="${width - pad.right}" y2="${yy}" stroke="#e2e8f0" stroke-width="1"/>`;
+        svg += `<text x="${pad.left - 14}" y="${yy + 4}" text-anchor="end" font-size="12" fill="#475569">${value}</text>`;
+      }
+
+      categories.forEach((label, idx) => {
+        const xx = x(idx);
+        svg += `<line x1="${xx}" y1="${pad.top}" x2="${xx}" y2="${pad.top + chartH}" stroke="#e5e7eb" stroke-width="1"/>`;
+        svg += `<text x="${xx}" y="${height - 34}" text-anchor="middle" font-size="14" fill="#111827">${label}</text>`;
+      });
+
+      series.forEach((line) => {
+        const points = line.points.map((value, idx) => `${x(idx)},${y(value)}`).join(" ");
+        svg += `<polyline points="${points}" fill="none" stroke="${line.color}" stroke-width="4"/>`;
+        line.points.forEach((value, idx) => {
+          const xx = x(idx);
+          const yy = y(value);
+          svg += `<circle cx="${xx}" cy="${yy}" r="7" fill="${line.color}"/>`;
+          svg += `<text x="${xx}" y="${yy - 14}" text-anchor="middle" font-size="12" font-weight="700" fill="${line.color}">${value.toFixed(2)}</text>`;
+        });
+      });
+
+      const thresholdY = y(5);
+      svg += `<line x1="${pad.left}" y1="${thresholdY}" x2="${width - pad.right}" y2="${thresholdY}" stroke="#ef4444" stroke-width="4"/>`;
+      svg += `<text x="${width - pad.right - 8}" y="${thresholdY - 8}" text-anchor="end" font-size="12" font-weight="700" fill="#dc2626">통과 기준 5회</text>`;
+
+      const legendX = 92;
+      const legendY = 104;
+      svg += `<rect x="${legendX - 18}" y="${legendY - 30}" width="132" height="152" rx="12" fill="#ffffff" stroke="#d1d5db"/>`;
+      series.forEach((line, idx) => {
+        const yy = legendY + idx * 28;
+        svg += `<line x1="${legendX}" y1="${yy}" x2="${legendX + 28}" y2="${yy}" stroke="${line.color}" stroke-width="4"/>`;
+        svg += `<circle cx="${legendX + 14}" cy="${yy}" r="6" fill="${line.color}"/>`;
+        svg += `<text x="${legendX + 44}" y="${yy + 5}" font-size="13" fill="#111827">${line.name}</text>`;
+      });
+      svg += `<line x1="${legendX}" y1="${legendY + 118}" x2="${legendX + 28}" y2="${legendY + 118}" stroke="#ef4444" stroke-width="4"/>`;
+      svg += `<text x="${legendX + 44}" y="${legendY + 123}" font-size="13" fill="#111827">기준 5회</text>`;
+      svg += `</svg>`;
+      return svg;
+    };
+
+    const antennaValueClass = (value, max) =>
+      value === max ? "border-emerald-200 bg-emerald-100 text-emerald-900" : "border-slate-200 bg-white text-slate-700";
+    const testScopeCard = (group, tone = "neutral") => `
+      <article class="rounded-3xl border ${toneMap[tone]} p-5 shadow-sm">
+        <div class="text-lg font-black">${group.title}</div>
+        <div class="mt-3 grid gap-2">
+          ${group.items
+            .map((item) => `<div class="rounded-2xl bg-white px-4 py-3 text-sm text-slate-700">${item}</div>`)
+            .join("")}
+        </div>
+      </article>
+    `;
+    const testScopeSectionHtml = () => `
+      <section id="test-scope" class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+        <div class="mb-6">
+          <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Test Scope</div>
+          <h2 class="mt-2 text-3xl font-black text-slate-950">${testScopeSection.title}</h2>
+          <p class="mt-3 text-sm leading-8 text-slate-700">${testScopeSection.subtitle}</p>
+          <div class="mt-4 rounded-3xl border border-sky-200 bg-sky-50 px-5 py-4 text-sm font-semibold leading-7 text-sky-950">
+            ${testScopeSection.headline}
+          </div>
+        </div>
+        <div class="grid gap-4 xl:grid-cols-3">
+          ${testScopeSection.axes
+            .map(
+              (axis) => `
+                <article class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                  <div class="text-lg font-black text-slate-950">${axis.name}</div>
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    ${axis.options
+                      .map(
+                        (option) => `
+                          <span class="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">${option}</span>
+                        `,
+                      )
+                      .join("")}
+                  </div>
+                  <div class="mt-4 text-sm leading-7 text-slate-600">${axis.note}</div>
+                </article>
+              `,
+            )
+            .join("")}
+        </div>
+        <div class="mt-6 grid gap-5 xl:grid-cols-2">
+          ${testScopeSection.covered.map((group) => testScopeCard(group, "good")).join("")}
+          ${testScopeSection.gaps.map((group) => testScopeCard(group, "warn")).join("")}
+        </div>
+        <div class="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-5">
+          <div class="text-lg font-black text-slate-950">왜 이 섹션이 필요한가</div>
+          <div class="mt-3 grid gap-2">
+            ${testScopeSection.whyThisMatters
+              .map((item) => `<div class="rounded-2xl bg-white px-4 py-3 text-sm text-slate-700">${item}</div>`)
+              .join("")}
+          </div>
+        </div>
+      </section>
+    `;
+    const antennaReviewSectionHtml = () => `
+      <section id="antenna-review" class="rounded-[2rem] border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-slate-50 p-8 shadow-soft">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div class="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">${antennaReviewSection.badge}</div>
+            <h2 class="mt-2 text-3xl font-black text-slate-950">${antennaReviewSection.title}</h2>
+            <p class="mt-4 text-sm leading-8 text-slate-700">${antennaReviewSection.summary}</p>
+          </div>
+          <div class="rounded-2xl border border-emerald-300 bg-emerald-100 px-4 py-3 text-sm font-semibold text-emerald-900">
+            ${antennaReviewSection.winner}
+          </div>
+        </div>
+
+        <div class="mt-6 overflow-x-auto rounded-[1.5rem] border border-slate-200 bg-white">
+          <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-100 text-left text-slate-700">
+              <tr>
+                <th class="px-4 py-3 font-semibold">안테나</th>
+                <th class="px-4 py-3 font-semibold">방사/특성</th>
+                <th class="px-4 py-3 font-semibold">장점</th>
+                <th class="px-4 py-3 font-semibold">피팅룸 적합도</th>
+                <th class="px-4 py-3 font-semibold">간단 요약</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 text-slate-700">
+              ${antennaReviewSection.rows
+                .map(
+                  (row) => `
+                    <tr class="${row.fitTone === "good" ? "bg-emerald-50" : ""}">
+                      <td class="px-4 py-4 font-semibold ${row.fitTone === "good" ? "text-emerald-900" : "text-slate-900"}">${row.name}</td>
+                      <td class="px-4 py-4">${row.type}</td>
+                      <td class="px-4 py-4">${row.strength}</td>
+                      <td class="px-4 py-4"><span class="rounded-full border ${badgeMap[row.fitTone]} px-3 py-1 text-xs font-semibold">${row.fit}</span></td>
+                      <td class="px-4 py-4">${row.note}</td>
+                    </tr>
+                  `,
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-6 grid gap-4 lg:grid-cols-2">
+          <div class="rounded-[1.5rem] border border-emerald-200 bg-white p-5">
+            <h3 class="text-lg font-bold text-slate-950">간단 결론</h3>
+            ${antennaReviewSection.conclusion
+              .map((line) => `<p class="mt-3 text-sm leading-7 text-slate-700">${line}</p>`)
+              .join("")}
+          </div>
+
+          <div class="rounded-[1.5rem] border border-slate-200 bg-white p-5">
+            <h3 class="text-lg font-bold text-slate-950">출처 토글</h3>
+            <p class="mt-3 text-sm leading-7 text-slate-700">
+              아래 항목을 열면 원문 요지를 바로 볼 수 있고, 링크를 누르면 출처 기사에서 해당 문구 근처로 바로 이동할 수 있습니다.
+            </p>
+            <div class="mt-4 space-y-3">
+              ${antennaReviewSection.sources
+                .map(
+                  (item) => `
+                    <details class="rounded-2xl border ${item.tone === "good" ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-slate-50"} px-4 py-3">
+                      <summary class="cursor-pointer font-semibold ${item.tone === "good" ? "text-emerald-900" : "text-slate-900"}">${item.label}</summary>
+                      <p class="mt-3 text-sm leading-7 text-slate-700">${item.text}</p>
+                      <a class="mt-2 inline-block text-sm font-semibold ${item.tone === "good" ? "text-emerald-700" : "text-sky-700"} underline" target="_blank" rel="noreferrer" href="${item.href}">원문에서 보기</a>
+                    </details>
+                  `,
+                )
+                .join("")}
+            </div>
+            <p class="mt-4 text-xs leading-6 text-slate-500">
+              출처: XMINNOV RFID Tag World, <a class="font-semibold text-sky-700 underline" target="_blank" rel="noreferrer" href="${antennaReviewSection.sourceHref}">RFID 안테나의 다른 유형</a>, 게시일 2024-05-27.
+            </p>
+          </div>
+        </div>
+      </section>
+    `;
+    const antennaCaseCard = (item) => {
+      const values = [
+        { label: "기존", value: item.base },
+        { label: "왼쪽", value: item.left },
+        { label: "중앙", value: item.center },
+        { label: "오른쪽", value: item.right },
+      ];
+      const max = Math.max(...values.map((v) => v.value));
+      return `
+        <article class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          ${item.src ? `
+            <div class="relative">
+              ${mediaFrame(item, "aspect-[16/10]")}
+              ${imageOverlayButton(item)}
+            </div>
+          ` : ""}
+          <div class="p-5">
+            <div class="space-y-1">
+              <div class="text-lg font-bold text-slate-900">${item.caseId}</div>
+              <div class="text-sm text-slate-600">${item.condition}</div>
+            </div>
+            <div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+              ${values
+                .map(
+                  (entry) => `
+                    <div class="rounded-2xl border p-3 text-center ${antennaValueClass(entry.value, max)}">
+                      <div class="text-xs font-semibold">${entry.label}</div>
+                      <div class="mt-1 text-lg font-bold">${formatNum(entry.value)}회</div>
+                    </div>
+                  `,
+                )
+                .join("")}
+            </div>
+            <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm">
+              <div><span class="font-semibold">최적 위치:</span> ${item.best}</div>
+              <div class="mt-1 text-slate-600">${item.summary}</div>
+            </div>
+            ${item.src ? `
+              <div class="mt-3 flex items-center justify-end gap-3">
+                ${mediaActions(item)}
+              </div>
+            ` : ""}
+          </div>
+        </article>
+      `;
+    };
+
+    const quickNavItems = [
+      { label: "맨 위", href: "#top" },
+      { label: "요약", href: "#impact-summary" },
+      { label: "현재 판단", href: "#current-judgment" },
+      { label: "간섭 요인", href: "#issue-causes" },
+      { label: "조건 비교", href: "#conditions" },
+      { label: "대표 예시", href: "#examples-hook" },
+      { label: "사람 영향", href: "#human-impact" },
+      { label: "안테나", href: "#antenna-position" },
+      { label: "외부 자료", href: "#external-evidence" },
+      { label: "해석 기준", href: "#interpretation-rules" },
+    ];
+
+    const sideNavItems = [
+      { label: "맨 위", href: "#top" },
+      { label: "요약", href: "#impact-summary" },
+      { label: "테스트 범위", href: "#test-scope" },
+      { label: "현재 판단", href: "#current-judgment" },
+      { label: "간섭 요인", href: "#issue-causes" },
+      { label: "조건 비교", href: "#conditions" },
+      { label: "대표 예시", href: "#examples-hook" },
+      { label: "사람 영향", href: "#human-impact" },
+      { label: "안테나", href: "#antenna-position" },
+      { label: "외부 자료", href: "#external-evidence" },
+      { label: "해석 기준", href: "#interpretation-rules" },
+    ];
+
+    app.innerHTML = `
+      <div id="top" class="mx-auto max-w-7xl space-y-10 px-4 py-8 md:px-6 lg:px-8">
+        <aside class="fixed right-4 top-1/2 z-40 hidden -translate-y-1/2 xl:block">
+          <div class="w-40 rounded-3xl border border-slate-200 bg-white/95 p-3 shadow-soft backdrop-blur">
+            <div class="mb-2 px-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Sections</div>
+            <div class="grid gap-2">
+              ${sideNavItems
+                .map(
+                  (item) => `
+                    <a href="${item.href}" class="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-800">
+                      ${item.label}
+                    </a>
+                  `,
+                )
+                .join("")}
+            </div>
+          </div>
+        </aside>
+
+        <a href="#top" class="fixed bottom-6 right-6 z-40 rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 shadow-soft transition hover:border-sky-300 hover:text-sky-800">
+          맨 위로
+        </a>
+
+        <div class="hidden flex-wrap items-center gap-4 text-sm font-semibold">
+          <a href="./styling_booth/" class="text-sky-700 underline">기록 목록으로</a>
+          <a href="./index.html" class="text-sky-700 underline">메인 홈으로</a>
+        </div>
+
+        <header class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div class="mb-4 flex flex-wrap gap-3 text-sm font-semibold lg:justify-end">
+            <a href="./styling_booth/" class="rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sky-800">기록 목록으로</a>
+            <a href="./index.html" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-700">메인 홈으로</a>
+          </div>
+          <div class="inline-flex rounded-full border border-sky-200 bg-sky-50 px-4 py-1 text-xs font-semibold tracking-[0.2em] text-sky-800">${reportMeta.badge}</div>
+          <h1 class="mt-4 text-4xl font-black tracking-tight text-slate-950 md:text-5xl">${reportMeta.title}</h1>
+          <p class="mt-4 max-w-4xl text-lg leading-8 text-slate-600">${reportMeta.subtitle}</p>
+          <div class="mt-6 grid gap-3 md:grid-cols-3">
+            ${topIntro
+              .map(
+                (item) => `
+                  <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">${item}</div>
+                `,
+              )
+              .join("")}
+          </div>
+        </header>
+
+        <nav class="sticky top-4 z-30 rounded-[2rem] border border-slate-200 bg-white/95 p-4 shadow-soft backdrop-blur">
+          <div class="flex flex-wrap gap-2">
+            ${quickNavItems
+              .map(
+                (item) => `
+                  <a href="${item.href}" class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-800">
+                    ${item.label}
+                  </a>
+                `,
+              )
+              .join("")}
+          </div>
+        </nav>
+
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div class="mb-6">
+            <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Root Cause</div>
+            <h2 class="mt-2 text-3xl font-black text-slate-950">RFID 인식 간섭 구조</h2>
+          </div>
+          <div class="rounded-3xl bg-slate-900 px-6 py-5 text-center text-2xl font-black text-white">${causeFlow.root}</div>
+          <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            ${causeFlow.groups
+              .map(
+                (group) => `
+                  <article class="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="rounded-2xl bg-white px-4 py-3 text-center text-sm font-bold text-slate-900">${group.title}</div>
+                    <div class="mt-3 grid gap-2">
+                      ${group.items
+                        .map((item) => `<div class="rounded-2xl bg-white px-3 py-2 text-sm text-slate-700">${item}</div>`)
+                        .join("")}
+                    </div>
+                  </article>
+                `,
+              )
+              .join("")}
+          </div>
+        </section>
+
+        <section class="grid gap-4 lg:grid-cols-3">
+          ${topSummaryCards
+            .map(
+              (card) => `
+                <article class="rounded-3xl border ${toneMap[card.tone]} p-5 shadow-sm">
+                  <div class="text-xs font-semibold uppercase tracking-[0.18em]">${card.label}</div>
+                  <div class="mt-3 text-2xl font-black">${card.value}</div>
+                  <p class="mt-2 text-sm leading-7">${card.text}</p>
+                </article>
+              `,
+            )
+            .join("")}
+        </section>
+
+        <section id="impact-summary" class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div class="mb-6">
+            <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Impact Summary</div>
+            <h2 class="mt-2 text-3xl font-black text-slate-950">RFID 테스트 결론 요약</h2>
+          </div>
+          <div class="overflow-hidden rounded-3xl border border-slate-200">
+            <div class="grid grid-cols-[1.1fr_1fr_1fr_0.9fr_1.2fr] gap-px bg-slate-200 text-sm font-bold text-slate-800">
+              <div class="bg-slate-50 px-4 py-3">구분</div>
+              <div class="bg-slate-50 px-4 py-3">조건</div>
+                <div class="bg-slate-50 px-4 py-3">각 태그 평균 인식 횟수 범위 / 감소폭</div>
+              <div class="bg-slate-50 px-4 py-3">미치는 영향</div>
+              <div class="bg-slate-50 px-4 py-3">원인 해석</div>
+              ${impactRows
+                .map(
+                  (row) => `
+                    <div class="bg-white px-4 py-4 text-sm font-semibold text-slate-900">${row.category}</div>
+                    <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.condition}</div>
+                    <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.delta}</div>
+                    <div class="bg-white px-4 py-4 text-sm font-semibold">${row.impact}</div>
+                    <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.reason}</div>
+                  `,
+                )
+                .join("")}
+            </div>
+          </div>
+        </section>
+
+        ${testScopeSectionHtml()}
+
+        <div id="current-judgment">
+          ${currentJudgmentSection()}
+        </div>
+
+        <section id="issue-causes" class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div class="mb-6">
+            <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Issue Causes</div>
+            <h2 class="mt-2 text-3xl font-black text-slate-950">RFID 인식 간섭 요인</h2>
+          </div>
+          <div class="grid gap-5 lg:grid-cols-2">
+            ${issueCauseCards.map(issueCard).join("")}
+          </div>
+        </section>
+
+        <section id="conditions" class="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+          <article class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+            <div class="mb-6">
+              <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Conditions</div>
+              <h2 class="mt-2 text-3xl font-black text-slate-950">어떤 경우에 잘 되고, 어떤 경우에 안 되는가</h2>
+            </div>
+            <div class="overflow-hidden rounded-3xl border border-slate-200">
+              <div class="grid grid-cols-[1fr_1.2fr_1fr_1fr] gap-px bg-slate-200">
+                <div class="bg-slate-50 px-4 py-3 text-sm font-bold">구분</div>
+                <div class="bg-slate-50 px-4 py-3 text-sm font-bold">잘 되는 조건</div>
+                <div class="bg-slate-50 px-4 py-3 text-sm font-bold">잘 안 되는 조건</div>
+                <div class="bg-slate-50 px-4 py-3 text-sm font-bold">이유</div>
+                ${conditionCompareRows
+                  .map(
+                    (row) => `
+                      <div class="bg-white px-4 py-4 text-sm font-semibold text-slate-900">${row.category}</div>
+                      <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.good}</div>
+                      <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.bad}</div>
+                      <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.reason}</div>
+                    `,
+                  )
+                  .join("")}
+              </div>
+            </div>
+          </article>
+
+          <article class="rounded-[2rem] border border-slate-200 bg-slate-50 p-8 shadow-soft">
+            <h3 class="text-2xl font-black text-slate-950">결론</h3>
+            <p class="mt-4 text-sm leading-8 text-slate-700">${keyConclusion}</p>
+            <div class="mt-6 grid gap-4">
+              <div class="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+                <div class="text-lg font-black text-emerald-900">🟢 잘 되는 조건</div>
+                <div class="mt-3 grid gap-2">
+                  ${quickConditionBlocks.good
+                    .map((item) => `<div class="rounded-2xl bg-white px-3 py-2 text-sm text-slate-700">${item}</div>`)
+                    .join("")}
+                </div>
+              </div>
+              <div class="rounded-3xl border border-rose-200 bg-rose-50 p-5">
+                <div class="text-lg font-black text-rose-900">🔴 잘 안 되는 조건</div>
+                <div class="mt-3 grid gap-2">
+                  ${quickConditionBlocks.bad
+                    .map((item) => `<div class="rounded-2xl bg-white px-3 py-2 text-sm text-slate-700">${item}</div>`)
+                    .join("")}
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        ${exampleSections
+          .map(
+            (section) => `
+              <section id="${section.title === "훅 배치" ? "examples-hook" : "examples-floor"}" class="space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+                <div>
+                  <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Representative Examples</div>
+                  <h2 class="mt-2 text-3xl font-black text-slate-950">${section.title}</h2>
+                  <p class="mt-2 text-sm text-slate-600">${section.subtitle}</p>
+                </div>
+                ${section.visuals?.length ? `
+                  <div class="grid gap-5 xl:grid-cols-2">
+                    ${section.visuals.map(visualCard).join("")}
+                  </div>
+                ` : ""}
+                ${section.blocks
+                  .map((block) =>
+                    renderCompareBlock(
+                      block.title,
+                      block.caption,
+                      block.goodItems,
+                      block.badItems,
+                      block.neutralItems || [],
+                      block.note || "",
+                      block.meanNote || "",
+                    ),
+                  )
+                  .join("")}
+              </section>
+            `,
+          )
+          .join("")}
+
+        <section id="human-impact" class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div>
+            <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Human Impact</div>
+            <h2 class="mt-2 text-3xl font-black text-slate-950">${peopleSection.title}</h2>
+            <p class="mt-2 text-sm text-slate-600">${peopleSection.subtitle}</p>
+          </div>
+          <div class="mt-6 grid gap-4 md:grid-cols-3">
+            ${peopleSection.cards
+              .map(
+                (card) => `
+                  <article class="rounded-3xl border ${toneMap[card.tone]} p-5">
+                    <div class="text-lg font-black">${card.label}</div>
+                    <div class="mt-2 text-sm font-semibold">${card.summary}</div>
+                    <div class="mt-4 text-xl font-black">${card.metric}</div>
+                    <div class="mt-2 text-sm leading-7">${card.detail}</div>
+                  </article>
+                `,
+              )
+              .join("")}
+          </div>
+        </section>
+
+        <section id="antenna-position" class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div>
+            <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Antenna Position</div>
+            <h2 class="mt-2 text-3xl font-black text-slate-950">${antennaSection.title}</h2>
+            <p class="mt-2 text-sm text-slate-600">${antennaSection.subtitle}</p>
+          </div>
+          <div class="mt-6 grid gap-4 md:grid-cols-4">
+            ${antennaSection.summaryCards
+              .map(
+                (card) => `
+                  <article class="overflow-hidden rounded-3xl border ${toneMap[card.tone]}">
+                    ${card.src ? `
+                      <div class="relative">
+                        ${mediaFrame(card, "aspect-[4/3]")}
+                        ${imageOverlayButton(card)}
+                      </div>
+                    ` : ""}
+                    <div class="p-5">
+                      <div class="text-sm font-semibold uppercase tracking-[0.16em]">${card.label}</div>
+                      <div class="mt-3 text-3xl font-black">${card.value}</div>
+                      <div class="mt-2 text-sm leading-7">${card.text}</div>
+                      ${card.src ? `<div class="mt-3 flex items-center justify-end gap-3">${mediaActions(card)}</div>` : ""}
+                    </div>
+                  </article>
+                `,
+              )
+              .join("")}
+          </div>
+          <div class="mt-8 overflow-hidden rounded-3xl border border-slate-200 bg-white p-4">
+            ${createAntennaLineSvg(antennaSection.cases)}
+          </div>
+          <div class="mt-8">
+            <h3 class="text-2xl font-black text-slate-950">케이스별 인식 횟수 비교</h3>
+            <div class="mt-4 grid gap-5 xl:grid-cols-2">
+              ${antennaSection.cases.map(antennaCaseCard).join("")}
+            </div>
+          </div>
+        </section>
+
+        <section id="external-evidence" class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div>
+            <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">External Evidence</div>
+            <h2 class="mt-2 text-3xl font-black text-slate-950">${externalEvidence.title}</h2>
+            <p class="mt-4 text-sm leading-8 text-slate-700">${highlightEvidenceIntro(externalEvidence.intro)}</p>
+          </div>
+          <div class="mt-6 overflow-hidden rounded-3xl border border-slate-200">
+            <div class="grid grid-cols-[1fr_1.4fr_1fr] gap-px bg-slate-200">
+              <div class="bg-slate-50 px-4 py-3 text-sm font-bold">출처</div>
+              <div class="bg-slate-50 px-4 py-3 text-sm font-bold">간섭 관련 확인 내용</div>
+              <div class="bg-slate-50 px-4 py-3 text-sm font-bold">시사점</div>
+              ${externalEvidence.rows
+                .map(
+                  (row) => `
+                    <div class="bg-white px-4 py-4 text-sm font-semibold text-slate-900"><a href="${row.href}" target="_blank" class="text-sky-700 underline">${row.source}</a></div>
+                    <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.finding}</div>
+                    <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.implication}</div>
+                  `,
+                )
+                .join("")}
+            </div>
+          </div>
+        </section>
+
+        <section id="interpretation-rules" class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <h3 class="text-2xl font-black text-slate-950">${supportNotes.title}</h3>
+          <p class="mt-4 text-sm leading-8 text-slate-700">${supportNotes.intro}</p>
+          <div class="mt-6 grid gap-6 xl:grid-cols-2">
+            <article class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+              <div class="text-lg font-black text-slate-950">${supportNotes.readCountTitle}</div>
+              <p class="mt-2 text-sm leading-7 text-slate-700">${supportNotes.readCountNote}</p>
+              <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200">
+                <div class="grid grid-cols-[1fr_1fr] gap-px bg-slate-200">
+                  <div class="bg-slate-50 px-4 py-3 text-sm font-bold">정상 인식 횟수(절사평균)</div>
+                  <div class="bg-slate-50 px-4 py-3 text-sm font-bold">판정</div>
+                  ${supportNotes.readCountRows
+                    .map(
+                      (row) => `
+                        <div class="bg-white px-4 py-4 text-sm font-semibold text-slate-900">${row.range}</div>
+                        <div class="px-4 py-4 text-sm font-bold ${toneMap[row.tone]}">${row.grade}</div>
+                      `,
+                    )
+                    .join("")}
+                </div>
+              </div>
+            </article>
+
+            <article class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+              <div class="text-lg font-black text-slate-950">${supportNotes.firstReadTitle}</div>
+              <p class="mt-2 text-sm leading-7 text-slate-700">${supportNotes.firstReadNote}</p>
+              <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200">
+                <div class="grid grid-cols-[0.9fr_0.9fr_1.5fr] gap-px bg-slate-200">
+                  <div class="bg-slate-50 px-4 py-3 text-sm font-bold">최초 인식 시간</div>
+                  <div class="bg-slate-50 px-4 py-3 text-sm font-bold">판정</div>
+                  <div class="bg-slate-50 px-4 py-3 text-sm font-bold">해석</div>
+                  ${supportNotes.firstReadRows
+                    .map(
+                      (row) => `
+                        <div class="bg-white px-4 py-4 text-sm font-semibold text-slate-900">${row.range}</div>
+                        <div class="px-4 py-4 text-sm font-bold ${toneMap[row.tone]}">${row.grade}</div>
+                        <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.meaning}</div>
+                      `,
+                    )
+                    .join("")}
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        ${antennaReviewSectionHtml()}
+      </div>
+    `;
+
+    const topNav = app.querySelector("nav.sticky");
+    if (topNav) {
+      topNav.remove();
+    }
+
+    const rightNavContainer = app.querySelector("aside .grid");
+    if (rightNavContainer) {
+      const targets = [
+        "impact-summary",
+        "test-scope",
+        "current-judgment",
+        "issue-causes",
+        "conditions",
+        "examples-hook",
+        "examples-floor",
+        "human-impact",
+        "antenna-position",
+        "external-evidence",
+        "interpretation-rules",
+        "antenna-review",
+      ];
+
+      const navItems = [{ href: "#top", label: "맨 위" }];
+
+      targets.forEach((id) => {
+        const section = document.getElementById(id);
+        if (!section) return;
+        const heading = section.querySelector("h1, h2, h3");
+        navItems.push({
+          href: `#${id}`,
+          label: heading ? heading.textContent.trim() : id,
+        });
+      });
+
+      rightNavContainer.innerHTML = navItems
+        .map(
+          (item) => `
+            <a href="${item.href}" class="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-800">
+              ${item.label}
+            </a>
+          `,
+        )
+        .join("");
+    }
+
+    const openModal = (src, label, openUrl) => {
+      modal.classList.remove("hidden");
+      modalContent.innerHTML = `
+        <div class="overflow-hidden bg-white">
+          <div class="border-b border-slate-200 px-5 py-4">
+            <div class="text-sm font-semibold text-slate-500">${label || "이미지"}</div>
+          </div>
+          <div class="bg-slate-50 p-4">
+            <img src="${src}" alt="${label || "이미지"}" class="max-h-[78vh] w-full object-contain" referrerpolicy="no-referrer" />
+          </div>
+          <div class="flex items-center justify-end gap-4 border-t border-slate-200 px-5 py-4">
+            <a href="${openUrl}" target="_blank" class="text-sm font-semibold text-sky-700 underline">새 탭 열기</a>
+          </div>
+        </div>
+      `;
+    };
+
+    document.addEventListener("click", (event) => {
+      const trigger = event.target.closest(".image-trigger");
+      if (trigger) {
+        openModal(trigger.dataset.src, trigger.dataset.label, trigger.dataset.open);
+      }
+    });
+
+    closeModal.addEventListener("click", () => {
+      modal.classList.add("hidden");
+      modalContent.innerHTML = "";
+    });
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        modal.classList.add("hidden");
+        modalContent.innerHTML = "";
+      }
+    });
+  </script>
+  <script src="./common_section_nav.js"></script>
+  <script src="./common_auto_reload.js"></script>
+</body>
+</html>

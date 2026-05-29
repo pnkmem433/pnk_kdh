@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RFID 테스트 결과 요약</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(14, 165, 233, 0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
+        #f8fafc;
+    }
+
+    .shadow-soft {
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+    }
+  </style>
+</head>
+<body data-section-theme="sky" class="min-h-screen text-slate-900">
+  <main id="app"></main>
+
+  <div id="imageModal" class="fixed inset-0 z-50 hidden bg-slate-100/95 p-4 backdrop-blur-sm md:p-8">
+    <button
+      id="closeModal"
+      class="absolute right-4 top-4 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm"
+    >
+      닫기
+    </button>
+    <div class="flex h-full items-center justify-center">
+      <div id="modalContent" class="w-full max-w-6xl overflow-hidden rounded-3xl border border-slate-300 bg-white shadow-2xl"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    const PHASE2_ONE_CLOTH_GOOD = "https://drive.google.com/open?id=1Xe9gSTrmLtNsbHubPLz58weDG3_fNVlF&usp=drive_copy";
+const PHASE2_ONE_CLOTH_BAD = "https://drive.google.com/open?id=1uGojWkj_4wrGKeFj2K5s2oua6vZfj-y8&usp=drive_copy";
+
+const PHASE2_MULTI_HOOK_GOOD = "https://drive.google.com/open?id=1o8u69GZ_E84eb8JCEC1Te2-X14CFyL4k&usp=drive_copy";
+const PHASE2_MULTI_HOOK_BAD = "https://drive.google.com/open?id=1qC4GbwiHpsMAam7muAYJLQjcn_T-pb1I&usp=drive_copy";
+
+const PHASE2_MULTI_FLOOR_STACK = "https://drive.google.com/open?id=1YRlgpVF8TWD9KtEhfFLIemratazScxK3&usp=drive_copy";
+const PHASE2_MULTI_FLOOR_RANDOM = "https://drive.google.com/open?id=1mIDcb3hdXz7xRAlHs7FUmHEtsi74Gii1&usp=drive_copy";
+
+const CAUSE_WALL_IMAGE = "https://drive.google.com/open?id=1vrPW7bYWMu2DZkDTX6-W1tC084B2FzXj&usp=drive_copy";
+const CAUSE_OVERLAP_IMAGE = "https://drive.google.com/open?id=1UTnrpIEtu5FHFjXaWDodexOaY49QHFBm&usp=drive_copy";
+
+const HOOK_TAG_UPRIGHT = "https://drive.google.com/open?id=1uGojWkj_4wrGKeFj2K5s2oua6vZfj-y8&usp=drive_copy";
+const TAG_FACE_TO_ANTENNA = "https://drive.google.com/open?id=1Fqf36j3h8SoTFzCDyhjHHHBsNpqLf2q8&usp=drive_copy";
+const TAG_FACE_AWAY_FROM_ANTENNA = "https://drive.google.com/open?id=1x8kk6FicneoQXllGs-Bv6cwBrveLNv2Y&usp=drive_copy";
+
+const ANTENNA_CASE_1_5 = "https://drive.google.com/open?id=1uGojWkj_4wrGKeFj2K5s2oua6vZfj-y8&usp=drive_copy";
+const ANTENNA_CASE_2_5 = "https://drive.google.com/open?id=1vvL1lq80q-vmvmEpJFWiSDFVJGkZXRbv&usp=drive_copy";
+const ANTENNA_CASE_3_2 = "https://drive.google.com/open?id=1zQIIvjEv5_A6kCMysi2PJvFt1Te2VAKs&usp=drive_copy";
+const ANTENNA_CASE_3_6 = "https://drive.google.com/open?id=1cg94OtqyY1oLFgi3yy0raX_rufd9cWJb&usp=drive_copy";
+const ANTENNA_POS_BASE = "https://drive.google.com/open?id=17zp03CAWdLdY_y9AOiwJfH5i3t9EPwkt&usp=drive_copy";
+const ANTENNA_POS_LEFT = "https://drive.google.com/open?id=1pcoyvJxW4QSleC7Yhubp1dYGCVD5KgtT&usp=drive_copy";
+const ANTENNA_POS_CENTER = "https://drive.google.com/open?id=1Nq7xv1ZQXhqTFCfPn31WUAIckDxk0y2q&usp=drive_copy";
+const ANTENNA_POS_RIGHT = "https://drive.google.com/open?id=1bIvf7AwemEj2cv0Ywm7MOP_VVoQu7B-X&usp=drive_copy";
+
+const reportMeta = {
+  badge: "RFID Styling Booth Report",
+  title: "RFID 테스트 결과 요약",
+  subtitle: "목표: 사용자가 옷 여러 벌을 들고 들어왔을 때 모든 태그가 안정적으로 읽히는가를 판단",
+};
+
+const topIntro = [
+  "핵심 질문 1. 언제 잘 읽히는가",
+  "핵심 질문 2. 언제 안 읽히는가",
+  "핵심 질문 3. 지금 무엇을 먼저 바꿔야 하는가",
+];
+
+const causeFlow = {
+  root: "RFID 인식 불량",
+  groups: [
+    { title: "벽 간섭", items: ["벽 근접 훅", "벽 반사 / 상쇄"] },
+    { title: "태그 방향 / 안테나 각도", items: ["후면 배치", "세워진 태그 + 상부 안테나"] },
+    { title: "태그 밀집 / 중첩", items: ["한 훅 밀집", "바닥 적층", "태그 간 결합 / 상쇄"] },
+    { title: "사람 차폐", items: ["사람 서있기", "몸 가까이 태그"] },
+    { title: "안테나 위치 불일치", items: ["태그를 비스듬히 봄", "중앙 상쇄 가능성"] },
+  ],
+};
+
+const topSummaryCards = [
+  {
+    label: "결론",
+    value: "재질보다 배치",
+    tone: "bad",
+    text: "주요 변수: 벽, 방향, 밀집, 사람, 안테나 위치",
+  },
+  {
+    label: "가장 큰 회복 변수",
+    value: "안테나 위치",
+    tone: "info",
+    text: "최소 0.00회 ~ 최대 69.00회",
+  },
+  {
+    label: "현재 우선 조치",
+    value: "출력 세기 테스트",
+    tone: "good",
+    text: "구조 변경보다 SDK 기반 출력 세기 조절 우선",
+  },
+];
+
+const impactRows = [
+  {
+    category: "옷 재질",
+    condition: "재질 추가",
+    delta: "약 0~10% 감소, 일부 증가",
+    impact: "⚪ 영향 거의 없음",
+    tone: "neutral",
+    reason: "옷감보다 태그 배치·방향 영향이 큼",
+  },
+  {
+    category: "훅 위치/배치",
+    condition: "밀집/분산 배치",
+    delta: "각 태그 평균 인식 횟수 기준, 최소 0.00회 ~ 최대 54.67회",
+    impact: "🔴 영향 큼",
+    tone: "bad",
+    reason: "벽 간섭 + 방향 불일치 -> 약한 태그 소멸",
+  },
+  {
+    category: "바닥 적층 방향",
+    condition: "한 방향 적층",
+    delta: "각 태그 평균 인식 횟수 기준, 최소 0.00회 ~ 최대 72.67회",
+    impact: "🔴 영향 큼",
+    tone: "bad",
+    reason: "같은 방향 보강 -> 반대 방향 태그 매몰",
+  },
+  {
+    category: "바닥 랜덤 배치",
+    condition: "랜덤 배치",
+    delta: "각 태그 평균 인식 횟수 기준, 최소 0.00회 ~ 최대 55.00회",
+    impact: "🔴 영향 큼",
+    tone: "bad",
+    reason: "특정 태그 독점은 줄지만 편차는 계속 큼",
+  },
+  {
+    category: "사람 존재",
+    condition: "사람 서있음",
+    delta: "약 5.33~22.33회 감소",
+    impact: "🔴 영향 보통",
+    tone: "warn",
+    reason: "인체 차폐 -> 원래 약한 태그부터 하락",
+  },
+  {
+    category: "사람-태그 근접",
+    condition: "몸 가까이 댐",
+    delta: "약 0.00~27.67회 감소, 일부 소폭 회복",
+    impact: "⚪ 영향 작음",
+    tone: "neutral",
+    reason: "가까워지면 나빠질 수는 있지만 영향이 아주 크지는 않음",
+  },
+  {
+    category: "안테나 위치",
+    condition: "왼쪽/중앙/오른쪽 재배치",
+    delta: "각 테스트 태그 평균 인식 횟수 기준, 최소 0.00회 ~ 최대 69.00회",
+    impact: "🔴 영향 큼",
+    tone: "bad",
+    reason: "위치가 맞으면 크게 회복, 안 맞으면 0회 유지",
+  },
+];
+
+const issueCauseCards = [
+  {
+    step: "1",
+    title: "벽과 너무 가까워 벽 간섭이 커지는 경우",
+    summary: "요약: 훅이 벽에 붙고 태그 뒤에 벽이 있으면 반사와 상쇄가 같이 생긴다.",
+    detail:
+      "대표 실패: 왼쪽훅 후면 8.59 -> 0.00회. 벽 가까운 훅일수록 정면/후면 차이가 커지고, 약한 태그부터 먼저 사라진다.",
+    images: [
+      {
+        label: "벽 근접 훅",
+        summary: "벽면과 태그가 가까운 구조",
+        src: CAUSE_WALL_IMAGE,
+      },
+    ],
+  },
+  {
+    step: "2",
+    title: "사람이 부스 안에 들어와 전파를 가로막는 경우",
+    summary: "요약: 인체가 전파를 일부 흡수·차단해 전체 인식 여유를 줄인다.",
+    detail:
+      "사람이 있으면 태그 평균이 약 5.33~22.33회 줄었다. 원래 약한 태그가 먼저 기준 이하로 떨어진다. 이 조건은 부스 내부에서 거의 항상 발생하므로, 사진보다 감소폭 해석이 더 중요하다.",
+    images: [],
+  },
+  {
+    step: "3",
+    title: "RFID 리더기와 태그 방향 / 안테나 각도가 맞지 않는 경우",
+    summary: "요약: 훅 태그는 세워져 있고 안테나는 위에서 아래로 보기 때문에 바닥보다 각도 민감도가 크다.",
+    detail:
+      "훅에서는 QR 방향만으로 결과가 고정되지 않는다. 정면 기준으로 보면 왼쪽 훅은 두 방향 모두 강했고, 중앙 훅은 두 방향 모두 약했으며, 오른쪽 훅은 방향 민감도가 더 크게 나타났다. 즉 QR 방향 단독보다 태그 위치, 벽과 거리, 정면/후면, 상부 안테나 각도가 함께 결과를 만든다.",
+    qrMatrixCaption: "정면 기준 QR 방향 비교",
+    qrMatrix: [
+      { hook: "왼쪽 훅", hidden: 60.33, visible: 65.33, note: "두 방향 모두 강함" },
+      { hook: "중앙 훅", hidden: 12.33, visible: 9.33, note: "두 방향 모두 약함" },
+      { hook: "오른쪽 훅", hidden: 0.67, visible: 11.0, note: "방향 민감도 큼" },
+    ],
+    images: [
+      {
+        label: "훅 태그가 세워진 상태",
+        summary: "훅에서는 태그가 수직에 가까워진다",
+        src: HOOK_TAG_UPRIGHT,
+      },
+      {
+        label: "QR 안 보이게",
+        summary: "태그 면이 안테나 쪽",
+        src: TAG_FACE_TO_ANTENNA,
+      },
+      {
+        label: "QR 보이게",
+        summary: "태그 면이 안테나 반대쪽",
+        src: TAG_FACE_AWAY_FROM_ANTENNA,
+      },
+    ],
+  },
+  {
+    step: "4",
+    title: "여러 태그가 가까이 겹쳐 서로 간섭하는 경우",
+    summary: "요약: 한 훅 밀집, 바닥 적층, 랜덤 겹침이 들어가면 태그별 편차가 크게 벌어진다.",
+    detail:
+      "같은 방향 태그끼리는 보강되지만, 그 사이에 낀 반대 방향 태그는 쉽게 매몰된다. 특정 태그만 살아남고 나머지는 급격히 줄어드는 패턴이 반복된다.",
+    images: [
+      {
+        label: "적층 / 중첩 구조",
+        summary: "여러 태그가 겹치고 몰린 상태",
+        src: CAUSE_OVERLAP_IMAGE,
+      },
+    ],
+  },
+  {
+    step: "5",
+    title: "안테나 위치",
+    summary: "요약: 안테나는 항상 중앙이 좋은 것이 아니라 태그 위치마다 최적점이 따로 있다.",
+    detail:
+      "중앙은 좌우 반사가 겹쳐 상쇄가 생길 수 있어 일관성이 낮다. 같은 실패 케이스도 좌우 위치로 옮기면 더 크게 회복되는 경우가 반복됐다.",
+    images: [],
+  },
+];
+
+const keyConclusion =
+  "결론: 옷 재질 영향은 작았고, 실제 인식 성능은 주로 벽 간섭, 태그 방향, 태그 밀집, 사람 존재, 안테나 위치에 의해 좌우됐다. 특히 안테나는 항상 중앙이 좋은 것이 아니고, 현재 공간에서는 오른쪽이 더 자주 유리했다. 결국 태그 면을 얼마나 정면에 가깝게 보느냐가 핵심이었다.";
+
+const conditionCompareRows = [
+  {
+    category: "훅 위치/배치",
+    good: "벽 간섭이 덜하고 태그가 안테나 쪽을 비교적 잘 보는 배치",
+    bad: "벽 가까운 훅, 후면 배치, 한 훅 밀집",
+    reason: "벽 반사 + 방향 불일치 -> 약한 태그부터 매몰",
+  },
+  {
+    category: "바닥 적층 방향",
+    good: "여러 태그 방향이 비슷해 전체가 같이 응답",
+    bad: "일부만 역방향이거나 하단 태그 방향이 다름",
+    reason: "같은 방향 보강 -> 반대 방향 태그 약화",
+  },
+  {
+    category: "바닥 랜덤 배치",
+    good: "위치가 좋고 열린 태그가 우연히 유리한 자세",
+    bad: "각도·겹침이 불리한 태그가 눌리거나 가려짐",
+    reason: "특정 태그 독점은 줄어도 편차는 유지",
+  },
+  {
+    category: "사람 존재",
+    good: "사람이 없어 경로가 열림",
+    bad: "사람이 안테나와 태그 사이를 가로막음",
+    reason: "인체 흡수·차단 -> 약한 태그부터 하락",
+  },
+  {
+    category: "사람-태그 근접",
+    good: "사람과 태그가 떨어져 있어 자세 변화가 적음",
+    bad: "몸 쪽으로 붙거나 태그 각도가 틀어짐",
+    reason: "가까워짐 자체보다 자세 변화가 더 큼",
+  },
+  {
+    category: "안테나 위치",
+    good: "태그를 더 정면에 가깝게 보는 위치",
+    bad: "태그를 비스듬히 보거나 중앙 상쇄가 겹치는 위치",
+    reason: "위치마다 최적점이 다름",
+  },
+];
+
+const quickConditionBlocks = {
+  good: [
+    "태그 면이 안테나 쪽",
+    "벽과 거리가 있음",
+    "같은 방향 태그끼리 보강",
+    "사람이 없어 경로가 열림",
+    "안테나가 태그를 더 정면에 가깝게 봄",
+  ],
+  bad: [
+    "후면 또는 반대 방향",
+    "벽 가까이 배치",
+    "보강된 태그 사이 반대 방향 태그",
+    "사람이 경로를 가로막음",
+    "안테나가 태그를 비스듬히 봄",
+  ],
+};
+
+const exampleSections = [
+  {
+    key: "hook",
+    title: "훅 배치",
+    subtitle: "정면은 안정, 후면은 급락",
+    blocks: [
+      {
+        title: "옷 1벌 비교",
+        caption: "대표 조건 비교",
+        goodItems: [
+          {
+            label: "잘 됨",
+            phase: "Phase2(옷1벌)",
+            testId: "1-2",
+            grade: "🟢 매우 좋음",
+            summary: "정면 + 옷밖",
+            meanLabel: "평균 인식 횟수",
+            meanRead: 60.33,
+            compareRead: "8.59 -> 60.33 / 7.02배 증가",
+            src: PHASE2_ONE_CLOTH_GOOD,
+          },
+        ],
+        badItems: [
+          {
+            label: "잘 안 됨",
+            phase: "Phase2(옷1벌)",
+            testId: "1-5",
+            grade: "🔴 실패",
+            summary: "후면 + 취약 방향",
+            meanLabel: "평균 인식 횟수",
+            meanRead: 0.0,
+            compareRead: "8.59 -> 0.00 / -100%",
+            src: PHASE2_ONE_CLOTH_BAD,
+          },
+        ],
+      },
+      {
+        title: "옷 여러벌 대표 예시",
+        caption: "대표 배치 기준 비교",
+        note:
+          "여기서 잘 됨은 대표 예시일 뿐이다. 모든 태그가 다 잘 읽힌다는 뜻은 아니며, 훅과 태그의 상대 위치·겹침·방향에 따라 어떤 태그는 살아남고 어떤 태그는 매몰된다.",
+        meanNote:
+          "평균 인식 횟수 = 파란셔츠(AA000010) 5회 평균. 전체 옷 평균이 아니라 대표 태그 기준이다.",
+        goodItems: [
+          {
+            label: "잘 됨 예시",
+            phase: "Phase2(옷여러벌)",
+            testId: "1-3",
+            grade: "🟢 매우 좋음",
+            summary: "3,1,2,1 분산 배치",
+            meanLabel: "평균 인식 횟수",
+            meanRead: 51.0,
+            compareRead: "1-1 대비 +48.67회",
+            src: PHASE2_MULTI_HOOK_GOOD,
+            tagReads: [
+              ["AA000010", 51.0],
+              ["AA000011", 60.0],
+              ["AA000019", 3.67],
+              ["AA000002", 54.67],
+              ["AA000014", 1.33],
+              ["AA000001", 66.33],
+              ["AA000015", 0.0],
+            ],
+          },
+        ],
+        badItems: [
+          {
+            label: "잘 안 됨 예시",
+            phase: "Phase2(옷여러벌)",
+            testId: "1-1",
+            grade: "🔴 실패",
+            summary: "한 훅 7벌 밀집",
+            meanLabel: "평균 인식 횟수",
+            meanRead: 2.33,
+            compareRead: "1-3 대비 -48.67회",
+            src: PHASE2_MULTI_HOOK_BAD,
+            tagReads: [
+              ["AA000010", 2.33],
+              ["AA000011", 61.67],
+              ["AA000019", 51.67],
+              ["AA000002", 18.33],
+              ["AA000014", 25.67],
+              ["AA000001", 60.0],
+              ["AA000015", 3.33],
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    key: "floor",
+    title: "바닥 적층 / 랜덤",
+    subtitle: "적층 방향과 랜덤 편차가 핵심",
+    visuals: [
+      { label: "적층 구조 사진", summary: "2-1,2,3,5,6,7 공통 배치", src: PHASE2_MULTI_FLOOR_STACK },
+      { label: "랜덤 배치 사진", summary: "2-4 비적층 랜덤 배치", src: PHASE2_MULTI_FLOOR_RANDOM },
+    ],
+    blocks: [
+      {
+        title: "옷 여러벌 대표 예시",
+        caption: "대표 배치 기준 비교",
+        note:
+          "여기서 잘 됨은 대표 예시일 뿐이다. 적층도 모든 태그가 같이 좋아지는 것이 아니라, 어떤 방향으로 쌓였는지에 따라 살아남는 태그와 매몰되는 태그가 갈린다.",
+        meanNote:
+          "평균 인식 횟수 = 파란셔츠(AA000010) 5회 평균. 적층 사진 기준 최상단 태그는 AA000010, 최하단 태그는 AA000019다.",
+        goodItems: [
+          {
+            label: "잘 됨 예시",
+            phase: "Phase2(옷여러벌)",
+            testId: "2-5",
+            grade: "🟢 매우 좋음",
+            summary: "전 태그 정방향 적층 / 최상단 AA000010, 최하단 AA000019",
+            meanLabel: "평균 인식 횟수",
+            meanRead: 58.67,
+            compareRead: "2-3 대비 +58.67회",
+            reason: "정방향으로 놓인 태그들은 함께 보강돼 강하게 읽혔다. 다만 모든 태그가 같이 좋아진 것은 아니고, AA000002와 AA000014는 겹침과 축 불일치로 끝까지 매몰됐다.",
+            src: PHASE2_MULTI_FLOOR_STACK,
+            tagReads: [
+              ["AA000010", 58.67],
+              ["AA000011", 51.0],
+              ["AA000002", 0.0],
+              ["AA000014", 0.0],
+              ["AA000001", 46.67],
+              ["AA000015", 52.67],
+              ["AA000019", 65.33],
+            ],
+          },
+        ],
+        badItems: [
+          {
+            label: "잘 안 됨 예시",
+            phase: "Phase2(옷여러벌)",
+            testId: "2-3",
+            grade: "🔴 실패",
+            summary: "최하단 AA000019만 정방향, 나머지 역방향",
+            meanLabel: "평균 인식 횟수",
+            meanRead: 0.0,
+            compareRead: "2-5 대비 -58.67회",
+            reason: "최하단 19만 정방향이고 나머지 태그가 역방향이라, 일부 강한 태그만 살아남고 파란셔츠를 포함한 여러 태그는 바닥 적층 안에서 에너지를 거의 못 받아 매몰됐다.",
+            src: PHASE2_MULTI_FLOOR_STACK,
+            tagReads: [
+              ["AA000010", 0.0],
+              ["AA000011", 54.0],
+              ["AA000002", 0.0],
+              ["AA000014", 0.0],
+              ["AA000001", 72.67],
+              ["AA000015", 29.67],
+              ["AA000019", 65.33],
+            ],
+          },
+        ],
+        neutralItems: [
+          {
+            label: "랜덤 / 편차",
+            phase: "Phase2(옷여러벌)",
+            testId: "2-4",
+            grade: "🟡 좋음",
+            summary: "비적층 랜덤 배치",
+            meanLabel: "평균 인식 횟수",
+            meanRead: 39.0,
+            compareRead: "2-5 대비 -19.67회",
+            reason: "적층 독점은 줄었지만 태그마다 각도와 겹침이 제각각이라 편차가 커졌다. AA000019처럼 열린 태그는 계속 유리했고, 약한 태그들은 여전히 0회로 남았다.",
+            src: PHASE2_MULTI_FLOOR_RANDOM,
+            tagReads: [
+              ["AA000010", 39.0],
+              ["AA000011", 0.0],
+              ["AA000002", 0.0],
+              ["AA000014", 0.0],
+              ["AA000001", 0.0],
+              ["AA000015", 27.33],
+              ["AA000019", 55.0],
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+
+const peopleSection = {
+  title: "사람 영향",
+  subtitle: "사람은 반드시 존재하는 조건이므로, 사진보다 감소폭 해석이 중요",
+  cards: [
+    {
+      label: "사람 없음 기준",
+      summary: "경로가 열려 있을 때",
+      metric: "기준점",
+      detail: "가장 안정적인 상태",
+      tone: "good",
+    },
+    {
+      label: "사람 존재",
+      summary: "사람이 전파 경로를 가로막을 때",
+      metric: "약 5.33~22.33회 감소",
+      detail: "원래 약한 태그부터 먼저 하락",
+      tone: "bad",
+    },
+    {
+      label: "사람-태그 근접",
+      summary: "몸이 태그에 가까워질 때",
+      metric: "약 0.00~27.67회 감소",
+      detail: "가까워지면 나빠질 수는 있지만 영향이 아주 크지는 않음",
+      tone: "neutral",
+    },
+  ],
+};
+
+const antennaSection = {
+  title: "안테나 위치에 따른 인식 변화",
+  subtitle: "x축은 안테나 위치, 색은 테스트 케이스",
+  summaryCards: [
+    { label: "기존", value: "0 / 4", text: "기존 위치는 실패 케이스를 거의 살리지 못함", tone: "bad", src: ANTENNA_POS_BASE },
+    { label: "왼쪽", value: "3 / 4", text: "왼쪽 벽 반사가 강해 구석·후면은 불리하지만, 일부 태그는 정면 각도가 맞아 크게 회복", tone: "warn", src: ANTENNA_POS_LEFT },
+    { label: "중앙", value: "2 / 4", text: "중앙은 좌우 반사가 겹쳐 상쇄가 생길 수 있어 회복 폭이 들쭉날쭉함", tone: "neutral", src: ANTENNA_POS_CENTER },
+    { label: "오른쪽", value: "3 / 4", text: "좌우 대칭이 깨지며 상쇄가 줄고, 대각선 조사로 옷 틈새까지 전파가 더 잘 들어감", tone: "good", src: ANTENNA_POS_RIGHT },
+  ],
+  cases: [
+    {
+      caseId: "1-5",
+      condition: "후면 왼쪽훅 옷밖 QR 안보이게",
+      base: 0.0,
+      left: 7.0,
+      center: 0.0,
+      right: 26.67,
+      best: "오른쪽",
+      summary: "오른쪽 이동에서 가장 크게 회복",
+      src: ANTENNA_CASE_1_5,
+    },
+    {
+      caseId: "2-5",
+      condition: "후면 중앙훅 옷밖 QR 안보이게",
+      base: 0.0,
+      left: 9.33,
+      center: 0.0,
+      right: 4.67,
+      best: "왼쪽",
+      summary: "왼쪽만 기준 통과",
+      src: ANTENNA_CASE_2_5,
+    },
+    {
+      caseId: "3-2",
+      condition: "정면 오른쪽훅 옷밖 QR 안보이게",
+      base: 0.67,
+      left: 66.33,
+      center: 25.0,
+      right: 69.0,
+      best: "오른쪽",
+      summary: "모든 위치 개선, 오른쪽 최고",
+      src: ANTENNA_CASE_3_2,
+    },
+    {
+      caseId: "3-6",
+      condition: "후면 오른쪽훅 옷밖 QR 보이게",
+      base: 0.0,
+      left: 0.0,
+      center: 14.0,
+      right: 12.33,
+      best: "중앙",
+      summary: "중앙이 최고, 오른쪽도 회복",
+      src: ANTENNA_CASE_3_6,
+    },
+  ],
+};
+
+const externalEvidence = {
+  title: "외부 자료에서 확인된 내용",
+  intro:
+    "외부 자료들도 공통적으로 옷감 자체보다 배치 환경, 안테나 위치, 공간 구조, 태그 방향, 밀집도가 인식 성능에 더 큰 영향을 준다는 흐름을 보였다.",
+  rows: [
+    {
+      source: "RFIDTag - Why Use RFID Tags on Clothes",
+      href: "https://rfidtag.com/why-use-rfid-tags-on-clothes/",
+      finding: "RFID는 옷을 직접 보지 않아도 읽을 수 있고, 여러 겹 의류도 판독 가능하다고 설명",
+      implication: "재질 자체보다 배치, 방향, 환경 영향이 더 큼",
+    },
+    {
+      source: "Urovo - Applications and Benefits of RFID Technology in Fashion Retail",
+      href: "https://urovo.jp/blog/RFID-handheld-readers/398.html",
+      finding: "공간 제약이 큰 리테일 환경과 금속 간섭이 있는 복잡한 환경을 전제로 설명하고, SIC 간섭 억제 기능도 언급",
+      implication: "실제 리테일 현장도 간섭을 전형적 문제로 보고 장비와 알고리즘으로 보완함",
+    },
+    {
+      source: "XMINNOV - RFID Clothing Store Anti-theft Access Control",
+      href: "https://www.rfidtagworld.com/news/rfid-clothing-store-anti-theft-access-control.html",
+      finding: "fitting room 같은 사각지대를 언급하고, 출입구·출구 중심 안테나 커버를 강조",
+      implication: "내부 전체 상시 읽기보다 통과 구간 중심 설계가 많음",
+    },
+    {
+      source: "RFID News - Zara RFID case study",
+      href: "https://www.rfidjournal.com/news/zara-uses-rfid-to-speed-up-store-operations/73817/",
+      finding: "밀집 진열, 구조물, 안테나 위치, 태그 방향을 핵심 변수로 설명",
+      implication: "의류 리테일에서도 밀집, 구조, 방향, 안테나 위치가 핵심 문제",
+    },
+    {
+      source: "XIUCHENG RFID - Zara case study",
+      href: "https://www.xc-rfid.com/news/how-does-zara-use-rfid-tags.html",
+      finding: "fabric type, packaging density, store environment, reader infrastructure, pilot 테스트를 강조",
+      implication: "실제 구축도 파일럿 테스트 기반으로 환경 적합성을 먼저 검증함",
+    },
+    {
+      source: "하이태그 RFID 의류관리 시스템 소개",
+      href: "https://www.hitag.co.kr/",
+      finding: "게이트형, 아치형, 포탈형, 폴대형 등 구조물 기반 설치를 소개",
+      implication: "좁은 공간도 리더기 1개보다 구조물과 안테나 배치로 해결하는 방향이 일반적",
+    },
+  ],
+};
+
+const solutionSection = {
+  title: "현재 판단",
+  intro:
+    "외부 사례와 자체 테스트를 종합하면, RFID 인식 불량은 재질보다 배치 환경, 태그 방향, 밀집도, 사람, 안테나 위치 영향이 크다. 이를 완전히 해결하려면 구조/배치 재설계와 반복적인 검증이 필요하다.",
+  methods: [
+    {
+      name: "안테나 신호 파워 올리기",
+      how: "리더 출력값 조정",
+      needs: "SDK 또는 명령 프로토콜",
+      limit: "세기만 올려도 모든 조건이 해결되지는 않음. 특정 태그 쏠림 가능",
+    },
+    {
+      name: "안테나 개수 늘리기",
+      how: "상부 1개 외에 측면/벽면 안테나 추가",
+      needs: "추가 안테나, 설치 공간, 배선, 재테스트",
+      limit: "위치를 잘못 잡으면 개선 없이 시간만 소요",
+    },
+    {
+      name: "입구형 / 외부형 구조",
+      how: "출입구 중심으로 읽기",
+      needs: "구조 변경",
+      limit: "부스 내부 최종 상태까지는 완전 보장 어려움",
+    },
+    {
+      name: "태그 충돌 완화 로직",
+      how: "덜 읽힌 태그 우선 읽기",
+      needs: "SDK의 Q / Session 제어",
+      limit: "현재는 Q-value만 확인, Session 2는 미확인",
+    },
+    {
+      name: "태그 인식 횟수 기준 완화",
+      how: "코드에서 최소 인식 횟수 숫자 조정",
+      needs: "없음",
+      limit: "아예 0회인 태그는 기준을 낮춰도 그대로 0회라 효과가 거의 없음",
+    },
+    {
+      name: "태그 인식 시간 늘리기",
+      how: "코드에서 스캔 시간 숫자 조정",
+      needs: "없음",
+      limit: "정지 상태에서는 변화가 작았음. 다만 실제 사용처럼 움직임이 있으면 문 닫힘부터 재개방까지 약 10~15초 여유에서 일부 추가 인식 가능성은 있음",
+    },
+  ],
+  limits: [
+    "전파 세기, dead zone, 반사 분포를 직접 보는 측정 도구가 없음",
+    "출력·위치·구조를 바꿀 때마다 동일 조건 반복 측정이 필요",
+    "구조를 바꿔도 특정 위치나 특정 배치의 누락이 완전히 사라진다는 보장이 없음",
+  ],
+  judgment: [
+    "결론: 현 단계에서는 출력 세기 조절 테스트만 우선 진행",
+    "인식 횟수 기준 완화는 0회 태그에는 효과가 거의 없음",
+    "인식 시간 증가는 정지 상태에서는 효과가 작고, 실제 동작 상황에서만 제한적 보완 가능성이 있음",
+    "구조 변경 기반 해결과 안테나 추가 최적화는 보류",
+  ],
+  finalLine:
+    "최종 결론: 지금 단계에서 실제로 바로 시도할 조치는 SDK 기반 출력 세기 조절 테스트이며, 인식 횟수 기준 완화나 시간 증가보다 우선순위가 높다.",
+};
+
+const supportNotes = {
+  title: "해석 기준",
+  readCountTitle: "RFID 인식 판정 기준 (우선순위 1)",
+  readCountRows: [
+    { range: "40회 이상", grade: "🟢 매우 좋음", tone: "good" },
+    { range: "20~39회", grade: "🟡 좋음", tone: "warn" },
+    { range: "5~19회", grade: "🟠 인식은 되나 약함", tone: "info" },
+    { range: "0~4회", grade: "🔴 실패", tone: "bad" },
+  ],
+  firstReadTitle: "초기 인식 속도 기준 (이론적 반영, 우선순위 2)",
+  firstReadRows: [
+    {
+      range: "0~2000ms",
+      grade: "🟢 매우 빠름",
+      meaning: "10초 내 5회 인식 성공 가능성이 높음 -> 종합 판정 유지",
+      tone: "good",
+    },
+    {
+      range: "2001~3000ms",
+      grade: "🟡 빠름",
+      meaning: "통과는 가능하지만 경계선에 가까움 -> 종합 판정 유지",
+      tone: "warn",
+    },
+    {
+      range: "3001~4000ms",
+      grade: "🟠 느림",
+      meaning: "실패 확률이 급격히 높아짐 -> 종합 판정 1단계 하향",
+      tone: "info",
+    },
+    {
+      range: "4001ms 초과",
+      grade: "🔴 매우 느림",
+      meaning: "사실상 실패 구간 -> 종합 판정 2단계 하향",
+      tone: "bad",
+    },
+    {
+      range: "미인식",
+      grade: "🔴 실패",
+      meaning: "10초 내 5회 조건 충족 불가 -> 종합 판정 실패",
+      tone: "bad",
+    },
+  ],
+};
+
+
+const antennaComparisonSection = {
+  title: "피팅룸용 RFID 안테나 비교",
+  intro:
+    "비교 기준은 두 가지입니다. 1) 피팅룸 내부의 RFID 태그를 빠짐없이 읽을 것, 2) 피팅룸 밖의 태그는 되도록 읽지 않을 것. 아래 정리는 UHF 의류 태그와 고정형 리더를 전제로, 방사 형태별 장단점을 우리 실험 목적에 맞춰 다시 해석한 것입니다.",
+  recommendation:
+    "패치 안테나를 최우선 후보로 판단했습니다. 지향성을 주기 쉬워 피팅룸 내부 읽기 영역을 상대적으로 제어하기 좋고, 고정형 리더 구성과도 잘 맞기 때문입니다.",
+  sourceUrl: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html",
+  rows: [
+    {
+      name: "Dipole 안테나",
+      summary: "구조가 단순하고 범용성이 높지만, 선형 편파 특성이 강해 태그 방향 영향이 큼",
+      fit: "조건부",
+      why: "읽기 범위를 넓게 만들기 쉬운 대신 태그 방향 편차와 외부 누설 제어가 어려워 피팅룸 경계 관리에 불리합니다.",
+      rowClass: "bg-white",
+      badgeClass: "border-amber-200 bg-amber-50 text-amber-900",
+      links: [
+        { label: "원문 기사", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html" },
+        { label: "Dipole 부분 바로가기", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html#:~:text=Dipole%20안테나" },
+      ],
+    },
+    {
+      name: "Monopole 안테나",
+      summary: "소형 리더에 적합하고 크기가 작지만, 접지면과 설치 환경 영향을 많이 받음",
+      fit: "낮음",
+      why: "휴대형에는 유리하지만 피팅룸처럼 읽기 영역을 일정하게 만들고 외부 인식을 억제해야 하는 고정형 환경에는 제어 여지가 적습니다.",
+      rowClass: "bg-white",
+      badgeClass: "border-rose-200 bg-rose-50 text-rose-900",
+      links: [
+        { label: "원문 기사", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html" },
+        { label: "Monopole 부분 바로가기", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html#:~:text=Monopole%20안테나" },
+      ],
+    },
+    {
+      name: "패치 안테나",
+      summary: "평면형, 고정형 리더에 많이 쓰이며 원형 편파 구성에 유리해 태그 방향 편차 대응이 상대적으로 좋음",
+      fit: "가장 적합",
+      why: "피팅룸 내부에 필요한 방향으로 읽기 영역을 설계하기 쉽고, 도어 포털·고정형 리더 용도와도 맞아 내부 태그는 읽고 외부 태그는 덜 읽도록 튜닝하기 좋습니다.",
+      rowClass: "bg-emerald-50",
+      badgeClass: "border-emerald-200 bg-emerald-100 text-emerald-900",
+      detailSections: [
+        {
+          kind: "기본 패치형 (Microstrip)",
+          fitReason: "상부 고정 설치가 쉽고, 읽기 영역을 피팅룸 내부로 모으기 좋다.",
+          badReason: "태그 방향 편차 대응은 약해서, 현재 문제를 단독으로 해결하긴 어렵다.",
+          recommendation: "기본 후보",
+          toneClass: "bg-sky-50",
+          badgeClass: "border-sky-200 bg-sky-100 text-sky-900",
+          notes: "크기, 비용, 제작성은 좋다. 다만 실제 적용은 편파 구성과 급전 구조까지 같이 정해야 성능 차이가 난다.",
+        },
+        {
+          kind: "이중 편파형 (Dual Polarization)",
+          fitReason: "여러 방향의 태그가 섞일 때 대응력이 좋아 현재 환경과 잘 맞는다.",
+          badReason: "구조와 튜닝이 복잡해 빠른 검증용으로는 부담이 크다.",
+          recommendation: "조건부 추천",
+          toneClass: "bg-amber-50",
+          badgeClass: "border-amber-200 bg-amber-100 text-amber-900",
+          notes: "방향 편차 대응에는 유리하지만, 초기 프로토타입보다 고도화 단계에서 검토할 카드에 가깝다.",
+        },
+        {
+          kind: "원형 편파형 (Circular Polarization)",
+          fitReason: "태그 방향이 제각각이어도 비교적 안정적으로 읽을 수 있어 현재 조건에 가장 잘 맞는다.",
+          badReason: "일반 패치보다 사양 관리와 제품 단가가 조금 더 까다롭다.",
+          recommendation: "최우선 추천",
+          toneClass: "bg-emerald-50",
+          badgeClass: "border-emerald-200 bg-emerald-100 text-emerald-900",
+          notes: "우리 테스트에서 가장 큰 문제였던 태그 방향 편차와 위치 민감도를 줄이는 데 가장 직접적으로 도움이 되는 선택지다.",
+        },
+        {
+          kind: "사각 패치형 (Rectangular Patch)",
+          fitReason: "제작이 쉽고 저렴해 1차 시제품 검증용으로 쓰기 좋다.",
+          badReason: "반사와 방향 편차가 있는 현재 공간에서는 성능 편차가 남기 쉽다.",
+          recommendation: "테스트용 가능",
+          toneClass: "bg-white",
+          badgeClass: "border-slate-200 bg-slate-100 text-slate-800",
+          notes: "빠른 검증용으로는 괜찮지만, 최종안으로 바로 가기엔 방향 편차 대응력이 아쉽다.",
+        },
+        {
+          kind: "원형 패치형 (Circular Patch)",
+          fitReason: "원형 편파 설계로 이어가기 쉬워 방향 편차 대응에 의미가 있다.",
+          badReason: "설계 부담이 있어 지금 단계에선 사각 패치보다 실용성이 떨어진다.",
+          recommendation: "후순위 검토",
+          toneClass: "bg-white",
+          badgeClass: "border-slate-200 bg-slate-100 text-slate-800",
+          notes: "이론적으로는 쓸 수 있지만, 현재 단계에서는 사각 패치 기반 원편파 제품이 더 실용적이다.",
+        },
+        {
+          kind: "동축 급전형 (Coaxial Feeding Patch)",
+          fitReason: "불필요 복사를 줄이기 좋아 좁은 공간에서 읽기 영역 제어에 유리하다.",
+          badReason: "구조가 복잡해 상용품 비교 단계에서 쓰기엔 제작 부담이 있다.",
+          recommendation: "조건부 추천",
+          toneClass: "bg-amber-50",
+          badgeClass: "border-amber-200 bg-amber-100 text-amber-900",
+          notes: "전용 제작까지 갈 계획이면 좋은 선택이지만, 당장 빠르게 검증하려면 완제품 원편파 패치가 더 현실적이다.",
+        },
+        {
+          kind: "개구 결합형 (Aperture Coupled Patch)",
+          fitReason: "세밀한 튜닝 자유도가 커서 복잡한 공간 최적화에는 강하다.",
+          badReason: "공간, 비용, 튜닝 난도가 커서 현재 단계에는 다소 과하다.",
+          recommendation: "고급 옵션",
+          toneClass: "bg-white",
+          badgeClass: "border-slate-200 bg-slate-100 text-slate-800",
+          notes: "성능 잠재력은 높지만 지금 단계의 최적해라기보다, 기본 패치로 해결이 안 될 때 가는 다음 카드다.",
+        },
+      ],
+      links: [
+        { label: "원문 기사", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html" },
+        { label: "패치 안테나 부분 바로가기", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html#:~:text=%ED%8C%A8%EC%B9%98%20%EC%95%88%ED%85%8C%EB%82%98" },
+      ],
+    },
+    {
+      name: "Yagi 안테나",
+      summary: "고이득·장거리·강한 지향성이 장점인 전형적인 장거리용 안테나",
+      fit: "낮음",
+      why: "먼 거리 추적에는 좋지만 피팅룸 규모에서는 과도한 이득과 긴 도달거리 때문에 외부 태그까지 읽을 가능성이 커서 목적과 어긋납니다.",
+      rowClass: "bg-white",
+      badgeClass: "border-rose-200 bg-rose-50 text-rose-900",
+      links: [
+        { label: "원문 기사", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html" },
+        { label: "Yagi 부분 바로가기", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html#:~:text=yagi%20안테나" },
+      ],
+    },
+    {
+      name: "루프 안테나",
+      summary: "근거리·근접장 성격이 강하고 특정 주파수에 맞춘 설계가 쉬움",
+      fit: "조건부",
+      why: "읽기 영역을 작게 묶고 싶다는 목적에는 맞지만, 의류용 UHF 고정형 리더 기준으로는 일반적인 주력 선택지가 아니어서 별도 구조 검토가 필요합니다.",
+      rowClass: "bg-white",
+      badgeClass: "border-amber-200 bg-amber-50 text-amber-900",
+      links: [
+        { label: "원문 기사", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html" },
+        { label: "루프 안테나 부분 바로가기", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html#:~:text=%EB%B0%98%EB%B3%B5%20%EC%95%88%ED%85%8C%EB%82%98" },
+      ],
+    },
+    {
+      name: "Fractal 안테나",
+      summary: "소형·광대역·다중 주파수 대응이 가능하지만 구조와 튜닝이 복잡함",
+      fit: "낮음",
+      why: "멀티밴드나 복잡 환경에는 의미가 있지만, 이번처럼 목적이 분명한 단일 피팅룸 읽기 영역 설계에는 복잡성 대비 이점이 크지 않습니다.",
+      rowClass: "bg-white",
+      badgeClass: "border-slate-200 bg-slate-50 text-slate-800",
+      links: [
+        { label: "원문 기사", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html" },
+        { label: "Fractal 부분 바로가기", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html#:~:text=Fractal%20안테나" },
+      ],
+    },
+    {
+      name: "슬롯 안테나",
+      summary: "금속 구조물과의 통합에 유리하고 산업 환경에서 효율적",
+      fit: "보통 이하",
+      why: "금속 구조 일체형 설계가 필요한 환경에는 좋지만, 현재 피팅룸 시험 목적에서는 패치 대비 직접적인 장점이 적고 구현 복잡도는 더 높습니다.",
+      rowClass: "bg-white",
+      badgeClass: "border-slate-200 bg-slate-50 text-slate-800",
+      links: [
+        { label: "원문 기사", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html" },
+        { label: "슬롯 안테나 부분 바로가기", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html#:~:text=%EA%B5%AC%EB%A9%8D%20%EC%95%88%ED%85%8C%EB%82%98" },
+      ],
+    },
+    {
+      name: "PIFA 안테나",
+      summary: "낮은 프로파일과 소형화에 유리해 모바일 장치에 적합",
+      fit: "낮음",
+      why: "모바일 RFID 리더에는 좋은 선택이지만, 피팅룸처럼 공간 전체를 일정하게 커버해야 하는 고정형 구성에서는 우선순위가 낮습니다.",
+      rowClass: "bg-white",
+      badgeClass: "border-rose-200 bg-rose-50 text-rose-900",
+      links: [
+        { label: "원문 기사", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html" },
+        { label: "PIFA 부분 바로가기", href: "https://ko.rfidtagworld.com/news/rfid-antenna-types.html#:~:text=PIFA%20(Planar%20Inverted-F%20안테나)" },
+      ],
+    },
+  ],
+};
+
+
+const app = document.getElementById("app");
+    const modal = document.getElementById("imageModal");
+    const modalContent = document.getElementById("modalContent");
+    const closeModal = document.getElementById("closeModal");
+
+    const toneMap = {
+      good: "border-emerald-200 bg-emerald-50 text-emerald-900",
+      bad: "border-rose-200 bg-rose-50 text-rose-900",
+      warn: "border-amber-200 bg-amber-50 text-amber-950",
+      info: "border-sky-200 bg-sky-50 text-sky-900",
+      neutral: "border-slate-200 bg-slate-50 text-slate-800",
+    };
+
+    const badgeMap = {
+      good: "border-emerald-200 bg-emerald-100 text-emerald-800",
+      bad: "border-rose-200 bg-rose-100 text-rose-800",
+      warn: "border-amber-200 bg-amber-100 text-amber-900",
+      info: "border-sky-200 bg-sky-100 text-sky-800",
+      neutral: "border-slate-200 bg-slate-100 text-slate-700",
+    };
+
+    const gradeByRead = (value) => {
+      if (value >= 40) return { icon: "🟢", label: "매우 좋음", tone: "good" };
+      if (value >= 20) return { icon: "🟡", label: "좋음", tone: "warn" };
+      if (value >= 5) return { icon: "🟠", label: "인식은 되나 약함", tone: "info" };
+      return { icon: "🔴", label: "실패", tone: "bad" };
+    };
+
+    const formatNum = (value, digits = 2) => {
+      if (value === null || value === undefined) return "미인식";
+      return Number(value).toFixed(digits).replace(/\.00$/, "");
+    };
+
+    const getDriveId = (url = "") => {
+      if (!url) return "";
+      if (url.includes("open?id=")) return url.split("open?id=")[1].split("&")[0];
+      if (url.includes("/file/d/")) return url.split("/file/d/")[1].split("/")[0];
+      return "";
+    };
+
+    const resolveMedia = (src = "") => {
+      const id = getDriveId(src);
+      if (id) {
+        return {
+          image: `https://drive.google.com/thumbnail?id=${id}&sz=w3000`,
+          open: `https://drive.google.com/open?id=${id}`,
+        };
+      }
+      return { image: src, open: src };
+    };
+
+    const mediaFrame = (item, aspect = "aspect-[4/3]") => {
+      if (!item?.src) {
+        return `<div class="${aspect} flex items-center justify-center bg-slate-100 text-sm text-slate-500">사진 없음</div>`;
+      }
+      const media = resolveMedia(item.src);
+      return `
+        <div class="${aspect} overflow-hidden bg-slate-100">
+          <img src="${media.image}" alt="${item.label || "이미지"}" class="h-full w-full object-cover" loading="lazy" referrerpolicy="no-referrer" />
+        </div>
+      `;
+    };
+
+    const imageOverlayButton = (item) => {
+      if (!item?.src) return "";
+      const media = resolveMedia(item.src);
+      return `
+        <button
+          class="image-trigger absolute inset-0"
+          data-src="${media.image}"
+          data-open="${media.open}"
+          data-label="${item.label || "이미지"}"
+          aria-label="${item.label || "이미지"} 확대"
+        ></button>
+      `;
+    };
+
+    const mediaActions = (item) => {
+      if (!item?.src) return "";
+      const media = resolveMedia(item.src);
+      return `
+        <button
+          class="image-trigger text-xs font-semibold text-sky-700 underline"
+          data-src="${media.image}"
+          data-open="${media.open}"
+          data-label="${item.label || "이미지"}"
+        >
+          확대 보기
+        </button>
+        <a href="${media.open}" target="_blank" class="text-xs font-semibold text-sky-700 underline">새 탭 열기</a>
+      `;
+    };
+
+    const tagRow = ([name, value]) => {
+      const grade = gradeByRead(value);
+      return `
+        <div class="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-sm">
+          <span class="text-slate-700">${name}</span>
+          <span class="font-semibold ${grade.tone === "bad" ? "text-rose-700" : grade.tone === "warn" ? "text-amber-700" : grade.tone === "info" ? "text-sky-700" : "text-emerald-700"}">${grade.icon} ${formatNum(value)}회</span>
+        </div>
+      `;
+    };
+
+    const exampleCard = (item, tone = "neutral") => {
+      const grade = gradeByRead(item.meanRead);
+      return `
+        <article class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div class="relative">
+            ${mediaFrame(item)}
+            ${imageOverlayButton(item)}
+          </div>
+          <div class="space-y-3 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-lg font-bold text-slate-900">${item.label}</div>
+                <div class="text-sm text-slate-500">${item.phase} ${item.testId}</div>
+              </div>
+              <span class="rounded-full border ${badgeMap[grade.tone]} px-3 py-1 text-xs font-semibold">${item.grade || `${grade.icon} ${grade.label}`}</span>
+            </div>
+            <div class="text-sm text-slate-700">${item.summary}</div>
+            <div class="rounded-2xl ${toneMap[tone]} p-3 text-sm">
+              <div class="font-semibold">${item.meanLabel || "평균 인식 횟수"}: ${formatNum(item.meanRead)}회</div>
+              <div class="mt-1">${item.compareRead}</div>
+            </div>
+            ${item.reason ? `
+              <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm leading-7 text-slate-700">
+                <span class="font-semibold text-slate-900">원인:</span> ${item.reason}
+              </div>
+            ` : ""}
+            ${item.tagReads?.length ? `
+              <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                <div class="mb-2 text-xs font-semibold text-slate-600">전체 태그 평균 인식 횟수 (각 태그 5회 평균)</div>
+                <div class="grid gap-2">${item.tagReads.map(tagRow).join("")}</div>
+              </div>
+            ` : ""}
+            <div class="flex items-center justify-between gap-3">
+              <div class="text-xs text-slate-500">사진이 안 보이면 공유 권한을 확인하세요.</div>
+              <div class="flex items-center gap-3">${mediaActions(item)}</div>
+            </div>
+          </div>
+        </article>
+      `;
+    };
+
+    const visualCard = (item) => `
+      <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="relative">
+          ${mediaFrame(item, "aspect-[16/10]")}
+          ${imageOverlayButton(item)}
+        </div>
+        <div class="space-y-2 p-4">
+          <div class="text-base font-bold text-slate-900">${item.label}</div>
+          <div class="text-sm text-slate-700">${item.summary}</div>
+          <div class="flex items-center justify-end gap-3">${mediaActions(item)}</div>
+        </div>
+      </article>
+    `;
+
+    const issueCard = (item) => `
+      <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex items-start gap-3">
+          <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">${item.step}</span>
+          <div class="min-w-0">
+            <h4 class="text-lg font-bold text-slate-900">${item.title}</h4>
+            <p class="mt-2 text-sm font-semibold text-slate-700">${item.summary}</p>
+            <p class="mt-2 text-sm leading-7 text-slate-600">${item.detail}</p>
+          </div>
+        </div>
+        ${item.qrMatrix?.length ? `
+          <div class="mt-4">
+            ${item.qrMatrixCaption ? `<div class="mb-2 text-sm font-semibold text-slate-600">${item.qrMatrixCaption}</div>` : ""}
+          <div class="overflow-hidden rounded-2xl border border-slate-200">
+            <div class="grid grid-cols-[1fr_0.8fr_0.8fr_1fr] gap-px bg-slate-200">
+              <div class="bg-slate-50 px-3 py-3 text-sm font-bold">훅 위치</div>
+              <div class="bg-slate-50 px-3 py-3 text-sm font-bold">QR 안 보이게</div>
+              <div class="bg-slate-50 px-3 py-3 text-sm font-bold">QR 보이게</div>
+              <div class="bg-slate-50 px-3 py-3 text-sm font-bold">해석</div>
+              ${item.qrMatrix
+                .map((row) => {
+                  const hiddenGrade = gradeByRead(row.hidden);
+                  const visibleGrade = gradeByRead(row.visible);
+                  return `
+                    <div class="bg-white px-3 py-3 text-sm font-semibold text-slate-900">${row.hook}</div>
+                    <div class="bg-white px-3 py-3 text-sm font-bold ${hiddenGrade.tone === "bad" ? "text-rose-700" : hiddenGrade.tone === "warn" ? "text-amber-700" : hiddenGrade.tone === "info" ? "text-sky-700" : "text-emerald-700"}">${hiddenGrade.icon} ${formatNum(row.hidden)}회</div>
+                    <div class="bg-white px-3 py-3 text-sm font-bold ${visibleGrade.tone === "bad" ? "text-rose-700" : visibleGrade.tone === "warn" ? "text-amber-700" : visibleGrade.tone === "info" ? "text-sky-700" : "text-emerald-700"}">${visibleGrade.icon} ${formatNum(row.visible)}회</div>
+                    <div class="bg-white px-3 py-3 text-sm text-slate-700">${row.note}</div>
+                  `;
+                })
+                .join("")}
+            </div>
+          </div>
+          </div>
+        ` : ""}
+        ${item.images?.length ? `
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            ${item.images.map(visualCard).join("")}
+          </div>
+        ` : ""}
+      </article>
+    `;
+
+    const renderCompareBlock = (title, caption, goodItems = [], badItems = [], neutralItems = [], note = "", meanNote = "") => `
+      <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+        <div class="mb-4">
+          <h4 class="text-xl font-bold text-slate-900">${title}</h4>
+          <p class="mt-1 text-sm text-slate-600">${caption}</p>
+          ${note ? `<p class="mt-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-7 text-slate-700">${note}</p>` : ""}
+          ${meanNote ? `<p class="mt-2 text-xs font-semibold text-slate-500">${meanNote}</p>` : ""}
+        </div>
+        <div class="grid gap-5 ${neutralItems.length ? "xl:grid-cols-3" : "xl:grid-cols-2"}">
+          ${goodItems.map((item) => exampleCard(item, "good")).join("")}
+          ${badItems.map((item) => exampleCard(item, "bad")).join("")}
+          ${neutralItems.map((item) => exampleCard(item, "neutral")).join("")}
+        </div>
+      </div>
+    `;
+
+    const highlightEvidenceIntro = (text) => {
+      const targets = ["배치 환경", "안테나 위치", "공간 구조", "태그 방향", "밀집도"];
+      return targets.reduce(
+        (acc, word) =>
+          acc.replaceAll(
+            word,
+            `<span class="rounded-md bg-amber-100 px-1.5 py-0.5 font-semibold text-amber-950">${word}</span>`,
+          ),
+        text,
+      );
+    };
+
+    const createAntennaLineSvg = (cases) => {
+      const categories = ["기존", "왼쪽", "중앙", "오른쪽"];
+      const series = cases.map((item, index) => ({
+        name: item.caseId,
+        color: ["#e15241", "#3b82b6", "#2eaf67", "#e78a23"][index],
+        points: [item.base, item.left, item.center, item.right],
+      }));
+
+      const width = 980;
+      const height = 520;
+      const pad = { top: 88, right: 30, bottom: 80, left: 72 };
+      const chartW = width - pad.left - pad.right;
+      const chartH = height - pad.top - pad.bottom;
+      const max = 75;
+      const xStep = chartW / (categories.length - 1);
+      const x = (idx) => pad.left + idx * xStep;
+      const y = (value) => pad.top + chartH - (value / max) * chartH;
+
+      let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="100%" height="460">`;
+      svg += `<rect width="${width}" height="${height}" fill="#ffffff"/>`;
+      svg += `<text x="${width / 2}" y="34" text-anchor="middle" font-size="28" font-weight="700" fill="#111827">RFID Tag Read Count vs. Antenna Position</text>`;
+      svg += `<text x="${width / 2}" y="66" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">파란셔츠(AA000010) 기준 - 기존 위치에서 0~4회인 실패 케이스 비교</text>`;
+
+      for (let i = 0; i <= 7; i += 1) {
+        const value = i * 10;
+        const yy = y(value);
+        svg += `<line x1="${pad.left}" y1="${yy}" x2="${width - pad.right}" y2="${yy}" stroke="#e2e8f0" stroke-width="1"/>`;
+        svg += `<text x="${pad.left - 14}" y="${yy + 4}" text-anchor="end" font-size="12" fill="#475569">${value}</text>`;
+      }
+
+      categories.forEach((label, idx) => {
+        const xx = x(idx);
+        svg += `<line x1="${xx}" y1="${pad.top}" x2="${xx}" y2="${pad.top + chartH}" stroke="#e5e7eb" stroke-width="1"/>`;
+        svg += `<text x="${xx}" y="${height - 34}" text-anchor="middle" font-size="14" fill="#111827">${label}</text>`;
+      });
+
+      series.forEach((line) => {
+        const points = line.points.map((value, idx) => `${x(idx)},${y(value)}`).join(" ");
+        svg += `<polyline points="${points}" fill="none" stroke="${line.color}" stroke-width="4"/>`;
+        line.points.forEach((value, idx) => {
+          const xx = x(idx);
+          const yy = y(value);
+          svg += `<circle cx="${xx}" cy="${yy}" r="7" fill="${line.color}"/>`;
+          svg += `<text x="${xx}" y="${yy - 14}" text-anchor="middle" font-size="12" font-weight="700" fill="${line.color}">${value.toFixed(2)}</text>`;
+        });
+      });
+
+      const thresholdY = y(5);
+      svg += `<line x1="${pad.left}" y1="${thresholdY}" x2="${width - pad.right}" y2="${thresholdY}" stroke="#ef4444" stroke-width="4"/>`;
+      svg += `<text x="${width - pad.right - 8}" y="${thresholdY - 8}" text-anchor="end" font-size="12" font-weight="700" fill="#dc2626">통과 기준 5회</text>`;
+
+      const legendX = 92;
+      const legendY = 104;
+      svg += `<rect x="${legendX - 18}" y="${legendY - 30}" width="132" height="152" rx="12" fill="#ffffff" stroke="#d1d5db"/>`;
+      series.forEach((line, idx) => {
+        const yy = legendY + idx * 28;
+        svg += `<line x1="${legendX}" y1="${yy}" x2="${legendX + 28}" y2="${yy}" stroke="${line.color}" stroke-width="4"/>`;
+        svg += `<circle cx="${legendX + 14}" cy="${yy}" r="6" fill="${line.color}"/>`;
+        svg += `<text x="${legendX + 44}" y="${yy + 5}" font-size="13" fill="#111827">${line.name}</text>`;
+      });
+      svg += `<line x1="${legendX}" y1="${legendY + 118}" x2="${legendX + 28}" y2="${legendY + 118}" stroke="#ef4444" stroke-width="4"/>`;
+      svg += `<text x="${legendX + 44}" y="${legendY + 123}" font-size="13" fill="#111827">기준 5회</text>`;
+      svg += `</svg>`;
+      return svg;
+    };
+
+    const antennaValueClass = (value, max) =>
+      value === max ? "border-emerald-200 bg-emerald-100 text-emerald-900" : "border-slate-200 bg-white text-slate-700";
+    const antennaCaseCard = (item) => {
+      const values = [
+        { label: "기존", value: item.base },
+        { label: "왼쪽", value: item.left },
+        { label: "중앙", value: item.center },
+        { label: "오른쪽", value: item.right },
+      ];
+      const max = Math.max(...values.map((v) => v.value));
+      return `
+        <article class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          ${item.src ? `
+            <div class="relative">
+              ${mediaFrame(item, "aspect-[16/10]")}
+              ${imageOverlayButton(item)}
+            </div>
+          ` : ""}
+          <div class="p-5">
+            <div class="space-y-1">
+              <div class="text-lg font-bold text-slate-900">${item.caseId}</div>
+              <div class="text-sm text-slate-600">${item.condition}</div>
+            </div>
+            <div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+              ${values
+                .map(
+                  (entry) => `
+                    <div class="rounded-2xl border p-3 text-center ${antennaValueClass(entry.value, max)}">
+                      <div class="text-xs font-semibold">${entry.label}</div>
+                      <div class="mt-1 text-lg font-bold">${formatNum(entry.value)}회</div>
+                    </div>
+                  `,
+                )
+                .join("")}
+            </div>
+            <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm">
+              <div><span class="font-semibold">최적 위치:</span> ${item.best}</div>
+              <div class="mt-1 text-slate-600">${item.summary}</div>
+            </div>
+            ${item.src ? `
+              <div class="mt-3 flex items-center justify-end gap-3">
+                ${mediaActions(item)}
+              </div>
+            ` : ""}
+          </div>
+        </article>
+      `;
+    };
+
+    app.innerHTML = `
+      <div id="top" class="mx-auto max-w-7xl space-y-10 px-4 py-8 md:px-6 lg:px-8">
+        <div class="hidden flex-wrap items-center gap-4 text-sm font-semibold">
+          <a href="./index.html" class="text-sky-700 underline">기록 목록으로</a>
+          <a href="../index.html" class="text-sky-700 underline">메인 홈으로</a>
+        </div>
+        <header class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div class="mb-4 flex flex-wrap gap-3 text-sm font-semibold lg:justify-end">
+            <a href="./index.html" class="rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sky-800">기록 목록으로</a>
+            <a href="../index.html" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-700">메인 홈으로</a>
+          </div>
+          <div class="inline-flex rounded-full border border-sky-200 bg-sky-50 px-4 py-1 text-xs font-semibold tracking-[0.2em] text-sky-800">${reportMeta.badge}</div>
+          <h1 class="mt-4 text-4xl font-black tracking-tight text-slate-950 md:text-5xl">${reportMeta.title}</h1>
+          <p class="mt-4 max-w-4xl text-lg leading-8 text-slate-600">${reportMeta.subtitle}</p>
+          <div class="mt-6 grid gap-3 md:grid-cols-3">
+            ${topIntro
+              .map(
+                (item) => `
+                  <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">${item}</div>
+                `,
+              )
+              .join("")}
+          </div>
+        </header>
+
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div class="mb-6">
+            <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Root Cause</div>
+            <h2 class="mt-2 text-3xl font-black text-slate-950">RFID 인식 간섭 구조</h2>
+          </div>
+          <div class="rounded-3xl bg-slate-900 px-6 py-5 text-center text-2xl font-black text-white">${causeFlow.root}</div>
+          <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            ${causeFlow.groups
+              .map(
+                (group) => `
+                  <article class="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="rounded-2xl bg-white px-4 py-3 text-center text-sm font-bold text-slate-900">${group.title}</div>
+                    <div class="mt-3 grid gap-2">
+                      ${group.items
+                        .map((item) => `<div class="rounded-2xl bg-white px-3 py-2 text-sm text-slate-700">${item}</div>`)
+                        .join("")}
+                    </div>
+                  </article>
+                `,
+              )
+              .join("")}
+          </div>
+        </section>
+
+        <section class="grid gap-4 lg:grid-cols-3">
+          ${topSummaryCards
+            .map(
+              (card) => `
+                <article class="rounded-3xl border ${toneMap[card.tone]} p-5 shadow-sm">
+                  <div class="text-xs font-semibold uppercase tracking-[0.18em]">${card.label}</div>
+                  <div class="mt-3 text-2xl font-black">${card.value}</div>
+                  <p class="mt-2 text-sm leading-7">${card.text}</p>
+                </article>
+              `,
+            )
+            .join("")}
+        </section>
+
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div class="mb-6">
+            <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Impact Summary</div>
+            <h2 class="mt-2 text-3xl font-black text-slate-950">RFID 테스트 결론 요약</h2>
+          </div>
+          <div class="overflow-hidden rounded-3xl border border-slate-200">
+            <div class="grid grid-cols-[1.1fr_1fr_1fr_0.9fr_1.2fr] gap-px bg-slate-200 text-sm font-bold text-slate-800">
+              <div class="bg-slate-50 px-4 py-3">구분</div>
+              <div class="bg-slate-50 px-4 py-3">조건</div>
+                <div class="bg-slate-50 px-4 py-3">각 태그 평균 인식 횟수 범위 / 감소폭</div>
+              <div class="bg-slate-50 px-4 py-3">미치는 영향</div>
+              <div class="bg-slate-50 px-4 py-3">원인 해석</div>
+              ${impactRows
+                .map(
+                  (row) => `
+                    <div class="bg-white px-4 py-4 text-sm font-semibold text-slate-900">${row.category}</div>
+                    <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.condition}</div>
+                    <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.delta}</div>
+                    <div class="bg-white px-4 py-4 text-sm font-semibold">${row.impact}</div>
+                    <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.reason}</div>
+                  `,
+                )
+                .join("")}
+            </div>
+          </div>
+        </section>
+
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div>
+            <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Current Judgment</div>
+            <h2 class="mt-2 text-3xl font-black text-slate-950">${solutionSection.title}</h2>
+            <p class="mt-4 text-sm leading-8 text-slate-700">${solutionSection.intro}</p>
+          </div>
+          <div class="mt-6 overflow-hidden rounded-3xl border border-slate-200">
+            <div class="grid grid-cols-[1fr_1fr_1fr_1.2fr] gap-px bg-slate-200">
+              <div class="bg-slate-50 px-4 py-3 text-sm font-bold">방법</div>
+              <div class="bg-slate-50 px-4 py-3 text-sm font-bold">어떻게 적용하는가</div>
+              <div class="bg-slate-50 px-4 py-3 text-sm font-bold">필요 조건</div>
+              <div class="bg-slate-50 px-4 py-3 text-sm font-bold">한계</div>
+              ${solutionSection.methods
+                .map((item, index) => {
+                  const isHwRecommended = index === 1;
+                  const isSwRecommended = index === 5;
+                  const cellClass = isHwRecommended ? "bg-emerald-50" : isSwRecommended ? "bg-sky-50" : "bg-white";
+                  const titleClass = isHwRecommended ? "text-emerald-900" : isSwRecommended ? "text-sky-900" : "text-slate-900";
+                  const badge = isHwRecommended
+                    ? '<span class="ml-2 inline-flex rounded-full border border-emerald-300 bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-900">HW 추천</span>'
+                    : isSwRecommended
+                      ? '<span class="ml-2 inline-flex rounded-full border border-sky-300 bg-sky-100 px-2 py-1 text-xs font-bold text-sky-900">SW 추천</span>'
+                      : "";
+                  return `
+                    <div class="${cellClass} px-4 py-4 text-sm font-semibold ${titleClass}">${item.name}${badge}</div>
+                    <div class="${cellClass} px-4 py-4 text-sm text-slate-700">${item.how}</div>
+                    <div class="${cellClass} px-4 py-4 text-sm text-slate-700">${item.needs}</div>
+                    <div class="${cellClass} px-4 py-4 text-sm text-slate-700">${item.limit}</div>
+                  `;
+                })
+                .join("")}
+            </div>
+          </div>
+          <div class="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-5">
+            <div class="text-lg font-black text-slate-950">현재 한계</div>
+            <div class="mt-3 grid gap-2">
+              ${solutionSection.limits
+                .map((item) => `<div class="rounded-2xl bg-white px-4 py-3 text-sm text-slate-700">${item}</div>`)
+                .join("")}
+            </div>
+          </div>
+          <div class="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-6">
+            <div class="text-lg font-black text-emerald-950">현재 판단</div>
+            <div class="mt-3 grid gap-2">
+              ${solutionSection.judgment
+                .map((item, index) => `<div class="rounded-2xl bg-white px-4 py-3 text-sm ${index === 0 ? "font-bold text-emerald-900" : "text-slate-700"}">${item}</div>`)
+                .join("")}
+            </div>
+            <div class="mt-5 rounded-2xl border border-emerald-200 bg-white px-4 py-4 text-sm font-bold leading-7 text-emerald-900">${solutionSection.finalLine}</div>
+          </div>
+        </section>
+
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div class="mb-6">
+            <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Issue Causes</div>
+            <h2 class="mt-2 text-3xl font-black text-slate-950">RFID 인식 간섭 요인</h2>
+          </div>
+          <div class="grid gap-5 lg:grid-cols-2">
+            ${issueCauseCards.map(issueCard).join("")}
+          </div>
+        </section>
+
+        <section class="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+          <article class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+            <div class="mb-6">
+              <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Conditions</div>
+              <h2 class="mt-2 text-3xl font-black text-slate-950">어떤 경우에 잘 되고, 어떤 경우에 안 되는가</h2>
+            </div>
+            <div class="overflow-hidden rounded-3xl border border-slate-200">
+              <div class="grid grid-cols-[1fr_1.2fr_1fr_1fr] gap-px bg-slate-200">
+                <div class="bg-slate-50 px-4 py-3 text-sm font-bold">구분</div>
+                <div class="bg-slate-50 px-4 py-3 text-sm font-bold">잘 되는 조건</div>
+                <div class="bg-slate-50 px-4 py-3 text-sm font-bold">잘 안 되는 조건</div>
+                <div class="bg-slate-50 px-4 py-3 text-sm font-bold">이유</div>
+                ${conditionCompareRows
+                  .map(
+                    (row) => `
+                      <div class="bg-white px-4 py-4 text-sm font-semibold text-slate-900">${row.category}</div>
+                      <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.good}</div>
+                      <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.bad}</div>
+                      <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.reason}</div>
+                    `,
+                  )
+                  .join("")}
+              </div>
+            </div>
+          </article>
+
+          <article class="rounded-[2rem] border border-slate-200 bg-slate-50 p-8 shadow-soft">
+            <h3 class="text-2xl font-black text-slate-950">결론</h3>
+            <p class="mt-4 text-sm leading-8 text-slate-700">${keyConclusion}</p>
+            <div class="mt-6 grid gap-4">
+              <div class="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+                <div class="text-lg font-black text-emerald-900">🟢 잘 되는 조건</div>
+                <div class="mt-3 grid gap-2">
+                  ${quickConditionBlocks.good
+                    .map((item) => `<div class="rounded-2xl bg-white px-3 py-2 text-sm text-slate-700">${item}</div>`)
+                    .join("")}
+                </div>
+              </div>
+              <div class="rounded-3xl border border-rose-200 bg-rose-50 p-5">
+                <div class="text-lg font-black text-rose-900">🔴 잘 안 되는 조건</div>
+                <div class="mt-3 grid gap-2">
+                  ${quickConditionBlocks.bad
+                    .map((item) => `<div class="rounded-2xl bg-white px-3 py-2 text-sm text-slate-700">${item}</div>`)
+                    .join("")}
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        ${exampleSections
+          .map(
+            (section) => `
+              <section class="space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+                <div>
+                  <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Representative Examples</div>
+                  <h2 class="mt-2 text-3xl font-black text-slate-950">${section.title}</h2>
+                  <p class="mt-2 text-sm text-slate-600">${section.subtitle}</p>
+                </div>
+                ${section.visuals?.length ? `
+                  <div class="grid gap-5 xl:grid-cols-2">
+                    ${section.visuals.map(visualCard).join("")}
+                  </div>
+                ` : ""}
+                ${section.blocks
+                  .map((block) =>
+                    renderCompareBlock(
+                      block.title,
+                      block.caption,
+                      block.goodItems,
+                      block.badItems,
+                      block.neutralItems || [],
+                      block.note || "",
+                      block.meanNote || "",
+                    ),
+                  )
+                  .join("")}
+              </section>
+            `,
+          )
+          .join("")}
+
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div>
+            <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Human Impact</div>
+            <h2 class="mt-2 text-3xl font-black text-slate-950">${peopleSection.title}</h2>
+            <p class="mt-2 text-sm text-slate-600">${peopleSection.subtitle}</p>
+          </div>
+          <div class="mt-6 grid gap-4 md:grid-cols-3">
+            ${peopleSection.cards
+              .map(
+                (card) => `
+                  <article class="rounded-3xl border ${toneMap[card.tone]} p-5">
+                    <div class="text-lg font-black">${card.label}</div>
+                    <div class="mt-2 text-sm font-semibold">${card.summary}</div>
+                    <div class="mt-4 text-xl font-black">${card.metric}</div>
+                    <div class="mt-2 text-sm leading-7">${card.detail}</div>
+                  </article>
+                `,
+              )
+              .join("")}
+          </div>
+        </section>
+
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div>
+            <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Antenna Position</div>
+            <h2 class="mt-2 text-3xl font-black text-slate-950">${antennaSection.title}</h2>
+            <p class="mt-2 text-sm text-slate-600">${antennaSection.subtitle}</p>
+          </div>
+          <div class="mt-6 grid gap-4 md:grid-cols-4">
+            ${antennaSection.summaryCards
+              .map(
+                (card) => `
+                  <article class="overflow-hidden rounded-3xl border ${toneMap[card.tone]}">
+                    ${card.src ? `
+                      <div class="relative">
+                        ${mediaFrame(card, "aspect-[4/3]")}
+                        ${imageOverlayButton(card)}
+                      </div>
+                    ` : ""}
+                    <div class="p-5">
+                      <div class="text-sm font-semibold uppercase tracking-[0.16em]">${card.label}</div>
+                      <div class="mt-3 text-3xl font-black">${card.value}</div>
+                      <div class="mt-2 text-sm leading-7">${card.text}</div>
+                      ${card.src ? `<div class="mt-3 flex items-center justify-end gap-3">${mediaActions(card)}</div>` : ""}
+                    </div>
+                  </article>
+                `,
+              )
+              .join("")}
+          </div>
+          <div class="mt-8 overflow-hidden rounded-3xl border border-slate-200 bg-white p-4">
+            ${createAntennaLineSvg(antennaSection.cases)}
+          </div>
+          <div class="mt-8">
+            <h3 class="text-2xl font-black text-slate-950">케이스별 인식 횟수 비교</h3>
+            <div class="mt-4 grid gap-5 xl:grid-cols-2">
+              ${antennaSection.cases.map(antennaCaseCard).join("")}
+            </div>
+          </div>
+        </section>
+
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div>
+            <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">External Evidence</div>
+            <h2 class="mt-2 text-3xl font-black text-slate-950">${externalEvidence.title}</h2>
+            <p class="mt-4 text-sm leading-8 text-slate-700">${highlightEvidenceIntro(externalEvidence.intro)}</p>
+          </div>
+          <div class="mt-6 overflow-hidden rounded-3xl border border-slate-200">
+            <div class="grid grid-cols-[1fr_1.4fr_1fr] gap-px bg-slate-200">
+              <div class="bg-slate-50 px-4 py-3 text-sm font-bold">출처</div>
+              <div class="bg-slate-50 px-4 py-3 text-sm font-bold">간섭 관련 확인 내용</div>
+              <div class="bg-slate-50 px-4 py-3 text-sm font-bold">시사점</div>
+              ${externalEvidence.rows
+                .map(
+                  (row) => `
+                    <div class="bg-white px-4 py-4 text-sm font-semibold text-slate-900"><a href="${row.href}" target="_blank" class="text-sky-700 underline">${row.source}</a></div>
+                    <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.finding}</div>
+                    <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.implication}</div>
+                  `,
+                )
+                .join("")}
+            </div>
+          </div>
+        </section>
+
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <h3 class="text-2xl font-black text-slate-950">${supportNotes.title}</h3>
+          <div class="mt-6 grid gap-6 xl:grid-cols-2">
+            <article class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+              <div class="text-lg font-black text-slate-950">${supportNotes.readCountTitle}</div>
+              <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200">
+                <div class="grid grid-cols-[1fr_1fr] gap-px bg-slate-200">
+                  <div class="bg-slate-50 px-4 py-3 text-sm font-bold">정상 인식 횟수(절사평균)</div>
+                  <div class="bg-slate-50 px-4 py-3 text-sm font-bold">판정</div>
+                  ${supportNotes.readCountRows
+                    .map(
+                      (row) => `
+                        <div class="bg-white px-4 py-4 text-sm font-semibold text-slate-900">${row.range}</div>
+                        <div class="px-4 py-4 text-sm font-bold ${toneMap[row.tone]}">${row.grade}</div>
+                      `,
+                    )
+                    .join("")}
+                </div>
+              </div>
+            </article>
+
+            <article class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+              <div class="text-lg font-black text-slate-950">${supportNotes.firstReadTitle}</div>
+              <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200">
+                <div class="grid grid-cols-[0.9fr_0.9fr_1.5fr] gap-px bg-slate-200">
+                  <div class="bg-slate-50 px-4 py-3 text-sm font-bold">최초 인식 시간</div>
+                  <div class="bg-slate-50 px-4 py-3 text-sm font-bold">판정</div>
+                  <div class="bg-slate-50 px-4 py-3 text-sm font-bold">해석</div>
+                  ${supportNotes.firstReadRows
+                    .map(
+                      (row) => `
+                        <div class="bg-white px-4 py-4 text-sm font-semibold text-slate-900">${row.range}</div>
+                        <div class="px-4 py-4 text-sm font-bold ${toneMap[row.tone]}">${row.grade}</div>
+                        <div class="bg-white px-4 py-4 text-sm text-slate-700">${row.meaning}</div>
+                      `,
+                    )
+                    .join("")}
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="max-w-4xl">
+              <div class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Antenna Comparison</div>
+              <h2 class="mt-2 text-3xl font-black text-slate-950">${antennaComparisonSection.title}</h2>
+              <p class="mt-4 text-sm leading-8 text-slate-700">${antennaComparisonSection.intro}</p>
+            </div>
+            <a
+              href="${antennaComparisonSection.sourceUrl}"
+              target="_blank"
+              class="inline-flex rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-800"
+            >
+              출처 원문 열기
+            </a>
+          </div>
+
+          <div class="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-6">
+            <div class="text-lg font-black text-emerald-950">현재 권장안</div>
+            <p class="mt-3 text-sm leading-7 text-emerald-900">${antennaComparisonSection.recommendation}</p>
+          </div>
+
+          <div class="mt-6 overflow-x-auto rounded-3xl border border-slate-200">
+            <table class="min-w-full divide-y divide-slate-200">
+              <thead class="bg-slate-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-sm font-bold text-slate-900">안테나 종류</th>
+                  <th class="px-4 py-3 text-left text-sm font-bold text-slate-900">특성 요약</th>
+                  <th class="px-4 py-3 text-left text-sm font-bold text-slate-900">우리 실험 적합도</th>
+                  <th class="px-4 py-3 text-left text-sm font-bold text-slate-900">판단 요약</th>
+                  <th class="px-4 py-3 text-left text-sm font-bold text-slate-900">출처 토글</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                ${antennaComparisonSection.rows
+                  .map(
+                    (row) => `
+                      <tr class="${row.rowClass}">
+                        <td class="px-4 py-4 align-top text-sm font-black text-slate-950">${row.name}</td>
+                        <td class="px-4 py-4 align-top text-sm leading-7 text-slate-700">${row.summary}</td>
+                        <td class="px-4 py-4 align-top text-sm">
+                          <span class="inline-flex rounded-full border px-3 py-1 font-bold ${row.badgeClass}">${row.fit}</span>
+                        </td>
+                        <td class="px-4 py-4 align-top text-sm leading-7 text-slate-700">${row.why}</td>
+                        <td class="px-4 py-4 align-top text-sm text-slate-700">
+                          <details class="rounded-2xl border border-slate-200 bg-white p-3">
+                            <summary class="cursor-pointer font-semibold text-sky-700">바로가기 열기</summary>
+                            <div class="mt-3 grid gap-2">
+                              ${row.links
+                                .map(
+                                  (link) => `
+                                    <a href="${link.href}" target="_blank" class="text-sm text-sky-700 underline">${link.label}</a>
+                                  `,
+                                )
+                                .join("")}
+                            </div>
+                          </details>
+                        </td>
+                      </tr>
+                      ${
+                        row.detailSections
+                          ? `
+                            <tr class="bg-emerald-50/40">
+                              <td colspan="5" class="px-4 pb-5 pt-0">
+                                <details class="rounded-3xl border border-emerald-200 bg-white">
+                                  <summary class="cursor-pointer list-none px-5 py-4 text-sm font-black text-emerald-900">
+                                    패치 안테나 세부 구조 비교 보기
+                                  </summary>
+                                  <div class="border-t border-emerald-100 px-4 py-4">
+                                    <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                                      <table class="min-w-full divide-y divide-slate-200">
+                                        <thead class="bg-slate-50">
+                                          <tr>
+                                            <th class="px-4 py-3 text-left text-sm font-bold text-slate-900">종류</th>
+                                            <th class="px-4 py-3 text-left text-sm font-bold text-slate-900">우리 조건에 맞는 이유</th>
+                                            <th class="px-4 py-3 text-left text-sm font-bold text-slate-900">우리 조건에 안 맞는 이유</th>
+                                            <th class="px-4 py-3 text-left text-sm font-bold text-slate-900">추천도 / 메모</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-200 bg-white">
+                                          ${row.detailSections
+                                            .map(
+                                              (detail) => `
+                                                <tr class="${detail.toneClass}">
+                                                  <td class="px-4 py-4 align-top text-sm font-bold text-slate-950">${detail.kind}</td>
+                                                  <td class="px-4 py-4 align-top text-sm leading-7 text-slate-700">${detail.fitReason}</td>
+                                                  <td class="px-4 py-4 align-top text-sm leading-7 text-slate-700">${detail.badReason}</td>
+                                                  <td class="px-4 py-4 align-top text-sm leading-7 text-slate-700">
+                                                    <span class="mb-2 inline-flex rounded-full border px-3 py-1 text-xs font-black ${detail.badgeClass}">${detail.recommendation}</span>
+                                                    <div>${detail.notes}</div>
+                                                  </td>
+                                                </tr>
+                                              `,
+                                            )
+                                            .join("")}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+                                </details>
+                              </td>
+                            </tr>
+                          `
+                          : ""
+                      }
+                    `,
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    `;
+
+    const openModal = (src, label, openUrl) => {
+      modal.classList.remove("hidden");
+      modalContent.innerHTML = `
+        <div class="overflow-hidden bg-white">
+          <div class="border-b border-slate-200 px-5 py-4">
+            <div class="text-sm font-semibold text-slate-500">${label || "이미지"}</div>
+          </div>
+          <div class="bg-slate-50 p-4">
+            <img src="${src}" alt="${label || "이미지"}" class="max-h-[78vh] w-full object-contain" referrerpolicy="no-referrer" />
+          </div>
+          <div class="flex items-center justify-end gap-4 border-t border-slate-200 px-5 py-4">
+            <a href="${openUrl}" target="_blank" class="text-sm font-semibold text-sky-700 underline">새 탭 열기</a>
+          </div>
+        </div>
+      `;
+    };
+
+    document.addEventListener("click", (event) => {
+      const trigger = event.target.closest(".image-trigger");
+      if (trigger) {
+        openModal(trigger.dataset.src, trigger.dataset.label, trigger.dataset.open);
+      }
+    });
+
+    closeModal.addEventListener("click", () => {
+      modal.classList.add("hidden");
+      modalContent.innerHTML = "";
+    });
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        modal.classList.add("hidden");
+        modalContent.innerHTML = "";
+      }
+    });
+  </script>
+  <script src="../common_section_nav.js"></script>
+  <script src="../common_auto_reload.js"></script>
+</body>
+</html>

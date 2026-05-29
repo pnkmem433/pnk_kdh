@@ -1,0 +1,1411 @@
+﻿{
+    "person_3_1.csv":  {
+                           "sessions":  [
+                                            {
+                                                "session_id":  1,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  163,
+                                                                              "count":  57
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  159,
+                                                                              "count":  74
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  1257,
+                                                                              "count":  14
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  161,
+                                                                              "count":  23
+                                                                          },
+                                                             "BB000008":  {
+                                                                              "first":  1161,
+                                                                              "count":  6
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  2,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  256,
+                                                                              "count":  53
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  254,
+                                                                              "count":  64
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  951,
+                                                                              "count":  12
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  286,
+                                                                              "count":  24
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  3,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  149,
+                                                                              "count":  50
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  155,
+                                                                              "count":  66
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  153,
+                                                                              "count":  10
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  151,
+                                                                              "count":  19
+                                                                          },
+                                                             "BB000008":  {
+                                                                              "first":  386,
+                                                                              "count":  6
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  4,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  154,
+                                                                              "count":  57
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  152,
+                                                                              "count":  66
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  892,
+                                                                              "count":  6
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  362,
+                                                                              "count":  23
+                                                                          },
+                                                             "BB000008":  {
+                                                                              "first":  1164,
+                                                                              "count":  5
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  5,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  163,
+                                                                              "count":  51
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  161,
+                                                                              "count":  66
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  165,
+                                                                              "count":  9
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  159,
+                                                                              "count":  21
+                                                                          },
+                                                             "BB000008":  {
+                                                                              "first":  1176,
+                                                                              "count":  5
+                                                                          }
+                                                         }
+                                            }
+                                        ],
+                           "valid_trim":  5,
+                           "unique_trim":  5,
+                           "trimmed":  {
+                                           "AA000010":  {
+                                                            "counts":  [
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  0,
+                                                            "trim_first":  null
+                                                        },
+                                           "AA000019":  {
+                                                            "counts":  [
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  0,
+                                                            "trim_first":  null
+                                                        },
+                                           "AA000001":  {
+                                                            "counts":  [
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  0,
+                                                            "trim_first":  null
+                                                        },
+                                           "AA000011":  {
+                                                            "counts":  [
+                                                                           57,
+                                                                           53,
+                                                                           50,
+                                                                           57,
+                                                                           51
+                                                                       ],
+                                                            "firsts":  [
+                                                                           163,
+                                                                           256,
+                                                                           149,
+                                                                           154,
+                                                                           163
+                                                                       ],
+                                                            "trim_count":  53.67,
+                                                            "trim_first":  160
+                                                        },
+                                           "AA000015":  {
+                                                            "counts":  [
+                                                                           74,
+                                                                           64,
+                                                                           66,
+                                                                           66,
+                                                                           66
+                                                                       ],
+                                                            "firsts":  [
+                                                                           159,
+                                                                           254,
+                                                                           155,
+                                                                           152,
+                                                                           161
+                                                                       ],
+                                                            "trim_count":  66,
+                                                            "trim_first":  158.33
+                                                        },
+                                           "BB000008":  {
+                                                            "counts":  [
+                                                                           6,
+                                                                           0,
+                                                                           6,
+                                                                           5,
+                                                                           5
+                                                                       ],
+                                                            "firsts":  [
+                                                                           1161,
+                                                                           null,
+                                                                           386,
+                                                                           1164,
+                                                                           1176
+                                                                       ],
+                                                            "trim_count":  5.33,
+                                                            "trim_first":  1162.5
+                                                        },
+                                           "49543030":  {
+                                                            "counts":  [
+                                                                           14,
+                                                                           12,
+                                                                           10,
+                                                                           6,
+                                                                           9
+                                                                       ],
+                                                            "firsts":  [
+                                                                           1257,
+                                                                           951,
+                                                                           153,
+                                                                           892,
+                                                                           165
+                                                                       ],
+                                                            "trim_count":  10.33,
+                                                            "trim_first":  669.33
+                                                        },
+                                           "AA000002":  {
+                                                            "counts":  [
+                                                                           23,
+                                                                           24,
+                                                                           19,
+                                                                           23,
+                                                                           21
+                                                                       ],
+                                                            "firsts":  [
+                                                                           161,
+                                                                           286,
+                                                                           151,
+                                                                           362,
+                                                                           159
+                                                                       ],
+                                                            "trim_count":  22.33,
+                                                            "trim_first":  202
+                                                        }
+                                       }
+                       },
+    "person_3_2.csv":  {
+                           "sessions":  [
+                                            {
+                                                "session_id":  1,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  349,
+                                                                              "count":  35
+                                                                          },
+                                                             "AA000010":  {
+                                                                              "first":  2452,
+                                                                              "count":  5
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  864,
+                                                                              "count":  9
+                                                                          },
+                                                             "AA000009":  {
+                                                                              "first":  3065,
+                                                                              "count":  7
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  144,
+                                                                              "count":  72
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  893,
+                                                                              "count":  15
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  2,
+                                                "tags":  {
+                                                             "BB000002":  {
+                                                                              "first":  548,
+                                                                              "count":  6
+                                                                          },
+                                                             "AA000011":  {
+                                                                              "first":  348,
+                                                                              "count":  39
+                                                                          },
+                                                             "AA000010":  {
+                                                                              "first":  860,
+                                                                              "count":  8
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  956,
+                                                                              "count":  10
+                                                                          },
+                                                             "AA000009":  {
+                                                                              "first":  580,
+                                                                              "count":  8
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  240,
+                                                                              "count":  73
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  350,
+                                                                              "count":  15
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  3,
+                                                "tags":  {
+                                                             "BB000002":  {
+                                                                              "first":  1555,
+                                                                              "count":  5
+                                                                          },
+                                                             "AA000011":  {
+                                                                              "first":  353,
+                                                                              "count":  32
+                                                                          },
+                                                             "AA000010":  {
+                                                                              "first":  1763,
+                                                                              "count":  8
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  980,
+                                                                              "count":  12
+                                                                          },
+                                                             "AA000009":  {
+                                                                              "first":  1765,
+                                                                              "count":  6
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  355,
+                                                                              "count":  70
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  581,
+                                                                              "count":  14
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  4,
+                                                "tags":  {
+                                                             "BB000002":  {
+                                                                              "first":  398,
+                                                                              "count":  5
+                                                                          },
+                                                             "AA000011":  {
+                                                                              "first":  161,
+                                                                              "count":  37
+                                                                          },
+                                                             "AA000010":  {
+                                                                              "first":  2757,
+                                                                              "count":  5
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  159,
+                                                                              "count":  11
+                                                                          },
+                                                             "AA000009":  {
+                                                                              "first":  360,
+                                                                              "count":  7
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  157,
+                                                                              "count":  68
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  1060,
+                                                                              "count":  14
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  5,
+                                                "tags":  {
+                                                             "BB000002":  {
+                                                                              "first":  1693,
+                                                                              "count":  8
+                                                                          },
+                                                             "AA000011":  {
+                                                                              "first":  356,
+                                                                              "count":  35
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  254,
+                                                                              "count":  11
+                                                                          },
+                                                             "AA000009":  {
+                                                                              "first":  1664,
+                                                                              "count":  9
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  139,
+                                                                              "count":  74
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  1087,
+                                                                              "count":  14
+                                                                          }
+                                                         }
+                                            }
+                                        ],
+                           "valid_trim":  6.67,
+                           "unique_trim":  6.67,
+                           "trimmed":  {
+                                           "AA000010":  {
+                                                            "counts":  [
+                                                                           5,
+                                                                           8,
+                                                                           8,
+                                                                           5,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           2452,
+                                                                           860,
+                                                                           1763,
+                                                                           2757,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  6,
+                                                            "trim_first":  2107.5
+                                                        },
+                                           "AA000019":  {
+                                                            "counts":  [
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  0,
+                                                            "trim_first":  null
+                                                        },
+                                           "AA000001":  {
+                                                            "counts":  [
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  0,
+                                                            "trim_first":  null
+                                                        },
+                                           "AA000011":  {
+                                                            "counts":  [
+                                                                           35,
+                                                                           39,
+                                                                           32,
+                                                                           37,
+                                                                           35
+                                                                       ],
+                                                            "firsts":  [
+                                                                           349,
+                                                                           348,
+                                                                           353,
+                                                                           161,
+                                                                           356
+                                                                       ],
+                                                            "trim_count":  35.67,
+                                                            "trim_first":  350
+                                                        },
+                                           "AA000015":  {
+                                                            "counts":  [
+                                                                           72,
+                                                                           73,
+                                                                           70,
+                                                                           68,
+                                                                           74
+                                                                       ],
+                                                            "firsts":  [
+                                                                           144,
+                                                                           240,
+                                                                           355,
+                                                                           157,
+                                                                           139
+                                                                       ],
+                                                            "trim_count":  71.67,
+                                                            "trim_first":  180.33
+                                                        },
+                                           "BB000008":  {
+                                                            "counts":  [
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  0,
+                                                            "trim_first":  null
+                                                        },
+                                           "49543030":  {
+                                                            "counts":  [
+                                                                           9,
+                                                                           10,
+                                                                           12,
+                                                                           11,
+                                                                           11
+                                                                       ],
+                                                            "firsts":  [
+                                                                           864,
+                                                                           956,
+                                                                           980,
+                                                                           159,
+                                                                           254
+                                                                       ],
+                                                            "trim_count":  10.67,
+                                                            "trim_first":  691.33
+                                                        },
+                                           "AA000002":  {
+                                                            "counts":  [
+                                                                           15,
+                                                                           15,
+                                                                           14,
+                                                                           14,
+                                                                           14
+                                                                       ],
+                                                            "firsts":  [
+                                                                           893,
+                                                                           350,
+                                                                           581,
+                                                                           1060,
+                                                                           1087
+                                                                       ],
+                                                            "trim_count":  14.33,
+                                                            "trim_first":  844.67
+                                                        }
+                                       }
+                       },
+    "person_3_3.csv":  {
+                           "sessions":  [
+                                            {
+                                                "session_id":  1,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  259,
+                                                                              "count":  32
+                                                                          },
+                                                             "AA000010":  {
+                                                                              "first":  469,
+                                                                              "count":  8
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  1062,
+                                                                              "count":  8
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  139,
+                                                                              "count":  76
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  257,
+                                                                              "count":  36
+                                                                          },
+                                                             "BB000008":  {
+                                                                              "first":  5373,
+                                                                              "count":  6
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  2,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  761,
+                                                                              "count":  30
+                                                                          },
+                                                             "AA000010":  {
+                                                                              "first":  2889,
+                                                                              "count":  5
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  5151,
+                                                                              "count":  6
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  552,
+                                                                              "count":  44
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  147,
+                                                                              "count":  72
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  3,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  248,
+                                                                              "count":  37
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  138,
+                                                                              "count":  73
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  1050,
+                                                                              "count":  26
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  4,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  164,
+                                                                              "count":  40
+                                                                          },
+                                                             "AA000010":  {
+                                                                              "first":  4054,
+                                                                              "count":  6
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  2059,
+                                                                              "count":  9
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  162,
+                                                                              "count":  79
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  166,
+                                                                              "count":  18
+                                                                          },
+                                                             "BB000008":  {
+                                                                              "first":  3459,
+                                                                              "count":  5
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  5,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  155,
+                                                                              "count":  37
+                                                                          },
+                                                             "AA000010":  {
+                                                                              "first":  159,
+                                                                              "count":  12
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  2281,
+                                                                              "count":  7
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  4791,
+                                                                              "count":  9
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  157,
+                                                                              "count":  71
+                                                                          }
+                                                         }
+                                            }
+                                        ],
+                           "valid_trim":  5.33,
+                           "unique_trim":  5.33,
+                           "trimmed":  {
+                                           "AA000010":  {
+                                                            "counts":  [
+                                                                           8,
+                                                                           5,
+                                                                           0,
+                                                                           6,
+                                                                           12
+                                                                       ],
+                                                            "firsts":  [
+                                                                           469,
+                                                                           2889,
+                                                                           null,
+                                                                           4054,
+                                                                           159
+                                                                       ],
+                                                            "trim_count":  6.33,
+                                                            "trim_first":  1679
+                                                        },
+                                           "AA000019":  {
+                                                            "counts":  [
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  0,
+                                                            "trim_first":  null
+                                                        },
+                                           "AA000001":  {
+                                                            "counts":  [
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  0,
+                                                            "trim_first":  null
+                                                        },
+                                           "AA000011":  {
+                                                            "counts":  [
+                                                                           32,
+                                                                           30,
+                                                                           37,
+                                                                           40,
+                                                                           37
+                                                                       ],
+                                                            "firsts":  [
+                                                                           259,
+                                                                           761,
+                                                                           248,
+                                                                           164,
+                                                                           155
+                                                                       ],
+                                                            "trim_count":  35.33,
+                                                            "trim_first":  223.67
+                                                        },
+                                           "AA000015":  {
+                                                            "counts":  [
+                                                                           76,
+                                                                           72,
+                                                                           73,
+                                                                           79,
+                                                                           71
+                                                                       ],
+                                                            "firsts":  [
+                                                                           139,
+                                                                           147,
+                                                                           138,
+                                                                           162,
+                                                                           157
+                                                                       ],
+                                                            "trim_count":  73.67,
+                                                            "trim_first":  147.67
+                                                        },
+                                           "BB000008":  {
+                                                            "counts":  [
+                                                                           6,
+                                                                           0,
+                                                                           0,
+                                                                           5,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           5373,
+                                                                           null,
+                                                                           null,
+                                                                           3459,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  1.67,
+                                                            "trim_first":  4416
+                                                        },
+                                           "49543030":  {
+                                                            "counts":  [
+                                                                           8,
+                                                                           6,
+                                                                           0,
+                                                                           9,
+                                                                           7
+                                                                       ],
+                                                            "firsts":  [
+                                                                           1062,
+                                                                           5151,
+                                                                           null,
+                                                                           2059,
+                                                                           2281
+                                                                       ],
+                                                            "trim_count":  7,
+                                                            "trim_first":  2170
+                                                        },
+                                           "AA000002":  {
+                                                            "counts":  [
+                                                                           36,
+                                                                           44,
+                                                                           26,
+                                                                           18,
+                                                                           9
+                                                                       ],
+                                                            "firsts":  [
+                                                                           257,
+                                                                           552,
+                                                                           1050,
+                                                                           166,
+                                                                           4791
+                                                                       ],
+                                                            "trim_count":  26.67,
+                                                            "trim_first":  619.67
+                                                        }
+                                       }
+                       },
+    "person_3_4.csv":  {
+                           "sessions":  [
+                                            {
+                                                "session_id":  1,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  154,
+                                                                              "count":  30
+                                                                          },
+                                                             "AA000010":  {
+                                                                              "first":  1056,
+                                                                              "count":  10
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  3060,
+                                                                              "count":  5
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  152,
+                                                                              "count":  50
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  4362,
+                                                                              "count":  12
+                                                                          },
+                                                             "BB000008":  {
+                                                                              "first":  2747,
+                                                                              "count":  12
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  2,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  152,
+                                                                              "count":  28
+                                                                          },
+                                                             "AA000010":  {
+                                                                              "first":  3447,
+                                                                              "count":  5
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  150,
+                                                                              "count":  6
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  460,
+                                                                              "count":  57
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  186,
+                                                                              "count":  29
+                                                                          },
+                                                             "BB000008":  {
+                                                                              "first":  3241,
+                                                                              "count":  10
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  3,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  1359,
+                                                                              "count":  6
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  152,
+                                                                              "count":  74
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  150,
+                                                                              "count":  6
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  1051,
+                                                                              "count":  9
+                                                                          },
+                                                             "BB000008":  {
+                                                                              "first":  349,
+                                                                              "count":  9
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  4,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  360,
+                                                                              "count":  41
+                                                                          },
+                                                             "AA000010":  {
+                                                                              "first":  444,
+                                                                              "count":  11
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  961,
+                                                                              "count":  25
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  139,
+                                                                              "count":  42
+                                                                          },
+                                                             "BB000008":  {
+                                                                              "first":  1260,
+                                                                              "count":  7
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  5,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  147,
+                                                                              "count":  47
+                                                                          },
+                                                             "AA000010":  {
+                                                                              "first":  555,
+                                                                              "count":  8
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  262,
+                                                                              "count":  31
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  149,
+                                                                              "count":  54
+                                                                          }
+                                                         }
+                                            }
+                                        ],
+                           "valid_trim":  5.33,
+                           "unique_trim":  5.33,
+                           "trimmed":  {
+                                           "AA000010":  {
+                                                            "counts":  [
+                                                                           10,
+                                                                           5,
+                                                                           0,
+                                                                           11,
+                                                                           8
+                                                                       ],
+                                                            "firsts":  [
+                                                                           1056,
+                                                                           3447,
+                                                                           null,
+                                                                           444,
+                                                                           555
+                                                                       ],
+                                                            "trim_count":  7.67,
+                                                            "trim_first":  805.5
+                                                        },
+                                           "AA000019":  {
+                                                            "counts":  [
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  0,
+                                                            "trim_first":  null
+                                                        },
+                                           "AA000001":  {
+                                                            "counts":  [
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  0,
+                                                            "trim_first":  null
+                                                        },
+                                           "AA000011":  {
+                                                            "counts":  [
+                                                                           30,
+                                                                           28,
+                                                                           6,
+                                                                           41,
+                                                                           47
+                                                                       ],
+                                                            "firsts":  [
+                                                                           154,
+                                                                           152,
+                                                                           1359,
+                                                                           360,
+                                                                           147
+                                                                       ],
+                                                            "trim_count":  33,
+                                                            "trim_first":  222
+                                                        },
+                                           "AA000015":  {
+                                                            "counts":  [
+                                                                           50,
+                                                                           57,
+                                                                           74,
+                                                                           25,
+                                                                           31
+                                                                       ],
+                                                            "firsts":  [
+                                                                           152,
+                                                                           460,
+                                                                           152,
+                                                                           961,
+                                                                           262
+                                                                       ],
+                                                            "trim_count":  46,
+                                                            "trim_first":  291.33
+                                                        },
+                                           "BB000008":  {
+                                                            "counts":  [
+                                                                           12,
+                                                                           10,
+                                                                           9,
+                                                                           7,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           2747,
+                                                                           3241,
+                                                                           349,
+                                                                           1260,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  8.67,
+                                                            "trim_first":  2003.5
+                                                        },
+                                           "49543030":  {
+                                                            "counts":  [
+                                                                           5,
+                                                                           6,
+                                                                           6,
+                                                                           0,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           3060,
+                                                                           150,
+                                                                           150,
+                                                                           null,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  3.67,
+                                                            "trim_first":  150
+                                                        },
+                                           "AA000002":  {
+                                                            "counts":  [
+                                                                           12,
+                                                                           29,
+                                                                           9,
+                                                                           42,
+                                                                           54
+                                                                       ],
+                                                            "firsts":  [
+                                                                           4362,
+                                                                           186,
+                                                                           1051,
+                                                                           139,
+                                                                           149
+                                                                       ],
+                                                            "trim_count":  27.67,
+                                                            "trim_first":  462
+                                                        }
+                                       }
+                       },
+    "person_3_5.csv":  {
+                           "sessions":  [
+                                            {
+                                                "session_id":  1,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  147,
+                                                                              "count":  35
+                                                                          },
+                                                             "AA000010":  {
+                                                                              "first":  849,
+                                                                              "count":  12
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  2347,
+                                                                              "count":  15
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  149,
+                                                                              "count":  15
+                                                                          },
+                                                             "BB000008":  {
+                                                                              "first":  262,
+                                                                              "count":  26
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  2,
+                                                "tags":  {
+                                                             "AA000015":  {
+                                                                              "first":  147,
+                                                                              "count":  56
+                                                                          },
+                                                             "AA000011":  {
+                                                                              "first":  149,
+                                                                              "count":  65
+                                                                          },
+                                                             "BB000008":  {
+                                                                              "first":  178,
+                                                                              "count":  45
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  3,
+                                                "tags":  {
+                                                             "AA000015":  {
+                                                                              "first":  147,
+                                                                              "count":  64
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  1965,
+                                                                              "count":  5
+                                                                          },
+                                                             "AA000011":  {
+                                                                              "first":  347,
+                                                                              "count":  53
+                                                                          },
+                                                             "BB000008":  {
+                                                                              "first":  149,
+                                                                              "count":  18
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  4,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  2053,
+                                                                              "count":  22
+                                                                          },
+                                                             "AA000010":  {
+                                                                              "first":  1049,
+                                                                              "count":  23
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  140,
+                                                                              "count":  63
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  1047,
+                                                                              "count":  31
+                                                                          },
+                                                             "BB000008":  {
+                                                                              "first":  1814,
+                                                                              "count":  5
+                                                                          }
+                                                         }
+                                            },
+                                            {
+                                                "session_id":  5,
+                                                "tags":  {
+                                                             "AA000011":  {
+                                                                              "first":  2665,
+                                                                              "count":  23
+                                                                          },
+                                                             "AA000010":  {
+                                                                              "first":  650,
+                                                                              "count":  10
+                                                                          },
+                                                             "49543030":  {
+                                                                              "first":  1656,
+                                                                              "count":  6
+                                                                          },
+                                                             "AA000015":  {
+                                                                              "first":  553,
+                                                                              "count":  47
+                                                                          },
+                                                             "AA000002":  {
+                                                                              "first":  551,
+                                                                              "count":  16
+                                                                          },
+                                                             "BB000008":  {
+                                                                              "first":  1940,
+                                                                              "count":  36
+                                                                          }
+                                                         }
+                                            }
+                                        ],
+                           "valid_trim":  4.67,
+                           "unique_trim":  4.67,
+                           "trimmed":  {
+                                           "AA000010":  {
+                                                            "counts":  [
+                                                                           12,
+                                                                           0,
+                                                                           0,
+                                                                           23,
+                                                                           10
+                                                                       ],
+                                                            "firsts":  [
+                                                                           849,
+                                                                           null,
+                                                                           null,
+                                                                           1049,
+                                                                           650
+                                                                       ],
+                                                            "trim_count":  7.33,
+                                                            "trim_first":  849
+                                                        },
+                                           "AA000019":  {
+                                                            "counts":  [
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  0,
+                                                            "trim_first":  null
+                                                        },
+                                           "AA000001":  {
+                                                            "counts":  [
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0,
+                                                                           0
+                                                                       ],
+                                                            "firsts":  [
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null,
+                                                                           null
+                                                                       ],
+                                                            "trim_count":  0,
+                                                            "trim_first":  null
+                                                        },
+                                           "AA000011":  {
+                                                            "counts":  [
+                                                                           35,
+                                                                           65,
+                                                                           53,
+                                                                           22,
+                                                                           23
+                                                                       ],
+                                                            "firsts":  [
+                                                                           147,
+                                                                           149,
+                                                                           347,
+                                                                           2053,
+                                                                           2665
+                                                                       ],
+                                                            "trim_count":  37,
+                                                            "trim_first":  849.67
+                                                        },
+                                           "AA000015":  {
+                                                            "counts":  [
+                                                                           15,
+                                                                           56,
+                                                                           64,
+                                                                           63,
+                                                                           47
+                                                                       ],
+                                                            "firsts":  [
+                                                                           2347,
+                                                                           147,
+                                                                           147,
+                                                                           140,
+                                                                           553
+                                                                       ],
+                                                            "trim_count":  55.33,
+                                                            "trim_first":  282.33
+                                                        },
+                                           "BB000008":  {
+                                                            "counts":  [
+                                                                           26,
+                                                                           45,
+                                                                           18,
+                                                                           5,
+                                                                           36
+                                                                       ],
+                                                            "firsts":  [
+                                                                           262,
+                                                                           178,
+                                                                           149,
+                                                                           1814,
+                                                                           1940
+                                                                       ],
+                                                            "trim_count":  26.67,
+                                                            "trim_first":  751.33
+                                                        },
+                                           "49543030":  {
+                                                            "counts":  [
+                                                                           0,
+                                                                           0,
+                                                                           5,
+                                                                           0,
+                                                                           6
+                                                                       ],
+                                                            "firsts":  [
+                                                                           null,
+                                                                           null,
+                                                                           1965,
+                                                                           null,
+                                                                           1656
+                                                                       ],
+                                                            "trim_count":  1.67,
+                                                            "trim_first":  1810.5
+                                                        },
+                                           "AA000002":  {
+                                                            "counts":  [
+                                                                           15,
+                                                                           0,
+                                                                           0,
+                                                                           31,
+                                                                           16
+                                                                       ],
+                                                            "firsts":  [
+                                                                           149,
+                                                                           null,
+                                                                           null,
+                                                                           1047,
+                                                                           551
+                                                                       ],
+                                                            "trim_count":  10.33,
+                                                            "trim_first":  551
+                                                        }
+                                       }
+                       }
+}

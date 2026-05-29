@@ -29,7 +29,8 @@ String FirmwareUpdater::requestUrl() const {
 
 void FirmwareUpdater::performFirmwareUpdate(
     std::function<void(float)> progressCallback,
-    std::function<void(FirmwareUpdateResult)> resultCallback) {
+    std::function<void(FirmwareUpdateResult)> resultCallback,
+    ServiceCallback serviceCallback) {
   String url = requestUrl();
   if (WiFi.status() != WL_CONNECTED || url.isEmpty()) {
     if (resultCallback) {
@@ -68,8 +69,15 @@ void FirmwareUpdater::performFirmwareUpdate(
       float lastProgress = 0.0f;
 
       while (httpClient.connected() && (writtenSize < static_cast<size_t>(totalSize))) {
+        if (serviceCallback) {
+          serviceCallback();
+        }
+
         size_t available = stream->available();
         if (available == 0) {
+          if (serviceCallback) {
+            serviceCallback();
+          }
           delay(1);
           yield();
           continue;

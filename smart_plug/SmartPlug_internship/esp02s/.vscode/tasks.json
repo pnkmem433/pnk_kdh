@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "ESP02S Full Build",
+      "type": "shell",
+      "command": "$env:GDRIVE_VERSION = if ($env:GDRIVE_VERSION) { $env:GDRIVE_VERSION } else { Read-Host 'Enter firmware version number' }; & \"$env:USERPROFILE\\.platformio\\penv\\Scripts\\platformio.exe\" run -e esp02s",
+      "options": {
+        "cwd": "C:\\WS\\vs_kdh\\pnk_kdh\\smart_plug\\SmartPlug_internship\\esp02s",
+        "shell": {
+          "executable": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "args": [
+            "-Command"
+          ]
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

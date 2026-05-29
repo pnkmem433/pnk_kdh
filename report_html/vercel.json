@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/styling_booth", "destination": "/styling_booth/index.html" },
+    { "source": "/styling_booth/(.*)", "destination": "/styling_booth/$1" },
+    { "source": "/smart_plug", "destination": "/smart_plug/index.html" },
+    { "source": "/smart_plug/(.*)", "destination": "/smart_plug/$1" },
+    { "source": "/esp_now", "destination": "/esp_now/index.html" },
+    { "source": "/esp_now/(.*)", "destination": "/esp_now/$1" }
+  ]
+}

@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D 프린터기 사용 일정</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// Three.js STLLoader 정의 (동일)
+THREE.STLLoader = function(manager) { this.manager = manager || THREE.DefaultLoadingManager; };
+THREE.STLLoader.prototype = {
+    constructor: THREE.STLLoader,
+    load: function(url, onLoad) {
+        var loader = new THREE.FileLoader(this.manager);
+        loader.setResponseType('arraybuffer');
+        loader.load(url, function(text) { onLoad(this.parse(text)); }.bind(this));
+    },
+    parse: function(data) {
+        if (data instanceof ArrayBuffer) return this.isBinary(data) ? this.parseBinary(data) : this.parseASCII(this.ensureString(data));
+        return this.parseASCII(data);
+    },
+    isBinary: function(data) {
+        var reader = new DataView(data);
+        var faces = reader.getUint32(80, true);
+        return (80 + 4 + (faces * 50)) === reader.byteLength;
+    },
+    ensureString: function(buf) {
+        if (typeof buf !== 'string') {
+            var array = new Uint8Array(buf);
+            var str = '';
+            for (var i = 0; i < array.length; i++) str += String.fromCharCode(array[i]);
+            return str;
+        }
+        return buf;
+    },
+    parseBinary: function(data) {
+        var reader = new DataView(data);
+        var faces = reader.getUint32(80, true);
+        var geometry = new THREE.BufferGeometry();
+        var vertices = [], normals = [];
+        for (var face = 0; face < faces; face++) {
+            var start = 80 + 4 + (face * 50);
+            var nx = reader.getFloat32(start, true), ny = reader.getFloat32(start+4, true), nz = reader.getFloat32(start+8, true);
+            for (var i = 1; i <= 3; i++) {
+                var vstart = start + 12 + (i-1)*12;
+                vertices.push(reader.getFloat32(vstart, true), reader.getFloat32(vstart+4, true), reader.getFloat32(vstart+8, true));
+                normals.push(nx, ny, nz);
+            }
+        }
+        geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+        geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), 3));
+        return geometry;
+    },
+    parseASCII: function(data) {
+        var geometry = new THREE.BufferGeometry();
+        var patternVertex = /vertex\s+([\-+]?[0-9]+\.?[0-9]*([eE][\-+]?[0-9]+)?)+[\s]+([\-+]?[0-9]+\.?[0-9]*([eE][\-+]?[0-9]+)?)+[\s]+([\-+]?[0-9]+\.?[0-9]*([eE][\-+]?[0-9]+)?)+/g;
+        var vertices = [], result;
+        while ((result = patternVertex.exec(data)) !== null) vertices.push(parseFloat(result[1]), parseFloat(result[3]), parseFloat(result[5]));
+        geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+        geometry.computeVertexNormals();
+        return geometry;
+    }
+};
+</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+    --bg:#f8f9fc; --surface:#fff; --surface2:#f1f3f8;
+    --border:#dfe3eb; --border2:#c8ced9;
+    --text:#1a1d23; --text-dim:#64748b;
+    --shadow:0 4px 12px rgba(0,0,0,0.05); --now:#ef4444;
+    --header-height:64px;
+    --time-grid-width:960px;
+    --timeline-min-width:calc(80px + 160px + 70px + var(--time-grid-width));
+}
+[data-theme="dark"] {
+    --bg:#0f172a; --surface:#1e293b; --surface2:#334155;
+    --border:#334155; --border2:#475569;
+    --text:#f8fafc; --text-dim:#94a3b8;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans KR', sans-serif; background:var(--bg); color:var(--text); height:100vh; height:100dvh; overflow:hidden; }
+
+header {
+    min-height: var(--header-height); display:flex; align-items:center; padding:0 24px;
+    background:var(--surface); border-bottom:1px solid var(--border); box-shadow:var(--shadow);
+    z-index:100; position:relative; gap:15px;
+}
+header h1 { font-size:20px; font-weight:900; color:#2563eb; }
+
+.nav-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+.btn {
+    padding:8px 16px; border-radius:8px; border:1px solid var(--border);
+    background:var(--surface); color:var(--text); cursor:pointer; font-size:13px; font-weight:700;
+    white-space: nowrap;
+}
+.btn:hover { background:var(--surface2); }
+#dayLabel {
+    font-family:'JetBrains Mono';
+    font-weight:700;
+    min-width:220px;
+    text-align:center;
+    white-space: nowrap;
+}
+
+.toggles { display:flex; gap:8px; margin-left:auto; }
+.chip { padding:6px 14px; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; border:2px solid transparent; }
+.chip.off { opacity:0.3; filter:grayscale(1); }
+
+/* ── 그리드 레이아웃 ── */
+.main-container { height: calc(100vh - var(--header-height)); height: calc(100dvh - var(--header-height)); display: flex; flex-direction: column; min-height: 0; }
+.calendar-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.calendar-content {
+    min-width: 100%;
+    width: 100%;
+}
+
+.timeline-header {
+    display: grid; grid-template-columns: 80px 160px 70px minmax(0, 1fr);
+    background: var(--surface2); border-bottom: 2px solid var(--border2);
+    position: sticky;
+    top: 0;
+    z-index: 30;
+}
+.time-cols { display: grid; grid-template-columns: repeat(24, 1fr); }
+.time-label {
+    padding:12px 0; text-align:center; font-family:'JetBrains Mono'; font-size:11px;
+    color:var(--text-dim); border-right:1px solid var(--border);
+}
+
+.scroll-area { min-height: 0; }
+
+/* ── 요일 행 (높이 증가 및 선 정렬) ── */
+.day-row {
+    display: grid; grid-template-columns: 80px 160px 70px minmax(0, 1fr);
+    min-height: 160px;
+    border-bottom: 4px solid var(--border2);
+    scroll-margin-block: 24px;
+    content-visibility: auto;
+    contain-intrinsic-size: 160px;
+}
+.day-info {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: var(--surface); border-right: 2px solid var(--border2);
+}
+.day-num { font-size:36px; font-weight:900; color:#2563eb; }
+.day-row.is-today .day-info {
+    background: rgba(37, 99, 235, 0.08);
+}
+.day-row.is-sunday .day-num {
+    color: var(--now);
+}
+
+/* 프린터/구분 레이블 영역 */
+.printer-group, .type-group {
+    display: grid; grid-template-rows: repeat(3, 1fr);
+    border-right: 1px solid var(--border); background: var(--surface);
+}
+.p-label-box {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    padding: 10px; font-size: 12px; font-weight: 800; border-bottom: 1px solid var(--border);
+    line-height: 1.3; gap: 6px;
+}
+.p-meta {
+    display: flex;
+    justify-content: center;
+}
+.util-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 72px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    background: color-mix(in srgb, currentColor 10%, white);
+    font-size: 10px;
+    font-weight: 900;
+    line-height: 1.2;
+}
+.util-badge.pending {
+    color: var(--text-dim);
+    border-color: var(--border2);
+    background: var(--surface2);
+}
+.type-sub-grid {
+    display: grid; grid-template-rows: 1fr 1fr;
+    border-bottom: 1px solid var(--border);
+}
+.type-label {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; border-bottom: 1px solid rgba(0,0,0,0.05);
+    color: var(--text-dim);
+}
+
+/* ── 시간 그리드 영역 (가로선 추가) ── */
+.grid-area {
+    display: grid; grid-template-rows: repeat(6, 1fr); position: relative;
+    background-image: 
+        linear-gradient(to right, var(--border) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+    background-size: calc(100% / 24) 16.666%; /* 6단 가로선과 정확히 일치 */
+}
+/* 프린터기 단위로 더 굵은 가로선 */
+.grid-area::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to bottom, var(--border2) 2px, transparent 2px);
+    background-size: 100% 33.333%;
+}
+
+.ev-block {
+    position: absolute; border-radius: 6px; padding: 0 12px;
+    font-size: 12px; font-weight: 800; overflow: hidden; cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12); z-index: 10;
+    display: flex; flex-direction: column; justify-content: center;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+.ev-res { background: var(--surface) !important; border: 3px solid var(--p-color); color: var(--p-color); }
+.ev-act { color: #fff; background: var(--p-color); }
+
+/* ── 모달 & 3D 뷰어 ── */
+#modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
+}
+.modal-content {
+    background: var(--surface); width: 95%; max-width: 1000px; height: 85vh;
+    border-radius: 24px; display: grid; grid-template-columns: 350px 1fr; overflow: hidden;
+}
+.info-area { padding: 40px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
+.stl-viewer { background: #000; position: relative; }
+#loadingOverlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; color: white; }
+
+@media (max-width: 900px) {
+    :root {
+        --header-height: 132px;
+        --time-grid-width: 1080px;
+    }
+
+    .calendar-content {
+        min-width: var(--timeline-min-width);
+        width: max-content;
+    }
+
+    .timeline-header {
+        grid-template-columns: 80px 160px 70px var(--time-grid-width);
+    }
+
+    .day-row {
+        grid-template-columns: 80px 160px 70px var(--time-grid-width);
+    }
+
+    header {
+        padding: 10px 12px;
+        align-items: flex-start;
+        align-content: flex-start;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    header h1 {
+        width: 100%;
+        font-size: 18px;
+        line-height: 1.25;
+    }
+
+    .nav-group {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    #dayLabel {
+        order: -1;
+        width: 100%;
+        min-width: 0;
+        padding: 8px 10px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface2);
+        font-size: 12px;
+    }
+
+    .btn {
+        padding: 9px 12px;
+        font-size: 12px;
+    }
+
+    .toggles {
+        width: 100%;
+        margin-left: 0;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .chip {
+        flex: 0 0 auto;
+    }
+
+    .timeline-header { font-size: 12px; }
+
+    .time-label {
+        padding: 10px 0;
+        font-size: 10px;
+    }
+
+    .day-row { min-height: 138px; }
+
+    .day-num {
+        font-size: 30px;
+    }
+
+    .p-label-box {
+        padding: 8px 6px;
+        font-size: 11px;
+    }
+
+    .type-label {
+        font-size: 10px;
+    }
+
+    .ev-block {
+        padding: 0 8px;
+        font-size: 11px;
+    }
+
+    .modal-content {
+        width: calc(100% - 16px);
+        height: calc(100dvh - 16px);
+        border-radius: 18px;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto minmax(240px, 42vh);
+    }
+
+    .info-area {
+        padding: 20px;
+        gap: 14px;
+    }
+}
+
+@media (max-width: 520px) {
+    :root {
+        --header-height: 176px;
+        --time-grid-width: 1200px;
+    }
+
+    .nav-group .btn,
+    header > .btn {
+        flex: 1 1 calc(33.333% - 6px);
+        text-align: center;
+    }
+
+    .timeline-header > div,
+    .day-info,
+    .printer-group,
+    .type-group {
+        border-right-width: 1px;
+    }
+}
+
+</style>
+</head>
+<body>
+
+<header>
+    <h1>🖨 3D 프린터기 사용 일정</h1>
+    <div class="nav-group">
+        <div id="dayLabel">로딩 중...</div>
+        <button class="btn" onclick="shiftWeek(-1)">저번주</button>
+        <button class="btn" onclick="goToday()">오늘</button>
+        <button class="btn" onclick="shiftWeek(1)">다음주</button>
+    </div>
+    <div class="toggles" id="toggles"></div>
+    <button class="btn" onclick="loadData()">🔄 새로고침</button>
+</header>
+
+<div class="main-container">
+    <div class="calendar-scroll" id="calendarScroll">
+        <div class="calendar-content">
+            <div class="timeline-header">
+                <div style="padding:12px; font-weight:bold; text-align:center;">요일</div>
+                <div style="padding:12px; font-weight:bold; text-align:center;">프린터명</div>
+                <div style="padding:12px; font-weight:bold; text-align:center;">구분</div>
+                <div class="time-cols" id="timeHeader"></div>
+            </div>
+            <div class="scroll-area" id="weekContainer"></div>
+        </div>
+    </div>
+</div>
+
+<div id="modal" onclick="handleModalBackdrop(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="info-area">
+            <h2 id="mTitle">사용 정보</h2>
+            <div id="mInfo" style="line-height:2; font-size:15px;"></div>
+            <hr style="border:0; border-top:1px solid var(--border)">
+            <h3>📦 3D 모델 자동 로드</h3>
+            <p style="font-size:12px; color:var(--text-dim)">J열에 입력된 파일명으로 드라이브에서 로드합니다.</p>
+            <div id="stlList" style="margin-top:10px;"></div>
+            <button class="btn" onclick="closeModal()" style="margin-top:auto; background:#ef4444; color:white; border:none;">창 닫기</button>
+        </div>
+        <div class="stl-viewer" id="viewerContainer">
+            <div id="loadingOverlay">⌛ 모델을 가져오는 중...</div>
+            <div id="stlPlaceholder" style="color:#64748b; height:100%; display:flex; align-items:center; justify-content:center; text-align:center; padding:40px;">
+                왼쪽 파일 버튼을 누르면<br>구글 드라이브에서 3D 모델을 가져옵니다.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxVZLOjVw2g94Vm8yF1etpuWM_cg1Ge_JseQ3fM6vDSIX9rsqpv_QCgXjFr5bZUQ-AA/exec';
+
+const PRINTERS = [
+    { id: 1, name: 'Cubicon 3DP-310F', short: 'Cubicon<br>3DP-310F', color: '#2563eb' },
+    { id: 2, name: 'Cubicon Style-NEO A31C', short: 'Cubicon Style<br>Neo A31C', color: '#dc2626' },
+    { id: 3, name: 'Cubicon Dual Plus S30i', short: 'Cubicon Dual<br>Plus S30i', color: '#16a34a' }
+];
+
+const PRINTER_MAP = {
+    'Cubicon 3DP-310F': 1,
+    'Cubicon Style-NEO A31C': 2,
+    'Cubicon Dual Plus S30i': 3
+};
+
+let EVENTS = [];
+let visible = {};
+let currentBaseDate = new Date();
+let renderer, animId;
+let jsonpSeq = 0;
+let stlResizeHandler = null;
+let stlControls = null;
+let lastDataTimestamp = '0';
+let refreshTimer = null;
+let isLoadingData = false;
+
+PRINTERS.forEach(p => {
+    visible[`${p.id}-res`] = true;
+    visible[`${p.id}-act`] = true;
+});
+
+function escapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function extractStlFiles(fileCell) {
+    const matches = String(fileCell || '').match(/[^,\n;]+?\.stl/gi);
+    return (matches || []).map(v => v.trim()).filter(Boolean);
+}
+
+function extractTypeLabel(label, type) {
+    const text = String(label || '').trim();
+    if (!text) return '';
+    const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+    const keyword = type === 'res' ? '[예약]' : '[실사용]';
+    const matched = lines.find(line => line.includes(keyword));
+    if (matched) return matched;
+
+    const printingLine = lines.find(line => line.includes('[3D프린팅]'));
+    if (printingLine) return printingLine;
+
+    if (lines.length === 1) return lines[0];
+    return '';
+}
+
+function buildFallbackText(row, type) {
+    const parts = [];
+    if (row.user) parts.push(row.user);
+    if (row.item) parts.push(row.item);
+    const firstFile = extractStlFiles(row.file)[0];
+    if (firstFile) parts.push(firstFile);
+    return parts.join(' / ') || (type === 'res' ? '예약 일정' : '실사용 일정');
+}
+
+function buildEventText(row, type) {
+    return extractTypeLabel(type === 'res' ? row.resLabel : row.actLabel, type)
+        || extractTypeLabel(row.label, type)
+        || buildFallbackText(row, type);
+}
+
+function normalizeRow(row) {
+    return {
+        ...row,
+        label: String(row.label || '').trim(),
+        resLabel: String(row.resLabel || '').trim(),
+        actLabel: String(row.actLabel || '').trim(),
+        file: String(row.file || '').trim(),
+        item: String(row.item || '').trim(),
+        user: String(row.user || '').trim(),
+        memo: String(row.memo || '').trim(),
+        status: String(row.status || '').trim(),
+        reason: String(row.reason || '').trim()
+    };
+}
+
+function formatDateKey(date) {
+    return date.getFullYear()
+        + String(date.getMonth() + 1).padStart(2, '0')
+        + String(date.getDate()).padStart(2, '0');
+}
+
+function getDailyUtilizationInfo(dateStr, printerId) {
+    const todayKey = formatDateKey(new Date());
+    if (dateStr >= todayKey) {
+        return { text: '집계 대기', pending: true };
+    }
+
+    const intervals = EVENTS
+        .filter(e => e.date === dateStr && e.printer === printerId && e.type === 'act')
+        .map(e => [Math.max(0, e.start), Math.min(1440, e.start + e.dur)])
+        .sort((a, b) => a[0] - b[0]);
+
+    if (!intervals.length) {
+        return { text: '가동률 0%', pending: false };
+    }
+
+    const merged = [];
+    intervals.forEach(([start, end]) => {
+        const last = merged[merged.length - 1];
+        if (!last || start > last[1]) {
+            merged.push([start, end]);
+            return;
+        }
+        last[1] = Math.max(last[1], end);
+    });
+
+    const usedMinutes = merged.reduce((sum, [start, end]) => sum + Math.max(0, end - start), 0);
+    const percent = Math.round((usedMinutes / 1440) * 100);
+    return { text: `가동률 ${percent}%`, pending: false };
+}
+
+function requestWebApp(mode, params = {}) {
+    const callbackName = `__printerCalendarJsonp_${Date.now()}_${jsonpSeq++}`;
+    const query = new URLSearchParams({ mode, callback: callbackName, ...params });
+    const url = `${WEBAPP_URL}?${query.toString()}`;
+
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        const cleanup = () => {
+            delete window[callbackName];
+            script.remove();
+        };
+
+        window[callbackName] = data => {
+            cleanup();
+            resolve(data);
+        };
+
+        script.onerror = () => {
+            cleanup();
+            reject(new Error(`Web app request failed: ${mode}`));
+        };
+
+        script.src = url;
+        document.body.appendChild(script);
+    });
+}
+
+async function loadData() {
+    try {
+        const data = await requestWebApp('data');
+        EVENTS = parseEvents(data.rows || []);
+        renderAll();
+    } catch (e) {
+        console.error(e);
+        alert('시트 데이터를 불러오지 못했습니다. Apps Script를 다시 배포했는지와 웹앱 URL이 맞는지 확인해주세요.');
+    }
+}
+
+const initialLoadData = loadData;
+
+loadData = async function(options = {}) {
+    if (isLoadingData) return;
+    isLoadingData = true;
+    try {
+        const data = await requestWebApp('data');
+        EVENTS = parseEvents(data.rows || []);
+        lastDataTimestamp = String(data.updatedAt || Date.now());
+        renderAll();
+    } catch (e) {
+        console.error(e);
+        if (!options.silent) {
+            alert('?쒗듃 ?곗씠?곕? 遺덈윭?ㅼ? 紐삵뻽?듬땲?? Apps Script瑜??ㅼ떆 諛고룷?덈뒗吏? ?뱀빋 URL??留욌뒗吏 ?뺤씤?댁＜?몄슂.');
+        }
+    } finally {
+        isLoadingData = false;
+    }
+};
+
+async function pollForUpdates() {
+    if (isLoadingData) return;
+    try {
+        const res = await requestWebApp('ts');
+        const nextTs = String((res && res.ts) || '0');
+        if (lastDataTimestamp === '0') {
+            lastDataTimestamp = nextTs;
+            return;
+        }
+        if (nextTs !== '0' && nextTs !== lastDataTimestamp) {
+            lastDataTimestamp = nextTs;
+            await loadData({ silent: true });
+        }
+    } catch (e) {
+        console.error('Auto refresh failed:', e);
+    }
+}
+
+function startAutoRefresh() {
+    if (refreshTimer) clearInterval(refreshTimer);
+    refreshTimer = setInterval(pollForUpdates, 3000);
+}
+
+function parseEvents(rows) {
+    const evs = [];
+    rows.map(normalizeRow).forEach(row => {
+        const pid = PRINTER_MAP[row.printer];
+        if (!pid || !row.date || row.deleted) return;
+
+        const process = (timeStr, durStr, type) => {
+            if (!timeStr || !durStr) return;
+            const [h, m] = timeStr.split(':').map(Number);
+            const [dh, dm] = durStr.split(':').map(Number);
+            const start = h * 60 + m;
+            const dur = dh * 60 + dm;
+            const eventBase = {
+                ...row,
+                printer: pid,
+                type,
+                displayText: buildEventText(row, type)
+            };
+
+            if (start + dur > 1440) {
+                evs.push({ ...eventBase, date: row.date, start, dur: 1440 - start, symbol: '↪' });
+                const dt = new Date(row.date.slice(0, 4), row.date.slice(4, 6) - 1, Number(row.date.slice(6, 8)) + 1);
+                const nextDate = dt.getFullYear() + String(dt.getMonth() + 1).padStart(2, '0') + String(dt.getDate()).padStart(2, '0');
+                evs.push({ ...eventBase, date: nextDate, start: 0, dur: (start + dur) - 1440, symbol: '↩' });
+            } else {
+                evs.push({ ...eventBase, date: row.date, start, dur, symbol: '' });
+            }
+        };
+
+        process(row.resStart, row.resDur, 'res');
+        process(row.actStart, row.actDur, 'act');
+    });
+    return evs;
+}
+
+function renderAll(options = {}) {
+    renderTimeHeader();
+    renderToggles();
+    renderWeek(options);
+}
+
+function renderTimeHeader() {
+    const h = document.getElementById('timeHeader');
+    h.innerHTML = '';
+    for (let i = 0; i < 24; i++) {
+        const d = document.createElement('div');
+        d.className = 'time-label';
+        d.textContent = `${String(i).padStart(2, '0')}:00`;
+        h.appendChild(d);
+    }
+}
+
+function renderToggles() {
+    const t = document.getElementById('toggles');
+    t.innerHTML = '';
+    PRINTERS.forEach(p => {
+        ['res', 'act'].forEach(type => {
+            const key = `${p.id}-${type}`;
+            const chip = document.createElement('div');
+            chip.className = `chip ${visible[key] ? '' : 'off'}`;
+            chip.style.cssText = `background-color:${type === 'act' ? p.color : 'transparent'}; border-color:${p.color}; color:${type === 'act' ? '#fff' : p.color};`;
+            chip.textContent = `${p.name.split(' ')[1]} ${type === 'res' ? '예약' : '실사용'}`;
+            chip.onclick = () => {
+                visible[key] = !visible[key];
+                renderAll();
+            };
+            t.appendChild(chip);
+        });
+    });
+}
+
+function renderWeek(options = {}) {
+    const container = document.getElementById('weekContainer');
+    container.innerHTML = '';
+    const startOfWeek = new Date(currentBaseDate);
+    const day = startOfWeek.getDay();
+    startOfWeek.setDate(startOfWeek.getDate() - day + (day === 0 ? -6 : 1));
+    document.getElementById('dayLabel').textContent = `${startOfWeek.toLocaleDateString()} - ${new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString()}`;
+
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(startOfWeek.getTime() + i * 24 * 60 * 60 * 1000);
+        container.appendChild(createDayRow(d));
+    }
+
+    if (options.centerDate) {
+        requestAnimationFrame(() => scrollDateRowToCenter(options.centerDate));
+    }
+}
+
+function createDayRow(date) {
+    const dateStr = formatDateKey(date);
+    const todayKey = formatDateKey(new Date());
+    const row = document.createElement('div');
+    row.className = 'day-row';
+    row.dataset.date = dateStr;
+    if (dateStr === todayKey) row.classList.add('is-today');
+    if (date.getDay() === 0) row.classList.add('is-sunday');
+    row.innerHTML = `
+        <div class="day-info">
+            <div style="font-size:13px; font-weight:700; color:var(--text-dim)">${['일', '월', '화', '수', '목', '금', '토'][date.getDay()]}요일</div>
+            <div class="day-num">${date.getDate()}</div>
+        </div>
+        <div class="printer-group">
+            ${PRINTERS.map(p => {
+                const utilization = getDailyUtilizationInfo(dateStr, p.id);
+                return `<div class="p-label-box" style="color:${p.color}">
+                    <div>${p.short}</div>
+                    <div class="p-meta">
+                        <span class="util-badge ${utilization.pending ? 'pending' : ''}">${utilization.text}</span>
+                    </div>
+                </div>`;
+            }).join('')}
+        </div>
+        <div class="type-group">
+            ${PRINTERS.map(() => `<div class="type-sub-grid"><div class="type-label">예약</div><div class="type-label">실사용</div></div>`).join('')}
+        </div>
+        <div class="grid-area" id="grid_${dateStr}"></div>
+    `;
+
+    const grid = row.querySelector(`#grid_${dateStr}`);
+    EVENTS.filter(e => e.date === dateStr).forEach(e => {
+        if (!visible[`${e.printer}-${e.type}`]) return;
+        const p = PRINTERS.find(x => x.id === e.printer);
+        const evEl = document.createElement('div');
+        evEl.className = `ev-block ${e.type === 'res' ? 'ev-res' : 'ev-act'}`;
+        evEl.style.cssText = `--p-color:${p.color}; left:${(e.start / 1440) * 100}%; width:${(e.dur / 1440) * 100}%; top:${(((e.printer - 1) * 2) + (e.type === 'res' ? 0 : 1)) / 6 * 100 + 0.5}%; height:15.5%;`;
+        evEl.innerHTML = `<div style="height:100%; display:flex; align-items:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(e.symbol + e.displayText)}</div>`;
+        evEl.onclick = () => openModal(e);
+        grid.appendChild(evEl);
+    });
+    return row;
+}
+
+function scrollDateRowToCenter(dateStr) {
+    const weekContainer = document.getElementById('weekContainer');
+    const scrollArea = document.getElementById('calendarScroll');
+    const target = weekContainer.querySelector(`.day-row[data-date="${dateStr}"]`);
+    if (!target) return;
+
+    const targetTop = target.offsetTop;
+    const targetHeight = target.offsetHeight;
+    const nextTop = targetTop - (scrollArea.clientHeight / 2) + (targetHeight / 2);
+    const maxScroll = Math.max(0, scrollArea.scrollHeight - scrollArea.clientHeight);
+    scrollArea.scrollTo({
+        top: Math.min(Math.max(0, nextTop), maxScroll),
+        behavior: 'smooth'
+    });
+}
+
+function infoLine(label, value) {
+    return `<b>${escapeHtml(label)}:</b> ${escapeHtml(value || '-')}`;
+}
+
+function openModal(e) {
+    const modal = document.getElementById('modal');
+    const printer = PRINTERS.find(x => x.id === e.printer);
+    const stlFiles = extractStlFiles(e.file);
+    const displayTitle = e.displayText || buildFallbackText(e, e.type);
+
+    document.getElementById('mTitle').textContent = displayTitle;
+    document.getElementById('mInfo').innerHTML = [
+        infoLine('장비', printer ? printer.name : ''),
+        infoLine('사용자', e.user),
+        infoLine('출력품명', e.item),
+        infoLine('예약', e.resStart && e.resDur ? `${e.resStart} (${e.resDur})` : ''),
+        infoLine('실사용', e.actStart && e.actDur ? `${e.actStart} (${e.actDur})` : ''),
+        infoLine('상태', e.status),
+        infoLine('사유', e.reason),
+        infoLine('STL 파일', stlFiles.join(', ')),
+        infoLine('메모', e.memo)
+    ].join('<br>');
+
+    const stlList = document.getElementById('stlList');
+    stlList.innerHTML = '';
+    document.getElementById('stlPlaceholder').style.display = 'flex';
+    if (renderer) {
+        cancelAnimationFrame(animId);
+        renderer.domElement.remove();
+        renderer = null;
+    }
+
+    if (stlFiles.length) {
+        stlFiles.forEach(fileName => {
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.style.width = '100%';
+            btn.style.marginBottom = '10px';
+            btn.textContent = `${fileName} 보기`;
+            btn.onclick = () => loadFromDrive(fileName, e.user);
+            stlList.appendChild(btn);
+        });
+    } else {
+        stlList.innerHTML = '<div style="color:var(--text-dim); text-align:center; padding:20px;">J열에 등록된 STL 파일명이 없습니다.</div>';
+    }
+
+    modal.style.display = 'flex';
+}
+
+function withGasRunner(fileName, userName) {
+    return new Promise((resolve, reject) => {
+        google.script.run
+            .withSuccessHandler(resolve)
+            .withFailureHandler(reject)
+            .getSTLData(fileName, userName);
+    });
+}
+
+async function loadFromDrive(fileName, userName) {
+    const loading = document.getElementById('loadingOverlay');
+    loading.style.display = 'flex';
+    try {
+        let res;
+        if (window.google && google.script && google.script.run) {
+            res = await withGasRunner(fileName, userName);
+        } else {
+            res = await requestWebApp('stl', { file: fileName, user: userName || '' });
+        }
+
+        if (res && res.success && (res.data || res.base64)) {
+            renderSTL(res.data || res.base64);
+        } else {
+            alert((res && res.msg) || 'STL 파일을 불러오지 못했습니다.');
+        }
+    } catch (error) {
+        console.error(error);
+        alert('STL 파일을 불러오는 중 오류가 발생했습니다.');
+    } finally {
+        loading.style.display = 'none';
+    }
+}
+
+function renderSTL(base64Data) {
+    document.getElementById('stlPlaceholder').style.display = 'none';
+    const container = document.getElementById('viewerContainer');
+    if (renderer) {
+        cancelAnimationFrame(animId);
+        renderer.domElement.remove();
+        renderer.dispose();
+    }
+    if (stlControls) {
+        stlControls.dispose();
+        stlControls = null;
+    }
+    if (stlResizeHandler) {
+        window.removeEventListener('resize', stlResizeHandler);
+        stlResizeHandler = null;
+    }
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x22252a);
+
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 10000);
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    container.appendChild(renderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0x888888));
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(1, 1, 1).normalize();
+    scene.add(light);
+    const light2 = new THREE.DirectionalLight(0xffffff, 0.5);
+    light2.position.set(-1, -1, -1).normalize();
+    scene.add(light2);
+
+    const binary = atob(base64Data);
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        array[i] = binary.charCodeAt(i);
+    }
+
+    const geometry = new THREE.STLLoader().parse(array.buffer);
+    geometry.computeVertexNormals();
+
+    const mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({
+        color: 0x2563eb,
+        specular: 0x111111,
+        shininess: 100,
+        side: THREE.DoubleSide
+    }));
+    geometry.computeBoundingBox();
+    const center = new THREE.Vector3();
+    geometry.boundingBox.getCenter(center);
+    mesh.position.sub(center);
+    scene.add(mesh);
+
+    const size = new THREE.Vector3();
+    geometry.boundingBox.getSize(size);
+    const maxDim = Math.max(size.x, size.y, size.z) || 1;
+    const cameraZ = Math.abs((maxDim / 2) / Math.tan((camera.fov * Math.PI / 180) / 2));
+    const distance = Math.max(cameraZ * 1.5, 10);
+    camera.position.set(distance * 0.8, distance * 0.8, distance * 1.5);
+    camera.lookAt(0, 0, 0);
+    camera.near = Math.max(distance / 1000, 0.1);
+    camera.far = Math.max(distance * 10, 10000);
+    camera.updateProjectionMatrix();
+
+    stlControls = new THREE.OrbitControls(camera, renderer.domElement);
+    stlControls.target.set(0, 0, 0);
+    stlControls.enableDamping = true;
+    stlControls.dampingFactor = 0.08;
+    stlControls.rotateSpeed = 0.9;
+    stlControls.zoomSpeed = 1.0;
+    stlControls.panSpeed = 0.8;
+    stlControls.minDistance = Math.max(maxDim * 0.25, 1);
+    stlControls.maxDistance = Math.max(distance * 4, 50);
+    stlControls.update();
+
+    stlResizeHandler = () => {
+        const width = container.clientWidth || 1;
+        const height = container.clientHeight || 1;
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+        if (stlControls) stlControls.update();
+    };
+    window.addEventListener('resize', stlResizeHandler);
+
+    function animate() {
+        animId = requestAnimationFrame(animate);
+        if (stlControls) stlControls.update();
+        renderer.render(scene, camera);
+    }
+
+    animate();
+}
+
+function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+    if (animId) cancelAnimationFrame(animId);
+    if (stlControls) {
+        stlControls.dispose();
+        stlControls = null;
+    }
+    if (stlResizeHandler) {
+        window.removeEventListener('resize', stlResizeHandler);
+        stlResizeHandler = null;
+    }
+}
+
+function handleModalBackdrop(event) {
+    if (event.target.id === 'modal') {
+        closeModal();
+    }
+}
+
+function shiftWeek(n) {
+    currentBaseDate.setDate(currentBaseDate.getDate() + n * 7);
+    renderAll();
+}
+
+function goCurrentWeek() {
+    currentBaseDate = new Date();
+    renderAll();
+}
+
+function goToday() {
+    const today = new Date();
+    currentBaseDate = today;
+    renderAll({ centerDate: formatDateKey(today) });
+}
+
+loadData();
+startAutoRefresh();
+</script>
+</body>
+</html>
