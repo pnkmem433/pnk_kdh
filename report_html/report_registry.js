@@ -1,5 +1,5 @@
 ﻿window.REPORT_REGISTRY = {
-    "generatedAt":  "2026-05-28 15:50:53",
+    "generatedAt":  "2026-05-29 13:17:13",
     "topics":  {
                    "styling_booth":  {
                                          "latest":  {
@@ -15,16 +15,16 @@
                                                              "subtitle":  "260528_강동현_RFID테스트케이스 구조화.html"
                                                          },
                                                          {
-                                                             "href":  "./260528_강동현_RFID테스트 결과 보고(phase1, phase2(옷1벌), phase2(옷여러벌)).html",
-                                                             "title":  "260528_강동현_RFID테스트 결과 보고(phase1, phase2(옷1벌), phase2(옷여러벌))",
-                                                             "dateLabel":  "2026-05-28",
-                                                             "subtitle":  "260528_강동현_RFID테스트 결과 보고(phase1, phase2(옷1벌), phase2(옷여러벌)).html"
-                                                         },
-                                                         {
                                                              "href":  "./260528_강동현_RFID테스트(phase1,phase2(옷1벌), phase2(옷 여러벌)) 분석 방법.html",
                                                              "title":  "260528_강동현_RFID테스트(phase1,phase2(옷1벌), phase2(옷 여러벌)) 분석 방법",
                                                              "dateLabel":  "2026-05-28",
                                                              "subtitle":  "260528_강동현_RFID테스트(phase1,phase2(옷1벌), phase2(옷 여러벌)) 분석 방법.html"
+                                                         },
+                                                         {
+                                                             "href":  "./260528_강동현_RFID테스트 결과 보고(phase1, phase2(옷1벌), phase2(옷여러벌)).html",
+                                                             "title":  "260528_강동현_RFID테스트 결과 보고(phase1, phase2(옷1벌), phase2(옷여러벌))",
+                                                             "dateLabel":  "2026-05-28",
+                                                             "subtitle":  "260528_강동현_RFID테스트 결과 보고(phase1, phase2(옷1벌), phase2(옷여러벌)).html"
                                                          }
                                                      ]
                                      },

@@ -1049,3 +1049,26 @@ const rowClassName = isFailedRow
 - 보고서 화면 설계 기준은 `총괄자 관점`, `두괄식 대시보드`, `근거 중심 데이터 배치`, `Lovable 스타일`이다.
 - Lovable 연동 확장 규칙에는 `oklch 토큰 시스템`, `font-sans 자간 -0.01em`, `glass / shadow-soft`, `TanStack Router 사고방식`, `table / accordion 마크업 패턴`, `RFID 5회 미만 하이라이트 알고리즘`이 포함된다.
 - 앞으로 AI에게 HTML 생성이나 수정 작업을 요청할 때는 이 문서 하나만 기준으로 사용하면 된다.
+
+
+---
+
+## 한글 인코딩 규칙
+
+한글이 들어간 HTML, Markdown, JavaScript 문자열은 모두 **UTF-8로 저장**한다.
+
+필수 규칙:
+
+- HTML 문서에는 반드시 `<meta charset="UTF-8" />`를 넣는다.
+- PowerShell로 파일을 저장할 때는 기본 인코딩에 맡기지 말고 `Set-Content -Encoding UTF8` 또는 `Out-File -Encoding utf8`을 명시한다.
+- 한글 문장을 문자열로 대량 치환할 때는 `Get-Content -Raw -Encoding UTF8`로 읽고, 저장도 UTF-8로 다시 쓴다.
+- 터미널에서 글자가 깨져 보여도 브라우저와 IDE에서 정상일 수 있으므로, 최종 확인은 **브라우저 + IDE** 기준으로 한다.
+- `?곷떒...`, `諛곗튂...` 같은 형태가 보이면 내용 자체가 틀린 것이 아니라 **인코딩이 깨진 것**일 가능성이 크므로, 원문 한국어를 다시 넣고 UTF-8로 저장한다.
+
+권장 작업 순서:
+
+1. 원문 한국어 문장을 먼저 확정한다.
+2. 파일을 UTF-8로 읽는다.
+3. 문자열 치환 또는 편집을 수행한다.
+4. UTF-8로 다시 저장한다.
+5. 브라우저와 IDE에서 제목, 본문, 버튼 라벨 한글이 정상인지 확인한다.
