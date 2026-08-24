@@ -98,8 +98,4 @@ void FonkanFF701RfidReader::onRead(std::function<void(String)> cb) {
 // 리더 모델명 반환
 String FonkanFF701RfidReader::readerName() { return "Fonkan FF-701"; }
 
-bool FonkanFF701RfidReader::getPowerLevelDbm(int &outDbm) { return false; }
-
-bool FonkanFF701RfidReader::setPowerLevelDbm(int dbm) { return false; }
-
 

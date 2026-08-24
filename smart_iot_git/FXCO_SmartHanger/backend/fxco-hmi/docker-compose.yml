@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  fxco-hmi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fxco-hmi
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env  # .env 파일에서 환경 변수 로드 (런타임에 주입)
+    # 또는 직접 환경 변수 지정 (선택사항)
+    # environment:
+    #   - DB_HOST=127.0.0.1
+    #   - DB_PORT=3306
+    #   - DB_USERNAME=root
+    #   - DB_PASSWORD=your_password
+    #   - DB_DATABASE=fxco_db
+    #   - PORT=3000
+    #   - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - fxco-network
+
+networks:
+  fxco-network:
+    driver: bridge
+
+
+
+

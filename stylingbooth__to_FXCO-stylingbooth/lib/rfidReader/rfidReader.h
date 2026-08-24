@@ -61,8 +61,6 @@ public:
 
   // 리더 모델명 문자열 반환(로그/디버깅용)
   virtual String readerName() = 0;
-  virtual bool getPowerLevelDbm(int &outDbm) = 0;
-  virtual bool setPowerLevelDbm(int dbm) = 0;
 };
 
 #include "fonkanFF701/fonkanFF701.h"

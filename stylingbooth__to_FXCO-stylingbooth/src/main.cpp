@@ -27,9 +27,6 @@
 #ifndef DEFAULT_LOADING_TIME_SECONDS
 #define DEFAULT_LOADING_TIME_SECONDS 10
 #endif
-#ifndef RFID_DEFAULT_POWER_DBM
-#define RFID_DEFAULT_POWER_DBM -2
-#endif
 
 #ifndef LAN_RECOVERY_INTERVAL_MS
 #define LAN_RECOVERY_INTERVAL_MS 15000UL
@@ -55,21 +52,6 @@ unsigned long lastLanAttemptMs = 0;
 volatile uint64_t lastCloseTimeUs = 0;
 volatile uint64_t readingTimeUs =
     static_cast<uint64_t>(DEFAULT_LOADING_TIME_SECONDS) * 1000ULL * 1000ULL;
-
-void applyConfiguredRfidPower() {
-  if (RFID_DEFAULT_POWER_DBM < -2 || RFID_DEFAULT_POWER_DBM > 25) {
-    Serial.printf("RFID default power out of range: %d dBm\n",
-                  RFID_DEFAULT_POWER_DBM);
-    return;
-  }
-
-  if (reader->setPowerLevelDbm(RFID_DEFAULT_POWER_DBM)) {
-    Serial.printf("RFID default power set: %d dBm\n", RFID_DEFAULT_POWER_DBM);
-  } else {
-    Serial.printf("RFID default power set failed: %d dBm\n",
-                  RFID_DEFAULT_POWER_DBM);
-  }
-}
 
 struct PendingNetworkEvent {
   enum Type : uint8_t {
@@ -282,12 +264,10 @@ void setup() {
   Serial.begin(115200);
   delay(200);
   Serial.println("System boot");
-  Serial.printf("RFID default power config: %d dBm\n", RFID_DEFAULT_POWER_DBM);
 
   HttpManageX::initMutex();
 
   reader->begin();
-  applyConfiguredRfidPower();
   reader->onRead([](String tag) {
     Serial.printf("RFID read %s\n", tag.c_str());
   });
