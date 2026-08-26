@@ -12,7 +12,7 @@ constexpr uint32_t RETRY_INTERVAL_MS = 100;
 constexpr uint8_t MAX_WIFI_CHANNEL = 13;
 constexpr uint32_t SLAVE_STATE_LOG_INTERVAL_MS = 10000;
 
-uint8_t MASTER_MAC[6] = {0x68, 0x67, 0x25, 0xEC, 0xA5, 0x84};
+uint8_t MASTER_MAC[6] = {0xB0, 0x81, 0x84, 0x04, 0x50, 0x68};
 
 enum ChannelState : uint8_t {
   SEARCHING,

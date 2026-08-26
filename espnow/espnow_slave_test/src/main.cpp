@@ -49,7 +49,7 @@ NfcReader nfcReader2({
     .MISO = D9,
     .MOSI = D10,
     .SS = D4,
-    .RST = -1,
+    .RST = D2,
     .IRQ = -1,
   },
   .task = &nfcTask2,

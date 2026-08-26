@@ -147,7 +147,7 @@ const uint8_t BROADCAST_MAC[ESP_NOW_ETH_ALEN] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0
 const char* WIFI_SSID = "CC-Retail";
 const char* WIFI_PASS = "pnks1111";
 const char* MQTT_BROKER = "api.pnkslab.com";
-const int MQTT_PORT = 1884;
+const int MQTT_PORT = 1883;
 const char* MQTT_USER = "pnks";
 const char* MQTT_PASS = "pnks1111";
 

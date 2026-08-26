@@ -107,6 +107,7 @@ private:
   uint32_t _lastCheckMs = 0;
   uint8_t _version = 0;
   uint32_t _lastLogMs = 0;
+  uint32_t _lastUidDebugMs = 0;
   uint8_t _lastReqStatus = 0xFF;
   String _lastError;
 };
