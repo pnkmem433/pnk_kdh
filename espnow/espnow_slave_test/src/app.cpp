@@ -81,6 +81,11 @@ void setup() {
   delay(50); // [수정] 두 리더기가 동시에 초기화되면서 SPI 버스가 엉키는 것을 방지
 
   // NFC-2 초기화 복구 (진단용)
+  Serial.printf("[Slave-%u][NFC-1] init version=0x%02X status=%s\n",
+                g_slaveId,
+                nfcReader.version(),
+                nfcReader.hasError() ? nfcReader.lastError().c_str() : "OK");
+
   nfcReader2.begin({
       .onRead =
           [](const String& uidStr) {
@@ -106,6 +111,11 @@ void setup() {
             Serial.printf("⚠️ [ERROR] NFC-2 통신 오류 (배선 점검 필요) - %s\n", err.c_str());
           },
   });
+
+  Serial.printf("[Slave-%u][NFC-2] init version=0x%02X status=%s\n",
+                g_slaveId,
+                nfcReader2.version(),
+                nfcReader2.hasError() ? nfcReader2.lastError().c_str() : "OK");
 
   EspNowLink::getInstance().setTimingSnapshot(nfcReader.pollIntervalMs(), nfcReader.removeTimeMs());
 

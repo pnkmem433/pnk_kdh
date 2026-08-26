@@ -134,7 +134,7 @@ void NfcReader::begin()
     _rfid.PCD_Init();
     delay(10);
     _rfid.PCD_AntennaOn();
-    _rfid.PCD_SetAntennaGain(MFRC522::RxGain_23dB_2);
+    _rfid.PCD_SetAntennaGain(MFRC522::RxGain_avg);
   }
 
   _ok = checkHardware();
@@ -188,7 +188,7 @@ void NfcReader::reset()
   delay(10);
   _rfid.PCD_Init();
   _rfid.PCD_AntennaOn();
-  _rfid.PCD_SetAntennaGain(MFRC522::RxGain_23dB_2);
+  _rfid.PCD_SetAntennaGain(MFRC522::RxGain_avg);
   _failCount = 0;
   _missCount = 0;
   _pendingReadUid = "";
@@ -316,8 +316,6 @@ void NfcReader::taskTick()
   }
   _lastPollMs = now;
 
-  bool cardSeenThisTick = false;
-  String seenUid;
   SpiLock lock;
   if (!lock.ok())
   {
@@ -333,135 +331,75 @@ void NfcReader::taskTick()
       {
         _lastReqStatus = static_cast<uint8_t>(req);
       }
-    reinitIfNeeded();
-  }
-  else
-  {
-    cardSeenThisTick = true;
-    _cardPresent = true;
-    _missCount = 0;
-    _failCount = 0;
-    _lastReqStatus = static_cast<uint8_t>(req);
-    _lastSeenMs = now;
-
-    if (_rfid.PICC_ReadCardSerial())
+    if (now - _lastLogMs > 1000)
     {
-      seenUid = uidToHex(_rfid.uid.uidByte, _rfid.uid.size);
+      _lastLogMs = now;
+      Serial.printf("[NFC ss=%u] wakeup=%s version=0x%02X\n",
+                    _ss,
+                    statusName(req),
+                    _version);
     }
-    else
+    if (_cardPresent && _settings.miss >= 0)
     {
-      reinitIfNeeded();
-    }
-  }
-
-  if (cardSeenThisTick && !seenUid.isEmpty())
-  {
-    _cardPresent = true;
-    _lastUid = seenUid;
-    _removePending = false;
-    _removePendingStartMs = 0;
-
-    if (_lastEnableMs != 0 && (now - _lastEnableMs) < ENABLE_READ_CONFIRM_RESET_MS)
-    {
-      _pendingReadUid = seenUid;
-      _pendingReadCount = 1;
-      _pendingReadStartMs = now;
-      return;
-    }
-
-    if (now < _bootWarmupUntilMs)
-    {
-      _pendingReadUid = seenUid;
-      _pendingReadCount = READ_CONFIRM_COUNT;
-      _pendingReadStartMs = now;
-      return;
-    }
-
-    if (_publishedPresent)
-    {
-      _pendingReadUid = "";
-      _pendingReadCount = 0;
-      _pendingReadStartMs = 0;
-      return;
-    }
-
-    if (seenUid != _pendingReadUid)
-    {
-      _pendingReadUid = seenUid;
-      _pendingReadCount = 1;
-      _pendingReadStartMs = now;
-      return;
-    }
-
-    if (_pendingReadCount < 0xFF)
-    {
-      _pendingReadCount++;
-    }
-
-    const bool readConfirmed =
-        _pendingReadCount >= READ_CONFIRM_COUNT &&
-        (now - _pendingReadStartMs) >= READ_CONFIRM_MS;
-    const bool readAllowed =
-        !(_lastEventType == EVENT_REMOVE && (now - _lastEventMs) < EVENT_REFRACTORY_MS);
-
-    if (readConfirmed && readAllowed)
-    {
-      _publishedPresent = true;
-      _pendingReadUid = "";
-      _pendingReadCount = 0;
-      _pendingReadStartMs = 0;
-      _lastEventType = EVENT_READ;
-      _lastEventMs = now;
-      if (_onRead)
+      const bool removeExpired =
+          (_removeTimeMs == 0) || (_lastSeenMs > 0 && (now - _lastSeenMs) >= _removeTimeMs);
+      if (removeExpired)
       {
-        _onRead(seenUid);
+        _cardPresent = false;
+        _publishedPresent = false;
+        _lastUid = "";
+        if (_onRemove)
+        {
+          _onRemove();
+        }
       }
     }
+    reinitIfNeeded();
     return;
   }
 
-  _pendingReadUid = "";
-  _pendingReadCount = 0;
-  _pendingReadStartMs = 0;
-
-  if (!cardSeenThisTick && _cardPresent && _settings.miss >= 0)
+  if (now - _lastLogMs > 250)
   {
-    if (now < _bootWarmupUntilMs || now < _suppressRemoveUntil || !_publishedPresent)
-    {
-      return;
-    }
+    _lastLogMs = now;
+    Serial.printf("[NFC ss=%u] card_detected atqa=%02X%02X\n",
+                  _ss,
+                  atqa[0],
+                  atqa[1]);
+  }
 
-    const bool removeExpired =
-        (_removeTimeMs == 0) || (_lastSeenMs > 0 && (now - _lastSeenMs) >= _removeTimeMs);
-    if (!removeExpired)
-    {
-      return;
-    }
+  _cardPresent = true;
+  _publishedPresent = true;
+  _removePending = false;
+  _removePendingStartMs = 0;
+  _missCount = 0;
+  _failCount = 0;
+  _lastReqStatus = static_cast<uint8_t>(req);
+  _lastSeenMs = now;
 
-    if (!_removePending)
-    {
-      _removePending = true;
-      _removePendingStartMs = now;
-      return;
-    }
+  if (!_rfid.PICC_ReadCardSerial())
+  {
+    Serial.printf("[NFC ss=%u] uid_read_failed\n", _ss);
+    reinitIfNeeded();
+    return;
+  }
 
-    const bool removeConfirmed = (now - _removePendingStartMs) >= REMOVE_PENDING_GRACE_MS;
-    const bool removeAllowed =
-        !(_lastEventType == EVENT_READ && (now - _lastEventMs) < EVENT_REFRACTORY_MS);
-
-    if (removeConfirmed && removeAllowed)
+  String uid = uidToHex(_rfid.uid.uidByte, _rfid.uid.size);
+  if (now - _lastUidDebugMs > 250)
+  {
+    _lastUidDebugMs = now;
+    Serial.printf("[NFC ss=%u] uid_candidate=%s len=%u\n",
+                  _ss,
+                  uid.c_str(),
+                  _rfid.uid.size);
+  }
+  if (uid != _lastUid)
+  {
+    _lastUid = uid;
+    _lastEventType = EVENT_READ;
+    _lastEventMs = now;
+    if (_onRead)
     {
-      _cardPresent = false;
-      _publishedPresent = false;
-      _removePending = false;
-      _removePendingStartMs = 0;
-      _lastEventType = EVENT_REMOVE;
-      _lastEventMs = now;
-      _lastUid = "";
-      if (_onRemove)
-      {
-        _onRemove();
-      }
+      _onRead(uid);
     }
   }
 }
