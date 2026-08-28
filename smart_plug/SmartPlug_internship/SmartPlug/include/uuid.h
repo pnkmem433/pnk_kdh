@@ -2,7 +2,6 @@
 #define UUID_H
 
 #include <Arduino.h>
-#include <EEPROM.h>
 
 class Uuid {
 public:
@@ -18,8 +17,6 @@ private:
 
   String uuid;
 
-  static constexpr int EEPROM_SIZE = 64;
-  static constexpr int UUID_ADDR = 0;
   static constexpr int UUID_LENGTH = 12;
 };
 

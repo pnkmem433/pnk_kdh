@@ -5,8 +5,20 @@ import pathlib
 import re
 import shlex
 import shutil
-import sqlite3
 import subprocess
+import sys
+from colorama import Fore
+
+# requests 라이브러리 자동 설치 로직
+try:
+    import requests
+except ImportError:
+    print("[POST] requests module not found. Installing via pip...")
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "requests"])
+        import requests
+    except Exception as e:
+        raise RuntimeError(f"[POST] Failed to install requests: {e}")
 
 _cached_version = None
 
@@ -58,7 +70,10 @@ def _project_config():
 
 
 def _config_value(name: str, default: str = "") -> str:
-    return _project_config().get("common", name, default).strip()
+    try:
+        return _project_config().get("common", name, default).strip()
+    except Exception:
+        return default
 
 
 def _require_config_value(name: str) -> str:
@@ -66,18 +81,6 @@ def _require_config_value(name: str) -> str:
     if not value:
         raise RuntimeError(f"[POST] {name} is missing in platformio.ini")
     return value
-
-
-def _gdrive_dir() -> pathlib.Path:
-    return pathlib.Path(_require_config_value("custom_gdrive_copy_dir"))
-
-
-def _server_upload_dir() -> pathlib.Path:
-    return pathlib.Path(_require_config_value("custom_server_upload_dir"))
-
-
-def _server_db_path() -> pathlib.Path:
-    return _server_upload_dir().parent / "local-ota.sqlite"
 
 
 def _basename() -> str:
@@ -207,14 +210,14 @@ def _update_remote_latest_symlink() -> None:
     )
 
 
-def _find_current_version(gdrive_dir: pathlib.Path, basename: str) -> str | None:
+def _find_current_version(output_dir: pathlib.Path, basename: str) -> str | None:
     pattern = re.compile(rf"^v(\d+)_{re.escape(basename)}$", re.IGNORECASE)
     latest_version = None
     latest_mtime = None
-    if not gdrive_dir.exists():
+    if not output_dir.exists():
         return None
 
-    for entry in gdrive_dir.iterdir():
+    for entry in output_dir.iterdir():
         if not entry.is_file() or entry.suffix.lower() != ".bin":
             continue
         match = pattern.match(entry.name)
@@ -238,13 +241,12 @@ def _get_version() -> str:
     patch = _read_macro_int(app_config, "FW_VER_PATCH")
     _cached_version = str((major * 100) + (minor * 10) + patch)
 
-    current_version = _find_current_version(_gdrive_dir(), _basename())
+    current_version = _find_current_version(_output_dir(), _basename())
     if current_version is not None and int(_cached_version) < int(current_version):
         raise RuntimeError(
-            f"[POST] AppConfig version v{_cached_version} is older than current GDrive version v{current_version}."
+            f"[POST] AppConfig version v{_cached_version} is older than current local version v{current_version}."
         )
 
-    os.environ["GDRIVE_VERSION"] = _cached_version
     print(f"[POST] Derived from AppConfig.h => v{_cached_version}", flush=True)
     return _cached_version
 
@@ -261,71 +263,57 @@ def _firmware_family() -> str:
     return _read_macro_string(_app_config_text(), "CURRENT_FIRMWARE_FAMILY").strip().lower()
 
 
-def _copy_file(
-    bin_source: pathlib.Path,
-    target_dir: pathlib.Path,
-    base_name: str,
-    label: str,
-) -> pathlib.Path:
-    target_dir.mkdir(parents=True, exist_ok=True)
-    target_bin = target_dir / base_name
-    shutil.copyfile(bin_source, target_bin)
-    print(f"[POST] {label} BIN -> {target_bin}", flush=True)
-    return target_bin
-
-
-def _cleanup_legacy_server_latest_files() -> None:
-    basename = _basename()
-    upload_dir = _server_upload_dir()
-    for path in (upload_dir / basename, upload_dir / f"{basename}.gz"):
-        if path.exists():
-            path.unlink()
-            print(f"[POST] Removed legacy server file -> {path}", flush=True)
-
-
-def _register_server_version(version: int, version_name: str, server_bin_path: pathlib.Path) -> None:
-    db_path = _server_db_path()
-    if not db_path.is_file():
-        raise RuntimeError(f"[POST] OTA server DB not found: {db_path}")
-
+def _upload_swagger(bin_path: pathlib.Path, version: str) -> None:
+    """공용 OTA 등록 API 서버(NestJS) /versions/create 에 펌웨어 등록."""
+    base = _config_value("custom_swagger_base_url", "http://gym907-0001.iptime.org:3315").rstrip("/")
+    login_url = f"{base}/auth/login"
+    upload_url = f"{base}/versions/create"
+    user = _config_value("custom_swagger_user", "admin")
+    password = _config_value("custom_swagger_password", "admin1234")
     project_id = _project_id()
-    chip_type = _chip_type()
-    firmware_family = _firmware_family()
+    chip = _chip_type()
+    family = _firmware_family()
 
-    conn = sqlite3.connect(str(db_path))
     try:
-        cur = conn.cursor()
-        project = cur.execute("SELECT id FROM project WHERE id = ?", (project_id,)).fetchone()
-        if not project:
-            raise RuntimeError(f"[POST] Project {project_id} not found in OTA server DB")
-
-        existing = cur.execute(
-            "SELECT id FROM project_version WHERE project = ? AND chipType = ? AND firmwareFamily = ? AND versionNumber = ? ORDER BY id DESC LIMIT 1",
-            (project_id, chip_type, firmware_family, version),
-        ).fetchone()
-
-        if existing:
-            row_id = int(existing[0])
-            cur.execute(
-                "UPDATE project_version SET versionName = ?, chipType = ?, firmwareFamily = ?, isActive = 1, binFile = ?, project = ? WHERE id = ?",
-                (version_name, chip_type, firmware_family, str(server_bin_path), project_id, row_id),
-            )
-            print(f"[POST] Updated OTA DB row id={row_id} for {chip_type}/{firmware_family} v{version}", flush=True)
-        else:
-            cur.execute(
-                "INSERT INTO project_version (createdAt, versionNumber, versionName, chipType, firmwareFamily, isActive, binFile, project) VALUES (datetime('now'), ?, ?, ?, ?, 1, ?, ?)",
-                (version, version_name, chip_type, firmware_family, str(server_bin_path), project_id),
-            )
-            row_id = int(cur.lastrowid)
-            print(f"[POST] Inserted OTA DB row id={row_id} for {chip_type}/{firmware_family} v{version}", flush=True)
-
-        cur.execute(
-            "UPDATE project_version SET isActive = 0 WHERE project = ? AND chipType = ? AND firmwareFamily = ? AND id <> ?",
-            (project_id, chip_type, firmware_family, row_id),
+        login = requests.post(
+            login_url,
+            json={"id": user, "password": password},
+            timeout=15,
         )
-        conn.commit()
-    finally:
-        conn.close()
+        if login.status_code not in (200, 201):
+            raise RuntimeError(f"Swagger 로그인 실패: HTTP {login.status_code} {login.text}")
+        token = login.json().get("token", {}).get("access_token")
+        if not token:
+            raise RuntimeError("응답에 access_token 이 없습니다.")
+        print(f"[POST] Swagger 로그인 성공", flush=True)
+
+        headers = {"Authorization": f"Bearer {token}"}
+        payload = {
+            "projectId": str(project_id),
+            "versionNumber": str(version),
+            "versionName": f"v{version}",
+            "chipType": chip,
+            "firmwareFamily": family,
+        }
+        with bin_path.open("rb") as handle:
+            files = {
+                "binFile": (bin_path.name, handle, "application/octet-stream"),
+            }
+            up = requests.post(
+                upload_url,
+                data=payload,
+                files=files,
+                headers=headers,
+                timeout=120,
+            )
+        if up.status_code == 201:
+            print(f"[POST] Swagger 등록 성공: v{version} ({chip} / {family})", flush=True)
+            print(f"[Swagger] 등록 성공", flush=True)
+        else:
+            raise RuntimeError(f"Swagger 등록 실패: HTTP {up.status_code} {up.text}")
+    except Exception as exc:
+        print(f"[Swagger] 등록 실패: {exc}", flush=True)
+        raise exc
 
 
 def _run_post_firmware_copy(source, target, env):
@@ -343,16 +331,33 @@ def _run_post_firmware_copy(source, target, env):
     output_dir.mkdir(parents=True, exist_ok=True)
     local_bin = output_dir / versioned_name
 
+    # 1. 로컬 복사
     shutil.copyfile(firmware_bin, local_bin)
-
     print(f"[POST] BIN: {local_bin}", flush=True)
+    print(f"[POST] 1. Local Copied (BIN)", flush=True)
 
-    _copy_file(local_bin, _gdrive_dir(), local_bin.name, "GDrive")
-    server_bin = _copy_file(local_bin, _server_upload_dir(), local_bin.name, "Server versioned")
-    _cleanup_legacy_server_latest_files()
-    _register_server_version(version, f"v{version_text}_{_chip_type()}_{_firmware_family()}", server_bin)
-    _upload_remote_versioned_file(local_bin)
-    _update_remote_latest_symlink()
+    # 2. Swagger 업로드
+    enable_swagger = _config_value("custom_swagger_enable", "1")
+    if enable_swagger not in ("0", "false", "False", "no", "NO"):
+        print(f"[POST] 2. Registering on Swagger (local OTA server)...", flush=True)
+        try:
+            _upload_swagger(local_bin, version)
+        except Exception as exc:
+            pass
+
+    # 3. pnkslabserver 업로드 & 심링크
+    try:
+        _upload_remote_versioned_file(local_bin)
+    except Exception as exc:
+        print(f"[pnkslabserver] 업로드 실패: {exc}", flush=True)
+
+    try:
+        _update_remote_latest_symlink()
+        print(f"[pnkslabserver] 업로드 성공", flush=True)
+    except Exception as exc:
+        print(f"[pnkslabserver] 업로드 실패: {exc}", flush=True)
+
+    print(f"[POST] Deployment Complete for v{version}!\n", flush=True)
 
 
 post_action = env.Action(_run_post_firmware_copy)

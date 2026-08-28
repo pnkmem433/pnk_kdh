@@ -5,31 +5,48 @@ import shutil
 import subprocess
 import shlex
 import time
-import requests
+import sys
 import pathlib
 from colorama import Fore
+
+# requests 라이브러리 자동 설치 로직
+try:
+    import requests
+except ImportError:
+    print("[Deploy] requests module not found. Installing via pip...")
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "requests"])
+        import requests
+    except Exception as e:
+        raise RuntimeError(f"[Deploy] Failed to install requests: {e}")
 
 import tasmotapiolib
 
 
 # =========================
+# PlatformIO config helper
+# =========================
+def _get_option(key, default=""):
+    try:
+        # 현재 활성화된 [env:tasmota-smartplug] 섹션의 설정을 우선적으로 가져옵니다.
+        return env.GetProjectOption(key)
+    except Exception:
+        return default
+
+
+# =========================
 # Swagger(Local OTA Server)
 # =========================
-BASE_URL = "http://192.168.0.84:3004"
-LOGIN_ENDPOINT = f"{BASE_URL}/auth/login"
-UPLOAD_ENDPOINT = f"{BASE_URL}/versions/create"
-
-USER_CREDENTIALS = {
-    "id": "admin",
-    "password": "admin1234",
-}
-
-
-def get_access_token():
+def get_access_token(base_url):
+    login_endpoint = f"{base_url.rstrip('/')}/auth/login"
+    user_credentials = {
+        "id": _get_option("custom_swagger_user", "admin"),
+        "password": _get_option("custom_swagger_password", "admin1234"),
+    }
     try:
         response = requests.post(
-            LOGIN_ENDPOINT,
-            json=USER_CREDENTIALS,
+            login_endpoint,
+            json=user_credentials,
             timeout=10
         )
         if response.status_code in (200, 201):
@@ -45,11 +62,13 @@ def get_access_token():
 
 
 def upload_to_swagger(bin_path, version, chip_type, project_id):
-    token = get_access_token()
+    base_url = _get_option("custom_swagger_base_url", "http://gym907-0001.iptime.org:3315")
+    token = get_access_token(base_url)
     if not token:
         print(f"{Fore.RED}[SWAGGER] Skip upload (token unavailable)")
-        return
+        raise RuntimeError("Token unavailable")
 
+    upload_endpoint = f"{base_url.rstrip('/')}/versions/create"
     headers = {"Authorization": f"Bearer {token}"}
     payload = {
         "projectId": str(project_id),
@@ -65,7 +84,7 @@ def upload_to_swagger(bin_path, version, chip_type, project_id):
                 "binFile": (os.path.basename(bin_path), f, "application/octet-stream")
             }
             response = requests.post(
-                UPLOAD_ENDPOINT,
+                upload_endpoint,
                 data=payload,
                 files=files,
                 headers=headers,
@@ -73,21 +92,13 @@ def upload_to_swagger(bin_path, version, chip_type, project_id):
             )
         if response.status_code == 201:
             print(f"{Fore.BLUE}[SWAGGER] Upload success: v{version}")
+            print(f"{Fore.GREEN}[Swagger] 등록 성공")
         else:
             print(f"{Fore.RED}[SWAGGER] Upload failed: {response.status_code} {response.text}")
+            raise RuntimeError(f"HTTP {response.status_code}")
     except Exception as e:
-        print(f"{Fore.RED}[SWAGGER] Upload exception: {e}")
-
-
-# =========================
-# PlatformIO config helper
-# =========================
-def _get_option(key, default=""):
-    try:
-        # 현재 활성화된 [env:tasmota-smartplug] 섹션의 설정을 우선적으로 가져옵니다.
-        return env.GetProjectOption(key)
-    except Exception:
-        return default
+        print(f"{Fore.RED}[Swagger] 등록 실패: {e}")
+        raise e
 
 
 def _resolve_bin_and_gz_paths(target, env):
@@ -143,70 +154,79 @@ def post_build_action(source, target, env):
     base_name = _get_option("custom_output_basename", "esp02s_tasmota_lite.bin")
     chip_type = _get_option("custom_server_chip_type", "esp02s")
     project_id = _get_option("custom_server_project_id", "10")
-    
+
     # 버전 이름 정의 (v8_esp02s_tasmota_lite.bin / .bin.gz)
     versioned_name = f"v{version}_{base_name}"
     versioned_gz = f"{versioned_name}.gz"
-    
+
     r_subdir = _get_option("custom_remote_ota_subdir", "esp02s/tasmota_lite")
 
     print(f"\n{Fore.GREEN}[Deploy] Master Deployment Start: {versioned_name}")
     print(f"{Fore.MAGENTA}[DEBUG] Targeting Subdir: {r_subdir}")
 
-    # 2. GDrive 복사 (BIN & GZ 한 쌍)
-    gdrive_dir = _get_option("custom_gdrive_copy_dir")
-    if gdrive_dir:
-        os.makedirs(gdrive_dir, exist_ok=True)
-        shutil.copyfile(deploy_bin, os.path.join(gdrive_dir, versioned_name))
-        if deploy_gz and os.path.exists(deploy_gz):
-            shutil.copyfile(deploy_gz, os.path.join(gdrive_dir, versioned_gz))
-            print(f"{Fore.CYAN}[Deploy] 1. GDrive Copied (BIN & GZ)")
-        else:
-            print(f"{Fore.YELLOW}[Deploy] 1. GDrive Warning: .bin.gz not available after resolve/build")
+    # 2. 로컬 준비 (프로젝트 내부 build_output/firmware 복사)
+    output_dir = pathlib.Path(env.subst("$PROJECT_DIR")) / "build_output" / "firmware"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    local_bin = output_dir / versioned_name
+    local_gz = output_dir / versioned_gz
+
+    shutil.copyfile(deploy_bin, local_bin)
+    if deploy_gz and os.path.exists(deploy_gz):
+        shutil.copyfile(deploy_gz, local_gz)
+    print(f"{Fore.CYAN}[Deploy] 1. Local Copied (BIN & GZ)")
 
     # 3. Swagger upload (기본 바이너리만 업로드)
-    print(f"{Fore.BLUE}[Deploy] 2. Uploading to Swagger...")
-    upload_to_swagger(deploy_bin, version, chip_type, project_id)
+    enable_swagger = _get_option("custom_swagger_enable", "1")
+    if enable_swagger not in ("0", "false", "False", "no", "NO"):
+        print(f"{Fore.BLUE}[Deploy] 2. Uploading to Swagger...")
+        try:
+            upload_to_swagger(str(local_bin), version, chip_type, project_id)
+        except Exception:
+            pass
 
     # 4. 원격 서버 배포 및 심볼릭 링크 갱신
     host = _get_option("custom_remote_ota_host")
     if host:
-        r_dir = _get_option("custom_remote_ota_dir")
-        pw = _get_option("custom_remote_ota_password")
-        user = _get_option("custom_remote_ota_user")
-        port = _get_option("custom_remote_ota_port", "23")
-        l_script = _get_option("custom_remote_ota_link_script", "/home/pnkslabserver/tasmota-firmware/common/update_latest_links.py")
+        try:
+            r_dir = _get_option("custom_remote_ota_dir")
+            pw = _get_option("custom_remote_ota_password")
+            user = _get_option("custom_remote_ota_user")
+            port = _get_option("custom_remote_ota_port", "23")
+            l_script = _get_option("custom_remote_ota_link_script", "/home/pnkslabserver/tasmota-firmware/common/update_latest_links.py")
 
-        pscp = shutil.which("pscp") or r"C:\Program Files\PuTTY\pscp.exe"
-        plink = shutil.which("plink") or r"C:\Program Files\PuTTY\plink.exe"
+            pscp = shutil.which("pscp") or r"C:\Program Files\PuTTY\pscp.exe"
+            plink = shutil.which("plink") or r"C:\Program Files\PuTTY\plink.exe"
 
-        remote_full_path = f"{r_dir.rstrip('/')}/{r_subdir}"
-        remote_dest = f"{user}@{host}:{remote_full_path}/"
+            remote_full_path = f"{r_dir.rstrip('/')}/{r_subdir}"
+            remote_dest = f"{user}@{host}:{remote_full_path}/"
 
-        print(f"{Fore.YELLOW}[Deploy] 3. Uploading to Server: {r_subdir}")
-        
-        # A. 서버 폴더 존재 확인 및 생성
-        subprocess.run([plink, "-batch", "-ssh", "-P", port, "-pw", pw, f"{user}@{host}", f"mkdir -p {shlex.quote(remote_full_path)}"], check=True)
+            print(f"{Fore.YELLOW}[Deploy] 3. Uploading to Server: {r_subdir}")
 
-        # B. 파일 전송 (BIN & GZ)
-        subprocess.run([pscp, "-batch", "-P", port, "-pw", pw, deploy_bin, remote_dest + versioned_name], check=True)
-        if deploy_gz and os.path.exists(deploy_gz):
-            subprocess.run([pscp, "-batch", "-P", port, "-pw", pw, deploy_gz, remote_dest + versioned_gz], check=True)
+            # A. 서버 폴더 존재 확인 및 생성
+            subprocess.run([plink, "-batch", "-ssh", "-P", port, "-pw", pw, f"{user}@{host}", f"mkdir -p {shlex.quote(remote_full_path)}"], check=True)
 
-        # C. 심볼릭 링크 업데이트 (BIN / GZ 각각 수행)
-        if plink:
-            print(f"{Fore.YELLOW}[Deploy] 4. Running Remote Link Update...")
-            for ext in ["", ".gz"]:
-                link_name = base_name + ext
-                pattern = f"v*_{link_name}"
-                cmd = (
-                    f"python3 {shlex.quote(l_script)} "
-                    f"--root {shlex.quote(r_dir)} "
-                    f"--subdir {shlex.quote(r_subdir)} "
-                    f"--link-name {shlex.quote(link_name)} "
-                    f"--pattern {shlex.quote(pattern)}"
-                )
-                subprocess.run([plink, "-batch", "-ssh", "-P", port, "-pw", pw, f"{user}@{host}", cmd], check=True)
+            # B. 파일 전송 (BIN & GZ)
+            subprocess.run([pscp, "-batch", "-P", port, "-pw", pw, str(local_bin), remote_dest + versioned_name], check=True)
+            if local_gz.exists():
+                subprocess.run([pscp, "-batch", "-P", port, "-pw", pw, str(local_gz), remote_dest + versioned_gz], check=True)
+
+            # C. 심볼릭 링크 업데이트 (BIN / GZ 각각 수행)
+            if plink:
+                print(f"{Fore.YELLOW}[Deploy] 4. Running Remote Link Update...")
+                for ext in ["", ".gz"]:
+                    link_name = base_name + ext
+                    pattern = f"v*_{link_name}"
+                    cmd = (
+                        f"python3 {shlex.quote(l_script)} "
+                        f"--root {shlex.quote(r_dir)} "
+                        f"--subdir {shlex.quote(r_subdir)} "
+                        f"--link-name {shlex.quote(link_name)} "
+                        f"--pattern {shlex.quote(pattern)}"
+                    )
+                    subprocess.run([plink, "-batch", "-ssh", "-P", port, "-pw", pw, f"{user}@{host}", cmd], check=True)
+            print(f"{Fore.GREEN}[pnkslabserver] 업로드 성공")
+        except Exception as e:
+            print(f"{Fore.RED}[pnkslabserver] 업로드 실패: {e}")
 
     print(f"{Fore.GREEN}[Deploy] All Steps Completed Successfully for v{version}!\n")
 
