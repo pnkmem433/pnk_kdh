@@ -28,8 +28,6 @@ public:
   void onRead(std::function<void(String)> callback) override;
 
   String readerName() override;
-  bool getPowerLevelDbm(int &outDbm) override;
-  bool setPowerLevelDbm(int dbm) override;
 
 private:
   HardwareSerial &serial;

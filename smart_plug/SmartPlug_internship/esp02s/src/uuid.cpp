@@ -9,21 +9,7 @@
 Uuid::Uuid() {}
 
 void Uuid::begin() {
-  EEPROM.begin(EEPROM_SIZE);
-  delay(100);
-
-  char uuidc[UUID_LENGTH + 1];
-  for (int i = 0; i < UUID_LENGTH; ++i) {
-    uuidc[i] = EEPROM.read(UUID_ADDR + i);
-  }
-  uuidc[UUID_LENGTH] = '\0';
-
-  uuid = String(uuidc);
-  uuid.toUpperCase();
-  if (!isUuid()) {
-    uuid = generator();
-    saveUUID();
-  }
+  uuid = generator();
 }
 
 String Uuid::load() { return uuid; }
@@ -63,8 +49,5 @@ bool Uuid::isUuid() {
 }
 
 void Uuid::saveUUID() {
-  for (int i = 0; i < UUID_LENGTH; ++i) {
-    EEPROM.write(UUID_ADDR + i, uuid.charAt(i));
-  }
-  EEPROM.commit();
+  // No-op: dynamically loaded from WiFi MAC address ROM
 }

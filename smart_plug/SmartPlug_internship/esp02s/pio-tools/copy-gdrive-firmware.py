@@ -1,9 +1,9 @@
 Import("env")
 
-# 배포 파이프라인 (빌드 후 자동):
-#  1) GDrive: custom_gdrive_copy_dir 에 v{N}_esp02s_custom.bin(.gz)
-#  2) Swagger: POST /versions/create — smartScanner.py 와 동일 API(로그인·multipart·payload)
-#  3) 원격 OTA: pscp 로 bin/gz 업로드 후 update_latest_links.py 로 심볼릭 링크
+# 諛고룷 ?뚯씠?꾨씪??(鍮뚮뱶 ???먮룞):
+#  1) Local: copy firmware to build_output/firmware with versioned name
+#  2) Swagger: POST /versions/create ??smartScanner.py ? ?숈씪 API(濡쒓렇?맞톗ultipart쨌payload)
+#  3) ?먭꺽 OTA: pscp 濡?bin/gz ?낅줈????update_latest_links.py 濡??щ낵由?留곹겕
 
 import os
 import shutil
@@ -18,21 +18,15 @@ from colorama import Fore
 # =========================
 # Swagger(Local OTA Server)
 # =========================
-BASE_URL = "http://192.168.0.84:3004"
-LOGIN_ENDPOINT = f"{BASE_URL}/auth/login"
-UPLOAD_ENDPOINT = f"{BASE_URL}/versions/create"
-
-USER_CREDENTIALS = {
-    "id": "admin",
-    "password": "admin1234",
-}
-
-
 def get_access_token():
+    base_url = _get_option("custom_swagger_base_url", "http://gym907-0001.iptime.org:3315").rstrip("/")
     try:
         response = requests.post(
-            LOGIN_ENDPOINT,
-            json=USER_CREDENTIALS,
+            f"{base_url}/auth/login",
+            json={
+                "id": _get_option("custom_swagger_user", "admin"),
+                "password": _get_option("custom_swagger_password", "admin1234"),
+            },
             timeout=10
         )
         if response.status_code in (200, 201):
@@ -48,6 +42,7 @@ def get_access_token():
 
 
 def upload_to_swagger(bin_path, version):
+    base_url = _get_option("custom_swagger_base_url", "http://gym907-0001.iptime.org:3315").rstrip("/")
     token = get_access_token()
     if not token:
         print(f"{Fore.RED}[SWAGGER] Skip upload (token unavailable)")
@@ -68,7 +63,7 @@ def upload_to_swagger(bin_path, version):
                 "binFile": (os.path.basename(bin_path), f, "application/octet-stream")
             }
             response = requests.post(
-                UPLOAD_ENDPOINT,
+                f"{base_url}/versions/create",
                 data=payload,
                 files=files,
                 headers=headers,
@@ -87,11 +82,11 @@ def upload_to_swagger(bin_path, version):
 # =========================
 def _get_option(key, default=""):
     try:
-        # 현재 빌드 중인 [env:...] 섹션의 설정을 우선적으로 가져옵니다.
+        # ?꾩옱 鍮뚮뱶 以묒씤 [env:...] ?뱀뀡???ㅼ젙???곗꽑?곸쑝濡?媛?몄샃?덈떎.
         val = env.GetProjectOption(key)
         return str(val).strip()
     except Exception:
-        # 실패 시 .ini의 [common] 섹션이나 기본값 사용
+        # ?ㅽ뙣 ??.ini??[common] ?뱀뀡?대굹 湲곕낯媛??ъ슜
         try:
             return env.GetProjectConfig().get("common", key, default).strip()
         except:
@@ -102,42 +97,42 @@ def _get_option(key, default=""):
 # Main deploy pipeline
 # =========================
 def post_build_action(source, target, env):
-    # 0. 빌드된 파일 경로 정의
+    # 0. 鍮뚮뱶???뚯씪 寃쎈줈 ?뺤쓽
     source_bin = str(target[0])
     if not os.path.exists(source_bin):
         return
 
-    # 1. 설정 로드
+    # 1. ?ㅼ젙 濡쒕뱶
     version = _get_option("custom_firmware_version", "1")
     base_name = "esp02s_custom.bin"
     r_subdir = _get_option("custom_remote_ota_subdir", "esp02s/custom")
     
-    # 버전 이름 정의 (v7_esp02s_custom.bin / .bin.gz)
+    # 踰꾩쟾 ?대쫫 ?뺤쓽 (v7_esp02s_custom.bin / .bin.gz)
     versioned_name = f"v{version}_{base_name}"
     versioned_gz = f"{versioned_name}.gz"
 
     print(f"\n{Fore.GREEN}[Deploy] Master Deployment Start: {versioned_name}")
     print(f"{Fore.MAGENTA}[DEBUG] Targeting Subdir: {r_subdir}")
 
-    # 2. Gzip 압축 파일 생성 (원본 바이너리 -> .gz)
+    # 2. Gzip ?뺤텞 ?뚯씪 ?앹꽦 (?먮낯 諛붿씠?덈━ -> .gz)
     source_gz = source_bin + ".gz"
     with open(source_bin, "rb") as src, gzip.open(source_gz, "wb", compresslevel=9) as dst:
         shutil.copyfileobj(src, dst)
     print(f"{Fore.CYAN}[Deploy] Gzip compression complete.")
 
-    # 3. GDrive 복사 (BIN & GZ 한 쌍)
-    gdrive_dir = _get_option("custom_gdrive_copy_dir")
-    if gdrive_dir:
-        os.makedirs(gdrive_dir, exist_ok=True)
-        shutil.copyfile(source_bin, os.path.join(gdrive_dir, versioned_name))
-        shutil.copyfile(source_gz, os.path.join(gdrive_dir, versioned_gz))
-        print(f"{Fore.CYAN}[Deploy] 1. GDrive Copied (BIN & GZ)")
+    output_dir = pathlib.Path(env.subst("$PROJECT_DIR")) / "build_output" / "firmware"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    local_bin = output_dir / versioned_name
+    local_gz = output_dir / versioned_gz
+    shutil.copyfile(source_bin, local_bin)
+    shutil.copyfile(source_gz, local_gz)
+    print(f"{Fore.CYAN}[Deploy] 1. Local Copied (BIN & GZ)")
 
-    # 4. Swagger upload (기본 바이너리만 업로드)
+    # 4. Swagger upload (湲곕낯 諛붿씠?덈━留??낅줈??
     print(f"{Fore.BLUE}[Deploy] 2. Uploading to Swagger...")
-    upload_to_swagger(source_bin, version)
+    upload_to_swagger(str(local_bin), version)
 
-    # 5. 원격 서버 배포 및 심볼릭 링크 갱신
+    # 5. ?먭꺽 ?쒕쾭 諛고룷 諛??щ낵由?留곹겕 媛깆떊
     host = _get_option("custom_remote_ota_host")
     if host:
         r_dir = _get_option("custom_remote_ota_dir")
@@ -154,14 +149,14 @@ def post_build_action(source, target, env):
 
         print(f"{Fore.YELLOW}[Deploy] 3. Uploading BIN & GZ to Server: {r_subdir}")
         
-        # A. 서버 폴더 존재 확인 및 생성 (mkdir -p)
+        # A. ?쒕쾭 ?대뜑 議댁옱 ?뺤씤 諛??앹꽦 (mkdir -p)
         subprocess.run([plink, "-batch", "-ssh", "-P", port, "-pw", pw, f"{user}@{host}", f"mkdir -p {shlex.quote(remote_full_path)}"], check=True)
 
-        # B. 파일 전송 (BIN & GZ)
-        subprocess.run([pscp, "-batch", "-P", port, "-pw", pw, source_bin, remote_dest + versioned_name], check=True)
-        subprocess.run([pscp, "-batch", "-P", port, "-pw", pw, source_gz, remote_dest + versioned_gz], check=True)
+        # B. ?뚯씪 ?꾩넚 (BIN & GZ)
+        subprocess.run([pscp, "-batch", "-P", port, "-pw", pw, str(local_bin), remote_dest + versioned_name], check=True)
+        subprocess.run([pscp, "-batch", "-P", port, "-pw", pw, str(local_gz), remote_dest + versioned_gz], check=True)
 
-        # C. 심볼릭 링크 업데이트 (BIN / GZ 각각 수행)
+        # C. ?щ낵由?留곹겕 ?낅뜲?댄듃 (BIN / GZ 媛곴컖 ?섑뻾)
         if plink:
             print(f"{Fore.YELLOW}[Deploy] 4. Running Remote Link Update...")
             for ext in ["", ".gz"]:

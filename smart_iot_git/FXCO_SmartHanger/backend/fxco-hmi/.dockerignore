@@ -1,0 +1,35 @@
+# .env 파일은 이미지에 포함하지 않음 (보안)
+.env
+.env.local
+.env.*.local
+
+# node_modules는 이미지에서 다시 설치
+node_modules
+
+# 빌드 산출물
+dist
+coverage
+
+# 테스트 파일
+*.spec.ts
+test
+
+# Git 관련
+.git
+.gitignore
+
+# IDE 설정
+.vscode
+.idea
+
+# 로그 파일
+*.log
+logs
+
+# 기타
+README.md
+.env.example
+
+
+
+

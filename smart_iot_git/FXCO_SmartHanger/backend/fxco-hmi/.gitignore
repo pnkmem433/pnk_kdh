@@ -1,0 +1,57 @@
+# compiled output
+/dist
+/node_modules
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+
+# Tests
+/coverage
+/.nyc_output
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build
+*.tsbuildinfo
+
+# Docker images and archives
+*.tar
+*.tar.gz
+docker-images/
+
+# SQL files (backups, dumps)
+# 백업 파일만 ignore (날짜 형식의 백업 파일)
+*backup*.sql
+*backup.sql
+20260127*.sql
+
+
+

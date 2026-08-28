@@ -1,0 +1,1 @@
+enum SessionState { enter, scanned, played, exit }

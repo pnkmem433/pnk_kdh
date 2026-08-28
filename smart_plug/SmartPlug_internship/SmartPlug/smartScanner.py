@@ -4,7 +4,7 @@ import shutil
 
 import requests
 
-BASE_URL = "http://192.168.0.84:3004"
+BASE_URL = "http://gym907-0001.iptime.org:3315"
 LOGIN_ENDPOINT = f"{BASE_URL}/auth/login"
 VERSIONS_LIST_ENDPOINT = f"{BASE_URL}/versions/list"
 UPLOAD_ENDPOINT = f"{BASE_URL}/versions/create"
@@ -12,11 +12,7 @@ UPLOAD_ENDPOINT = f"{BASE_URL}/versions/create"
 PROJECT_ID_FIXED = 10
 CHIP_TYPE = "esp8685"
 FIRMWARE_FAMILY = "custom"
-GDRIVE_COPY_DIR = (
-    r"G:\.shortcut-targets-by-id\1eOl--DT4rr56gYI69AsP3L1Eyd-glIoh"
-    r"\3D 프린터 사용방법 인수인계\촬영 사진 영상\강동현"
-    r"\Smartplug 관련 파일\smartplug 펌웨어 버전 폴더\esp32\custom"
-)
+GDRIVE_COPY_DIR = os.path.join(os.path.dirname(__file__), "build_output", "firmware")
 
 USER_CREDENTIALS = {
     "id": "admin",

@@ -1,4 +1,4 @@
-#include <map>
+﻿#include <map>
 #include <vector>
 
 #include <UIPEthernet.h>
@@ -53,6 +53,9 @@
 #endif
 #ifndef LAN_CS_PIN
 #define LAN_CS_PIN D5
+#endif
+#ifndef LED_PIN
+#define LED_PIN D3
 #endif
 #ifndef LAN_CS_LABEL
 #define LAN_CS_LABEL "D5"
@@ -125,7 +128,7 @@ struct NetworkAction {
 };
 
 LAN lan(LAN_CS_PIN);
-LED led = LED(D4);
+LED led = LED(LED_PIN);
 RfidReader *reader =
     new FonkanFF704RfidReader(Serial1, RFID_RX_PIN, RFID_TX_PIN, RFID_BAUD_RATE);
 
@@ -249,7 +252,7 @@ bool ensureLanForHttp() {
 
   ethernetReady = lan.begin();
   if (!ethernetReady) {
-    Serial.println("HTTP ?꾩넚 ?앸왂: LAN ?곌껐???대젮媛 ?덉뒿?덈떎.");
+    Serial.println("HTTP send skipped: LAN is not connected.");
   }
   applyLocalLedState();
   return ethernetReady;
@@ -275,7 +278,7 @@ DoorApiResult executeDoorRequest(
   });
 
   if (!requestRan) {
-    Serial.println("HTTP ?꾩넚 ?ㅽ뙣: Ethernet mutex瑜??띾뱷?섏? 紐삵뻽?듬땲??");
+    Serial.println("HTTP send failed: could not acquire Ethernet mutex.");
   }
 
   return result;
@@ -344,7 +347,7 @@ std::vector<String> collectQualifiedSkus() {
     }
 
     if (tag.length() < RFID_TAG_SUBSTRING_END) {
-      Serial.printf("RFID ?쒓렇 湲몄씠 遺議깆쑝濡??쒖쇅: %s (%d??\n",
+      Serial.printf("RFID tag too short for SKU extraction: %s (count=%d)\n",
                     tag.c_str(), count);
       continue;
     }
@@ -363,7 +366,7 @@ std::vector<String> collectQualifiedSkus() {
     }
 
     if (!exists) {
-      Serial.printf("RFID ?꾩넚 ?꾨낫 SKU: %s (?먮낯 ?쒓렇 %s, %d??\n",
+      Serial.printf("RFID qualified SKU: %s (raw=%s, count=%d)\n",
                     sku.c_str(), tag.c_str(), count);
       skus.push_back(sku);
     }

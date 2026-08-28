@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script>
+    (function () {
+      function getParam(name) {
+        var params = new URLSearchParams(window.location.search);
+        var value = params.get(name);
+        if (value) return value.trim();
+
+        var hash = window.location.hash;
+        var qIndex = hash.indexOf("?");
+        if (qIndex !== -1) {
+          params = new URLSearchParams(hash.slice(qIndex));
+          value = params.get(name);
+          if (value) return value.trim();
+        }
+
+        return "";
+      }
+
+      var source = (getParam("src") || "").toLowerCase();
+      if (source !== "qr") return;
+
+      window.__enableGtm = true;
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-NXKZK8ZW");
+    })();
+  </script>
+  <title>Detail</title>
+  <style>
+    @font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Thin.woff2') format('woff2');
+    font-weight: 100;
+    font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Pretendard';
+        src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-ExtraLight.woff2') format('woff2');
+        font-weight: 200;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Pretendard';
+        src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Light.woff2') format('woff2');
+        font-weight: 300;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Pretendard';
+        src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Regular.woff2') format('woff2');
+        font-weight: 400;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Pretendard';
+        src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Medium.woff2') format('woff2');
+        font-weight: 500;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Pretendard';
+        src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-SemiBold.woff2') format('woff2');
+        font-weight: 600;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Pretendard';
+        src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Bold.woff2') format('woff2');
+        font-weight: 700;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Pretendard';
+        src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-ExtraBold.woff2') format('woff2');
+        font-weight: 800;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Pretendard';
+        src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Black.woff2') format('woff2');
+        font-weight: 900;
+        font-display: swap;
+    }
+
+    @font-face {
+    font-family: 'Paperozi';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-5Medium.woff2') format('woff2');
+    font-weight: 600;
+    font-display: swap;
+    }
+  </style>
+  <style>
+    
+    :root { --max: 720px; }
+    body { 
+      margin:0; 
+      font-family: 'Pretendard', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
+      color: #1a1a1a;
+    }
+    
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 16px; box-sizing: border-box; }
+
+    .header {
+      position: relative;
+      max-width: var(--max);
+      margin: 32px auto 24px;
+      box-sizing: border-box;
+      height: 48px; /* 버튼/로고 영역 높이 확보 */
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 16px;          /* wrap 기준 좌측 */
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      background: #FFFFFF;
+      font-family: inherit; /* 전역 설정을 확실히 상속 */
+      border: none;
+      border-radius: 20px;
+      padding: 8px 12px;
+      font-size: 24px;
+      color: #999999;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .logo {
+      position: absolute;              /* 🔥 header 영향 완전 차단 */
+      left: 50vw;                   /* 화면 가로 정중앙 */
+      top: 32px + 24px;             /* header의 실제 위치에 맞게 조정 */
+      transform: translateX(-50%);
+      width: 100px;
+      z-index: 1;
+      /* display: block;
+       /* 상단 여백 + 중앙 정렬 */
+    }
+
+    /* Top image */
+    .hero {
+      position: relative;              /* 필수 */
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fafafa;
+      display: grid;
+      place-items: center;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0) 55%,
+        rgba(255,255,255,0.95) 100%
+      );
+      pointer-events: none;
+    }
+
+    .hero img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      z-index: 0;
+    }
+
+
+    /* Price / Size / Colors row */
+    .hero .row {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 2em;
+      padding-top: 1em;
+      margin-top: 0;   /* 기존 margin-top 무력화 */
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.25) 5%,
+        rgba(255,255,255,0.5) 55%
+      );
+      z-index: 2;
+    }
+
+    /* row: 가로 3등분 */
+    .row {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+    }
+
+    /* 각 등분에서 pill 중앙 정렬 */
+    .row > .pill {
+      margin: 0 auto;
+    }
+
+    /* pill: 세로 배치 + border 제거 */
+    .pill {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 0;        /* 필요 시 유지 */
+      border: none;      /* border 제거 */
+      background: none;  /* 배경 제거 */
+    }
+
+    .k { font-weight: 400; color:#999999; font-size: 12px; }
+    .v { font-weight: 600; font-size: 18px; }
+
+    .colors {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 4px;
+      border: 1px solid #cccccc;
+      overflow: hidden;
+      gap: 0px;
+    }
+    .dot {
+      width: 24px;
+      height: 24px;
+      box-sizing: border-box;
+      display: inline-block;
+    }
+
+    /* Media text */
+    .media {
+      margin-top: 3em;
+      display: flex;
+      flex-direction: column;   /* 세로 배치 */
+      align-items: center;      /* 가로 중앙 */
+      gap: 6px;                 /* k ↔ title 간격 */
+      text-align: center;
+    }
+    .title {
+      font-size: 24px;
+      font-family: 'Paperozi';
+      font-weight: 600;
+    }
+
+    /* YouTube embed */
+    .player {
+      margin-top: 12px;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+    }
+    .player iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display:block;
+    }
+
+    /* Error */
+    .error {
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid #ffd1d1;
+      background: #fff5f5;
+      color: #9b1c1c;
+      border-radius: 10px;
+      white-space: pre-wrap;
+    }
+
+    .powered {
+      margin-top: 4em;
+      margin-bottom: 0.5em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .powered > .k {
+      color: #cccccc;
+      padding: 6px 12px 6px 12px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .powered > .k:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    (function () {
+      if (!window.__enableGtm) return;
+      var noscript = document.createElement("noscript");
+      noscript.innerHTML =
+        '<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NXKZK8ZW" height="0" width="0" style="display:none;visibility:hidden"></iframe>';
+      document.body.insertBefore(noscript, document.body.firstChild);
+    })();
+  </script>
+  <div class="header">
+    <button class="back-btn" id="backBtn">←</button>
+    <img class="logo" src="./images/INST_logo.png" alt="INST logo" />
+  </div>
+
+
+  <div class="wrap">
+    <div class="hero" id="hero">
+      <img id="heroImg" alt="product image" />
+      <div class="row">
+        <div class="pill">
+          <span class="k">가격</span>
+          <span class="v" id="price">-</span>
+        </div>
+        <div class="pill">
+          <span class="k">사이즈</span>
+          <span class="v" id="size">-</span>
+        </div>
+        <div class="pill">
+          <span class="k">색상</span>
+          <span class="colors" id="colors"></span>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="media">
+      <span class="k">Styling Theme</span>
+      <span class="title" id="mediaText">-</span>
+    </div>
+    
+
+    <div class="player">
+      <iframe
+        id="ytFrame"
+        title="YouTube video player"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
+    </div>
+
+    <div class="powered">
+      <a href="https://satin-narrow-57476246.figma.site/" target="_blank" rel="noopener noreferrer" class="k">
+        Powered by PNK SOLUTION
+      </a>
+    </div>
+
+    <div class="error" id="error" style="display:none;"></div>
+  </div>
+
+  <script>
+    // 뒤로가기 버튼
+    document.getElementById('backBtn').addEventListener('click', () => {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        location.href = 'index.html';
+      }
+    });
+
+    function $(id) { return document.getElementById(id); }
+
+    function getCodeParam() {
+      // 1. 일반 쿼리 (?code=...)
+      let params = new URLSearchParams(window.location.search);
+      let code = params.get("code");
+      if (code) return code.trim();
+
+      // 2. 해시 라우팅 (#/detail?code=...)
+      const hash = window.location.hash;
+      const qIndex = hash.indexOf("?");
+      if (qIndex !== -1) {
+        params = new URLSearchParams(hash.slice(qIndex));
+        code = params.get("code");
+        if (code) return code.trim();
+      }
+
+      return "";
+    }
+
+    function formatKRW(n) {
+      const num = Number(n);
+      if (!Number.isFinite(num)) return "-";
+      return "₩"+ num.toLocaleString("ko-KR");
+    }
+
+    // 다양한 유튜브 URL을 embed URL로 변환
+    function toYouTubeEmbedUrl(url) {
+      if (!url) return "";
+      try {
+        const u = new URL(url);
+        const host = u.hostname.replace("www.", "");
+
+        // youtu.be/<id>
+        if (host === "youtu.be") {
+          const id = u.pathname.split("/").filter(Boolean)[0];
+          return id ? `https://www.youtube.com/embed/${id}` : "";
+        }
+
+        // youtube.com/watch?v=<id>
+        if (host === "youtube.com" || host === "m.youtube.com") {
+          if (u.pathname === "/watch") {
+            const id = u.searchParams.get("v");
+            return id ? `https://www.youtube.com/embed/${id}` : "";
+          }
+          // youtube.com/embed/<id>
+          if (u.pathname.startsWith("/embed/")) {
+            return `https://www.youtube.com${u.pathname}`;
+          }
+          // youtube.com/shorts/<id>
+          if (u.pathname.startsWith("/shorts/")) {
+            const id = u.pathname.split("/").filter(Boolean)[1];
+            return id ? `https://www.youtube.com/embed/${id}` : "";
+          }
+        }
+        // URL이 유튜브가 아니면 그대로 시도하지 않음
+        return "";
+      } catch {
+        return "";
+      }
+    }
+
+    function showError(msg) {
+      const el = $("error");
+      el.style.display = "block";
+      el.textContent = msg;
+    }
+
+    async function loadData() {
+      const code = getCodeParam();
+      if (!code) {
+        showError("URL에 code 파라미터가 없습니다.\n예) detail.html?code=CN11667");
+        return;
+      }
+
+      let list;
+      try {
+        const res = await fetch("./data.json", { cache: "no-store" });
+        if (!res.ok) throw new Error(`data.json 로드 실패: HTTP ${res.status}`);
+        list = await res.json();
+        if (!Array.isArray(list)) throw new Error("data.json 형식이 배열이 아닙니다.");
+      } catch (e) {
+        showError(String(e));
+        return;
+      }
+
+      const item = list.find(x => String(x.tag || "").toUpperCase() === code.toUpperCase());
+      if (!item) {
+        showError(`data.json에서 tag가 "${code}" 인 항목을 찾지 못했습니다.`);
+        return;
+      }
+
+      // 1) 최상단 사진: 규칙이 없으니 기본값을 안전하게 처리
+      //    - 가능하면 data에 image 같은 필드를 두는 게 맞음.
+      //    - 임시로 /images/<tag>.jpg를 시도하고, 실패하면 회색 배경 유지
+      const img = $("heroImg");
+      img.src = `/images/${item.tag}.jpg`;
+      img.onerror = () => {
+        // 이미지가 없으면 img 숨기고 placeholder 유지
+        img.style.display = "none";
+        $("hero").textContent = "NO IMAGE";
+      };
+
+      // 2) 가격 / 사이즈 / 색상
+      $("price").textContent = formatKRW(item.price);
+
+      const opt = (item.sizeColorOptions && item.sizeColorOptions[0]) ? item.sizeColorOptions[0] : null;
+      $("size").textContent = opt?.size ?? "-";
+
+      const colorsEl = $("colors");
+      colorsEl.innerHTML = "";
+      const colors = Array.isArray(opt?.colors) ? opt.colors : [];
+      colors.forEach(c => {
+        const dot = document.createElement("span");
+        dot.className = "dot";
+        dot.style.backgroundColor = c;
+        dot.title = c;
+        colorsEl.appendChild(dot);
+      });
+
+      // 3) media 텍스트
+      $("mediaText").textContent = item.media ?? "-";
+
+      // 4) 유튜브 임베드
+      const embedUrl = toYouTubeEmbedUrl(item.youtube);
+      const frame = $("ytFrame");
+      if (embedUrl) {
+        frame.src = embedUrl;
+      } else {
+        frame.removeAttribute("src");
+        showError(
+          ( $("error").style.display === "block" ? $("error").textContent + "\n\n" : "" ) +
+          "youtube 링크가 유효한 유튜브 URL이 아니어서 임베드할 수 없습니다.\n" +
+          `입력값: ${item.youtube ?? "(없음)"}`
+        );
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
