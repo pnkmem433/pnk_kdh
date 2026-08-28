@@ -175,6 +175,7 @@ void setup() {
       ? "custom_ota"
       : (firmwareChanged ? "external_install" : "stable");
   clearOtaMarker();
+  writeBootState(static_cast<uint32_t>(FW_VERSION_CODE), familyCode);
 
   button.begin();
   relay.begin();
@@ -198,12 +199,7 @@ void setup() {
   statusLed.blink(100);
   delay(2000);
 
-  // [중요] 기존의 잘못된 UUID를 강제 초기화하기 위한 임시 코드
-  // 이 버전으로 OTA를 한 번 성공했다면, 다음 빌드 시에는 아래 3줄을 삭제하세요.
-  EEPROM.begin(OTA_MARKER_EEPROM_SIZE);
-  for (int i = 0; i < 12; i++) { EEPROM.write(i, 0); }
-  EEPROM.commit();
-  writeBootState(static_cast<uint32_t>(FW_VERSION_CODE), familyCode);
+
 
   uuid.begin();
   controlTopic = "smart_plug/" + uuid.load();

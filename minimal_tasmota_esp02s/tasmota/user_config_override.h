@@ -55,7 +55,7 @@
 #define MQTT_HOST         "api.pnkslab.com"
 
 #undef MQTT_PORT
-#define MQTT_PORT         1884
+#define MQTT_PORT         1883
 
 #undef MQTT_USER
 #define MQTT_USER         "pnks"

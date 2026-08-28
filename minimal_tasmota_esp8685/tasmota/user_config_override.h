@@ -77,7 +77,7 @@
 #define MQTT_HOST         "api.pnkslab.com"
 
 #undef MQTT_PORT
-#define MQTT_PORT         1884
+#define MQTT_PORT         1883
 
 #undef MQTT_USER
 #define MQTT_USER         "pnks"
@@ -540,7 +540,7 @@
 #ifdef OTA_URL
 #undef OTA_URL
 #endif
-#define OTA_URL "http://192.168.0.84:3004/firmwareDownload/migration-main?projectId=10&chipType=esp8685"
+#define OTA_URL "http://gym907-0001.iptime.org:3315/firmwareDownload/migration-main?projectId=10&chipType=esp8685"
 
 #define USE_WIFI_CONFIG_ONLY_WEBUI
 
